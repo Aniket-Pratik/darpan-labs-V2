@@ -1,0 +1,158 @@
+{
+  "module_id": "A2",
+  "module_name": "Spending & Financial Behavior",
+  "module_goal": "Understand financial decision-making, spending patterns, and money attitudes",
+  "estimated_duration_min": 4,
+  "completion_criteria": {
+    "coverage_threshold": 0.65,
+    "confidence_threshold": 0.60,
+    "min_questions": 4
+  },
+  "signal_targets": [
+    "spending_style",
+    "budget_approach",
+    "impulse_vs_planned",
+    "brand_loyalty",
+    "price_sensitivity",
+    "savings_attitude",
+    "financial_goals",
+    "purchase_research_depth"
+  ],
+  "questions": [
+    {
+      "question_id": "A2_q01",
+      "question_text": "How would you describe your general approach to spending money? Are you more of a saver, a spender, or somewhere in between?",
+      "question_type": "open_text",
+      "target_signals": ["spending_style", "savings_attitude"],
+      "follow_up_triggers": ["vague_answer", "single_word"],
+      "priority": 1,
+      "estimated_seconds": 40
+    },
+    {
+      "question_id": "A2_q02",
+      "question_text": "Think about the last significant purchase you made. What was it, and what was your decision process?",
+      "question_type": "open_text",
+      "target_signals": ["impulse_vs_planned", "purchase_research_depth"],
+      "follow_up_triggers": ["vague_answer"],
+      "priority": 1,
+      "estimated_seconds": 45
+    },
+    {
+      "question_id": "A2_q03",
+      "question_text": "Do you tend to stick with brands you know, or are you always looking for the next best thing?",
+      "question_type": "open_text",
+      "target_signals": ["brand_loyalty", "purchase_research_depth"],
+      "follow_up_triggers": [],
+      "priority": 1,
+      "estimated_seconds": 35
+    },
+    {
+      "question_id": "A2_q04",
+      "question_text": "How price-sensitive are you? Would you pay more for quality, convenience, or a brand you trust?",
+      "question_type": "open_text",
+      "target_signals": ["price_sensitivity", "brand_loyalty"],
+      "follow_up_triggers": ["vague_answer"],
+      "priority": 1,
+      "estimated_seconds": 35
+    },
+    {
+      "question_id": "A2_q05",
+      "question_text": "Do you use any kind of budget or tracking system for your spending? Why or why not?",
+      "question_type": "open_text",
+      "target_signals": ["budget_approach"],
+      "follow_up_triggers": [],
+      "priority": 2,
+      "estimated_seconds": 35
+    },
+    {
+      "question_id": "A2_q06",
+      "question_text": "When was the last time you made an impulse purchase? How did you feel about it afterwards?",
+      "question_type": "open_text",
+      "target_signals": ["impulse_vs_planned", "spending_style"],
+      "follow_up_triggers": [],
+      "priority": 2,
+      "estimated_seconds": 40
+    },
+    {
+      "question_id": "A2_q07",
+      "question_text": "What's something you'd happily spend a lot on, and something you'd never pay premium for?",
+      "question_type": "trade_off",
+      "target_signals": ["price_sensitivity", "spending_style"],
+      "follow_up_triggers": ["vague_answer"],
+      "priority": 1,
+      "estimated_seconds": 40
+    },
+    {
+      "question_id": "A2_q08",
+      "question_text": "How do you think about financial goals? Are you saving towards something specific, or more of a go-with-the-flow person?",
+      "question_type": "open_text",
+      "target_signals": ["financial_goals", "savings_attitude"],
+      "follow_up_triggers": [],
+      "priority": 2,
+      "estimated_seconds": 40
+    },
+    {
+      "question_id": "A2_q09",
+      "question_text": "Before buying something online, how much research do you typically do? Walk me through what that looks like.",
+      "question_type": "open_text",
+      "target_signals": ["purchase_research_depth"],
+      "follow_up_triggers": [],
+      "priority": 2,
+      "estimated_seconds": 40
+    },
+    {
+      "question_id": "A2_q10",
+      "question_text": "How do sales, discounts, or limited-time offers affect your buying decisions?",
+      "question_type": "open_text",
+      "target_signals": ["impulse_vs_planned", "price_sensitivity"],
+      "follow_up_triggers": [],
+      "priority": 2,
+      "estimated_seconds": 30
+    },
+    {
+      "question_id": "A2_q11",
+      "question_text": "Do you prefer paying for experiences (travel, dining) or things (gadgets, clothes)? Why?",
+      "question_type": "trade_off",
+      "target_signals": ["spending_style"],
+      "follow_up_triggers": [],
+      "priority": 3,
+      "estimated_seconds": 35
+    },
+    {
+      "question_id": "A2_q12",
+      "question_text": "How do recommendations from friends, reviews, or influencers affect what you buy?",
+      "question_type": "open_text",
+      "target_signals": ["purchase_research_depth", "brand_loyalty"],
+      "follow_up_triggers": [],
+      "priority": 3,
+      "estimated_seconds": 35
+    },
+    {
+      "question_id": "A2_q13",
+      "question_text": "If you suddenly received an unexpected bonus of one lakh rupees, what would you do with it?",
+      "question_type": "scenario",
+      "target_signals": ["savings_attitude", "financial_goals", "spending_style"],
+      "follow_up_triggers": [],
+      "priority": 3,
+      "estimated_seconds": 40
+    },
+    {
+      "question_id": "A2_q14",
+      "question_text": "Do you think your spending habits are similar to or different from people around you? In what way?",
+      "question_type": "open_text",
+      "target_signals": ["spending_style", "budget_approach"],
+      "follow_up_triggers": [],
+      "priority": 3,
+      "estimated_seconds": 35
+    },
+    {
+      "question_id": "A2_q15",
+      "question_text": "What subscription services do you pay for, and which ones feel worth it?",
+      "question_type": "open_text",
+      "target_signals": ["price_sensitivity", "brand_loyalty"],
+      "follow_up_triggers": [],
+      "priority": 3,
+      "estimated_seconds": 30
+    }
+  ]
+}

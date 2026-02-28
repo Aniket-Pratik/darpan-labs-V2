@@ -1,0 +1,157 @@
+{
+  "module_id": "M2",
+  "module_name": "Decision Logic & Risk",
+  "module_goal": "Understand how the user makes decisions and handles uncertainty",
+  "estimated_duration_min": 4,
+  "completion_criteria": {
+    "coverage_threshold": 0.75,
+    "confidence_threshold": 0.70,
+    "min_questions": 5,
+    "min_behavioral_rules": 2
+  },
+  "signal_targets": [
+    "speed_vs_deliberation",
+    "gut_vs_data",
+    "risk_appetite",
+    "reversibility_sensitivity",
+    "information_needs",
+    "decision_regret_pattern"
+  ],
+  "questions": [
+    {
+      "question_id": "M2_q01",
+      "question_text": "Think about the last big purchase you made. How did you go about deciding?",
+      "question_type": "scenario",
+      "target_signals": ["speed_vs_deliberation", "information_needs"],
+      "follow_up_triggers": ["vague_answer", "single_word"],
+      "priority": 1,
+      "estimated_seconds": 50
+    },
+    {
+      "question_id": "M2_q02",
+      "question_text": "When faced with an important decision, do you tend to go with your gut or do thorough research first?",
+      "question_type": "trade_off",
+      "target_signals": ["gut_vs_data"],
+      "follow_up_triggers": ["high_leverage"],
+      "priority": 1,
+      "estimated_seconds": 40
+    },
+    {
+      "question_id": "M2_q03",
+      "question_text": "How do you feel about taking risks — are you someone who plays it safe or enjoys a bit of uncertainty?",
+      "question_type": "trade_off",
+      "target_signals": ["risk_appetite"],
+      "follow_up_triggers": ["vague_answer"],
+      "priority": 1,
+      "estimated_seconds": 35
+    },
+    {
+      "question_id": "M2_q04",
+      "question_text": "Tell me about a time you made a quick decision. What made you comfortable acting fast?",
+      "question_type": "scenario",
+      "target_signals": ["speed_vs_deliberation", "gut_vs_data"],
+      "follow_up_triggers": ["vague_answer"],
+      "priority": 1,
+      "estimated_seconds": 45
+    },
+    {
+      "question_id": "M2_q05",
+      "question_text": "When something is hard to undo or reverse, does that change how carefully you decide?",
+      "question_type": "scenario",
+      "target_signals": ["reversibility_sensitivity"],
+      "follow_up_triggers": [],
+      "priority": 1,
+      "estimated_seconds": 35
+    },
+    {
+      "question_id": "M2_q06",
+      "question_text": "How much information do you typically need before you feel ready to make a decision?",
+      "question_type": "open_text",
+      "target_signals": ["information_needs", "speed_vs_deliberation"],
+      "follow_up_triggers": ["vague_answer"],
+      "priority": 2,
+      "estimated_seconds": 35
+    },
+    {
+      "question_id": "M2_q07",
+      "question_text": "Have you ever regretted a decision because you didn't think it through enough?",
+      "question_type": "scenario",
+      "target_signals": ["decision_regret_pattern", "speed_vs_deliberation"],
+      "follow_up_triggers": ["high_leverage"],
+      "priority": 2,
+      "estimated_seconds": 40
+    },
+    {
+      "question_id": "M2_q08",
+      "question_text": "What's the riskiest thing you've done in the last year?",
+      "question_type": "open_text",
+      "target_signals": ["risk_appetite"],
+      "follow_up_triggers": ["vague_answer"],
+      "priority": 2,
+      "estimated_seconds": 40
+    },
+    {
+      "question_id": "M2_q09",
+      "question_text": "Do you prefer to decide on your own or do you like getting opinions from others?",
+      "question_type": "forced_choice",
+      "target_signals": ["information_needs"],
+      "follow_up_triggers": [],
+      "priority": 2,
+      "estimated_seconds": 25
+    },
+    {
+      "question_id": "M2_q10",
+      "question_text": "If a decision goes wrong, are you more likely to blame yourself or the circumstances?",
+      "question_type": "trade_off",
+      "target_signals": ["decision_regret_pattern"],
+      "follow_up_triggers": [],
+      "priority": 3,
+      "estimated_seconds": 30
+    },
+    {
+      "question_id": "M2_q11",
+      "question_text": "When comparing options, what's the first thing you usually look at?",
+      "question_type": "open_text",
+      "target_signals": ["information_needs", "gut_vs_data"],
+      "follow_up_triggers": [],
+      "priority": 2,
+      "estimated_seconds": 30
+    },
+    {
+      "question_id": "M2_q12",
+      "question_text": "How do you handle situations where there's no clearly right answer?",
+      "question_type": "scenario",
+      "target_signals": ["gut_vs_data", "risk_appetite"],
+      "follow_up_triggers": [],
+      "priority": 3,
+      "estimated_seconds": 40
+    },
+    {
+      "question_id": "M2_q13",
+      "question_text": "Do deadlines help you decide faster, or do they stress you out?",
+      "question_type": "forced_choice",
+      "target_signals": ["speed_vs_deliberation"],
+      "follow_up_triggers": [],
+      "priority": 3,
+      "estimated_seconds": 25
+    },
+    {
+      "question_id": "M2_q14",
+      "question_text": "Would you rather have more options or fewer but clearer choices?",
+      "question_type": "trade_off",
+      "target_signals": ["information_needs", "speed_vs_deliberation"],
+      "follow_up_triggers": [],
+      "priority": 3,
+      "estimated_seconds": 25
+    },
+    {
+      "question_id": "M2_q15",
+      "question_text": "What's a rule or principle you follow when making tough decisions?",
+      "question_type": "open_text",
+      "target_signals": ["gut_vs_data", "risk_appetite"],
+      "follow_up_triggers": ["high_leverage"],
+      "priority": 2,
+      "estimated_seconds": 35
+    }
+  ]
+}

@@ -1,0 +1,87 @@
+SYSTEM:
+You are evaluating whether an interview module is complete.
+
+Given the module definition, questions asked, and answers received,
+determine if the module's coverage and confidence thresholds are met.
+
+DEVELOPER:
+Module: {module_id} - {module_name}
+Required signals: {signal_targets}
+Completion criteria: coverage >= {coverage_threshold}, confidence >= {confidence_threshold}
+
+Questions and answers so far:
+{module_turns}
+
+=== EVALUATION CRITERIA ===
+
+Signal counting rules:
+- A signal counts as "captured" if its confidence >= 0.4
+- A signal mentioned multiple times across answers should have HIGHER confidence (evidence accumulates)
+- Weighted scoring: not all signals are equal. Core signals for the module matter more than edge signals.
+
+Coverage calculation:
+- coverage_score = (number of captured signals) / (total required signals)
+- Only count signals with confidence >= 0.4 as captured
+
+Confidence calculation:
+- confidence_score = average confidence across ALL required signals (including missing ones as 0.0)
+- This means missing signals actively drag down the confidence score
+
+=== RECOMMENDATION LOGIC ===
+
+COMPLETE — recommend when:
+- coverage >= threshold AND confidence >= threshold
+- OR coverage >= threshold with only 1-2 low-priority signals missing and confidence is close to threshold (within 0.05)
+- The user has provided enough information to build a meaningful profile for this module
+
+ASK_MORE — recommend when:
+- Important signals are still missing (especially core signals for the module)
+- The user seems engaged and willing to continue
+- Fewer than 8 questions have been asked
+- Include 2-3 specific suggested_next_questions targeting the most important missing signals
+
+SKIP_OPTIONAL — recommend when:
+- More than 12 questions have been asked and coverage gains are diminishing
+- Only low-priority signals remain and the user seems fatigued
+- The cost of additional questions outweighs the marginal signal value
+
+=== FEW-SHOT EXAMPLE ===
+
+Module: M2 - Decision Logic & Risk
+Required signals: speed_vs_deliberation, gut_vs_data, risk_appetite, reversibility_sensitivity, information_needs, decision_regret_pattern
+Threshold: coverage >= 0.6, confidence >= 0.5
+
+Turn 1 — Q: "Walk me through how you made a recent important decision."
+A: "Last month I was choosing between two job offers. I made a spreadsheet comparing salary, commute, growth. Took me about a week to decide. I asked 3 friends for advice too."
+→ Extracted: speed_vs_deliberation (0.8), gut_vs_data (0.85), information_needs (0.7)
+
+Turn 2 — Q: "When a decision can be easily reversed, does that change how quickly you decide?"
+A: "Yeah totally. If I can return something or change my mind, I'll just go for it quickly. No point overthinking."
+→ Extracted: reversibility_sensitivity (0.85), speed_vs_deliberation (now 0.9)
+
+Turn 3 — Q: "Think of a decision you regret. What made it a bad call?"
+A: "Hmm not many honestly. I guess I sometimes regret not taking chances — like not applying for that startup role."
+→ Extracted: decision_regret_pattern (0.6), risk_appetite (0.5)
+
+Evaluation:
+- Captured: 6/6 signals (all >= 0.4)
+- coverage_score: 1.0
+- confidence_score: 0.78 (average of 0.9, 0.85, 0.5, 0.85, 0.7, 0.6)
+- recommendation: "COMPLETE"
+- module_summary: "Strong deliberate decision-maker who relies on data and external input. Decides faster when reversible. Regrets tend toward missed opportunities rather than bad choices. Moderate risk appetite — plays it safe but recognizes the cost."
+
+OUTPUT JSON:
+{{
+  "module_id": "{module_id}",
+  "is_complete": true|false,
+  "coverage_score": 0.0,
+  "confidence_score": 0.0,
+  "signals_captured": ["signal_name_1", "signal_name_2"],
+  "signals_missing": ["signal_name_3"],
+  "behavioral_rules_extracted": [
+    {{"rule": "if X then Y", "confidence": 0.0, "evidence_turn_ids": []}}
+  ],
+  "recommendation": "COMPLETE" | "ASK_MORE" | "SKIP_OPTIONAL",
+  "suggested_next_questions": [],
+  "module_summary": "string or null (if COMPLETE, summarize what was learned)"
+}}

@@ -1,0 +1,122 @@
+SYSTEM:
+You are analyzing a user's answer in a digital twin interview.
+Extract signals, assess answer quality, and determine if follow-up is needed.
+The user's answer may be in English, Hindi, or Hinglish (mixed). Parse the meaning and extract signals regardless of language. Report the detected language in `language_detected`.
+
+DEVELOPER:
+Module: {module_id} - {module_name}
+Question asked: {question_text}
+Target signal: {target_signal}
+User's answer: {answer_text}
+Previous answers in this module: {previous_answers}
+
+Valid signal names for this module (ONLY use these exact names):
+{signal_targets}
+
+TASK:
+1. Assess answer specificity (0.0 = vague, 1.0 = very specific with concrete details).
+2. Extract signals from the answer. For EACH valid signal name above, check if the answer reveals information about it — even indirectly. Use the EXACT signal names from the list. A single answer can reveal multiple signals.
+3. Identify behavioral rules (if-then patterns).
+4. Determine if follow-up is needed.
+
+=== FEW-SHOT EXAMPLES ===
+
+Example 1 — Rich English answer (multiple signals, high specificity):
+Question: "How do you typically approach a big purchase, like a new laptop or phone?"
+Answer: "I'm pretty methodical about it. I'll spend a few days reading reviews on YouTube and Reddit, compare specs in a spreadsheet, and then wait for a sale. I almost never buy on impulse — even if something looks great, I'll sleep on it for at least a night. I think the only exception is books; I'll just grab those without thinking."
+Expected output:
+- specificity_score: 0.85
+- signals_extracted: [
+    {{"signal": "speed_vs_deliberation", "value": "Highly deliberate for big purchases — spends days researching, sleeps on decisions. Exception: impulse buys for books.", "confidence": 0.9}},
+    {{"signal": "gut_vs_data", "value": "Data-driven — reads reviews, compares specs in spreadsheets, relies on external sources", "confidence": 0.9}},
+    {{"signal": "information_needs", "value": "High information needs — uses multiple sources (YouTube, Reddit, spreadsheets) before deciding", "confidence": 0.8}}
+  ]
+- needs_followup: false
+
+Example 2 — Vague answer (weak signal, follow-up needed):
+Question: "How do you usually make decisions when you're unsure?"
+Answer: "I just go with what feels right, I guess."
+Expected output:
+- specificity_score: 0.2
+- signals_extracted: [
+    {{"signal": "gut_vs_data", "value": "Leans toward intuition/gut feeling", "confidence": 0.4}}
+  ]
+- needs_followup: true
+- followup_reason: "vague"
+
+Example 3 — Hinglish answer (indirect signals):
+Question: "When you disagree with someone at work, how do you handle it?"
+Answer: "Mujhe confrontation pasand nahi hai. Main usually chup reh jaata hoon, ya phir baad mein privately baat karta hoon. Group mein toh kabhi nahi bolunga against someone."
+Expected output:
+- specificity_score: 0.7
+- signals_extracted: [
+    {{"signal": "conflict_style", "value": "Avoids direct confrontation — stays quiet in the moment, prefers addressing disagreements privately afterward", "confidence": 0.85}},
+    {{"signal": "directness", "value": "Low directness in conflict — will not speak against someone in a group setting", "confidence": 0.7}},
+    {{"signal": "group_size_comfort", "value": "Uncomfortable expressing dissent in group settings", "confidence": 0.6}}
+  ]
+- language_detected: "HG"
+- needs_followup: false
+
+=== SIGNAL VALUE QUALITY GUIDE ===
+Write signal values that are SPECIFIC and BEHAVIORAL. Preserve the detail from the user's answer.
+
+GOOD signal values (specific, behavioral, preserves detail):
+- "Deliberates for days on purchases over 5000 INR — reads reviews, compares in spreadsheets, sleeps on it"
+- "Avoids confrontation in groups but will address issues privately one-on-one afterward"
+- "Prefers small groups of 3-4 close friends over large social gatherings"
+
+BAD signal values (vague, loses information):
+- "Thinks before buying"
+- "Doesn't like conflict"
+- "Introverted"
+
+Signal extraction guidelines (use ONLY signal names from the valid list above):
+
+M1 — Core Identity & Context:
+- "occupation_lifestyle_overview" = what the person does for work and how their typical week looks
+- "age_band" = approximate age range or life decade
+- "living_context" = living situation (alone, family, roommates, city/suburb)
+- "self_described_personality" = how the person describes their own personality traits
+- "life_stage" = current life phase (student, early career, mid-career, retired, etc.)
+- "daily_routine_pattern" = daily habits, schedule structure, routine vs flexible
+
+M2 — Decision Logic & Risk:
+- "speed_vs_deliberation" = does the person decide quickly or take time to deliberate?
+- "gut_vs_data" = does the person rely on intuition or research/data for decisions?
+- "risk_appetite" = how comfortable is the person with taking risks?
+- "reversibility_sensitivity" = does reversibility of a decision affect how quickly they decide?
+- "information_needs" = how much information does the person need before deciding?
+- "decision_regret_pattern" = do they tend to regret decisions, and which kind?
+
+M3 — Preferences & Values:
+- "price_vs_quality" = does the person prioritize getting deals or getting quality?
+- "control_vs_convenience" = does the person want control/customization or ease of use?
+- "privacy_vs_personalization" = how does the person feel about data collection vs personalized experience?
+- "novelty_vs_familiarity" = does the person try new things or stick with what they know?
+- "speed_vs_thoroughness" = does the person prefer quick results or careful/thorough approach?
+- "independence_vs_support" = does the person prefer figuring things out alone or getting help?
+
+M4 — Communication & Social:
+- "directness" = how directly does the person communicate?
+- "conflict_style" = how does the person handle disagreements?
+- "introversion_extroversion" = social energy preference
+- "group_size_comfort" = preferred group sizes for interaction
+- "trust_formation" = how the person builds trust with others
+- "feedback_preference" = how they prefer to give/receive feedback
+
+IMPORTANT: Only extract signals whose names appear in the valid signal list for this module. A single answer often reveals multiple signals — extract all that apply.
+
+OUTPUT JSON:
+{{
+  "specificity_score": 0.0-1.0,
+  "signals_extracted": [
+    {{"signal": "exact_signal_name_from_list", "value": "what was learned", "confidence": 0.0-1.0}}
+  ],
+  "behavioral_rules": [
+    {{"rule": "if X then Y", "confidence": 0.0-1.0}}
+  ],
+  "needs_followup": true|false,
+  "followup_reason": "vague" | "contradiction" | "high_leverage" | null,
+  "sentiment": "positive|neutral|negative|mixed",
+  "language_detected": "EN|HI|HG"
+}}

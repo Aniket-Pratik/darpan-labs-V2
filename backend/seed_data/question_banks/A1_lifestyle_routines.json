@@ -1,0 +1,158 @@
+{
+  "module_id": "A1",
+  "module_name": "Lifestyle & Routines",
+  "module_goal": "Understand daily habits, routines, health choices, and lifestyle priorities",
+  "estimated_duration_min": 4,
+  "completion_criteria": {
+    "coverage_threshold": 0.65,
+    "confidence_threshold": 0.60,
+    "min_questions": 4
+  },
+  "signal_targets": [
+    "morning_routine",
+    "evening_routine",
+    "exercise_habits",
+    "diet_preferences",
+    "sleep_patterns",
+    "leisure_activities",
+    "time_management_style",
+    "health_consciousness"
+  ],
+  "questions": [
+    {
+      "question_id": "A1_q01",
+      "question_text": "Walk me through your typical morning — from the moment you wake up to when you start your day's work.",
+      "question_type": "open_text",
+      "target_signals": ["morning_routine", "time_management_style"],
+      "follow_up_triggers": ["vague_answer", "single_word"],
+      "priority": 1,
+      "estimated_seconds": 45
+    },
+    {
+      "question_id": "A1_q02",
+      "question_text": "How do you wind down at the end of the day? What does a typical evening look like?",
+      "question_type": "open_text",
+      "target_signals": ["evening_routine", "leisure_activities"],
+      "follow_up_triggers": ["vague_answer"],
+      "priority": 1,
+      "estimated_seconds": 40
+    },
+    {
+      "question_id": "A1_q03",
+      "question_text": "What's your relationship with exercise and physical activity? Do you have a regular routine?",
+      "question_type": "open_text",
+      "target_signals": ["exercise_habits", "health_consciousness"],
+      "follow_up_triggers": ["vague_answer"],
+      "priority": 1,
+      "estimated_seconds": 35
+    },
+    {
+      "question_id": "A1_q04",
+      "question_text": "How would you describe your eating habits? Are there foods you always go for or always avoid?",
+      "question_type": "open_text",
+      "target_signals": ["diet_preferences", "health_consciousness"],
+      "follow_up_triggers": ["single_word"],
+      "priority": 1,
+      "estimated_seconds": 40
+    },
+    {
+      "question_id": "A1_q05",
+      "question_text": "Are you more of a night owl or an early bird? How do you feel about your sleep schedule?",
+      "question_type": "open_text",
+      "target_signals": ["sleep_patterns"],
+      "follow_up_triggers": [],
+      "priority": 2,
+      "estimated_seconds": 30
+    },
+    {
+      "question_id": "A1_q06",
+      "question_text": "When you have free time with no obligations, what do you gravitate towards doing?",
+      "question_type": "open_text",
+      "target_signals": ["leisure_activities"],
+      "follow_up_triggers": ["vague_answer"],
+      "priority": 1,
+      "estimated_seconds": 35
+    },
+    {
+      "question_id": "A1_q07",
+      "question_text": "How do you manage your time across work, personal life, and hobbies? Do you use any systems or is it more spontaneous?",
+      "question_type": "open_text",
+      "target_signals": ["time_management_style"],
+      "follow_up_triggers": [],
+      "priority": 2,
+      "estimated_seconds": 40
+    },
+    {
+      "question_id": "A1_q08",
+      "question_text": "If you had to choose between a perfectly structured day and a completely unplanned day, which would you prefer and why?",
+      "question_type": "trade_off",
+      "target_signals": ["time_management_style", "leisure_activities"],
+      "follow_up_triggers": [],
+      "priority": 2,
+      "estimated_seconds": 35
+    },
+    {
+      "question_id": "A1_q09",
+      "question_text": "Has your lifestyle changed significantly in the last couple of years? What drove that change?",
+      "question_type": "open_text",
+      "target_signals": ["health_consciousness", "exercise_habits"],
+      "follow_up_triggers": ["vague_answer"],
+      "priority": 2,
+      "estimated_seconds": 40
+    },
+    {
+      "question_id": "A1_q10",
+      "question_text": "What's one habit you wish you could build, and one you wish you could break?",
+      "question_type": "open_text",
+      "target_signals": ["health_consciousness", "morning_routine"],
+      "follow_up_triggers": [],
+      "priority": 2,
+      "estimated_seconds": 35
+    },
+    {
+      "question_id": "A1_q11",
+      "question_text": "How important is health and wellness to you compared to other priorities like career, social life, or entertainment?",
+      "question_type": "open_text",
+      "target_signals": ["health_consciousness", "diet_preferences"],
+      "follow_up_triggers": [],
+      "priority": 3,
+      "estimated_seconds": 40
+    },
+    {
+      "question_id": "A1_q12",
+      "question_text": "What's the most consistent thing about your weekly routine — the one thing that rarely changes?",
+      "question_type": "open_text",
+      "target_signals": ["morning_routine", "evening_routine"],
+      "follow_up_triggers": [],
+      "priority": 3,
+      "estimated_seconds": 30
+    },
+    {
+      "question_id": "A1_q13",
+      "question_text": "Do you prefer doing activities alone or with others? How does that play out in your leisure time?",
+      "question_type": "open_text",
+      "target_signals": ["leisure_activities"],
+      "follow_up_triggers": [],
+      "priority": 3,
+      "estimated_seconds": 35
+    },
+    {
+      "question_id": "A1_q14",
+      "question_text": "How do weekends typically look different from weekdays for you?",
+      "question_type": "open_text",
+      "target_signals": ["leisure_activities", "time_management_style"],
+      "follow_up_triggers": [],
+      "priority": 3,
+      "estimated_seconds": 35
+    },
+    {
+      "question_id": "A1_q15",
+      "question_text": "If someone observed your daily life for a week, what patterns would they notice?",
+      "question_type": "scenario",
+      "target_signals": ["morning_routine", "evening_routine", "exercise_habits"],
+      "follow_up_triggers": [],
+      "priority": 3,
+      "estimated_seconds": 45
+    }
+  ]
+}

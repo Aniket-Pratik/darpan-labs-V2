@@ -1,0 +1,158 @@
+{
+  "module_id": "A4",
+  "module_name": "Work & Learning Style",
+  "module_goal": "Understand cognitive style, learning preferences, productivity patterns, and collaboration approach",
+  "estimated_duration_min": 4,
+  "completion_criteria": {
+    "coverage_threshold": 0.65,
+    "confidence_threshold": 0.60,
+    "min_questions": 4
+  },
+  "signal_targets": [
+    "learning_style",
+    "focus_patterns",
+    "problem_solving_approach",
+    "collaboration_preference",
+    "feedback_handling",
+    "productivity_patterns",
+    "information_processing",
+    "creativity_approach"
+  ],
+  "questions": [
+    {
+      "question_id": "A4_q01",
+      "question_text": "When you need to learn something new — like a tool or a concept — what's your go-to approach?",
+      "question_type": "open_text",
+      "target_signals": ["learning_style", "information_processing"],
+      "follow_up_triggers": ["vague_answer", "single_word"],
+      "priority": 1,
+      "estimated_seconds": 40
+    },
+    {
+      "question_id": "A4_q02",
+      "question_text": "When are you most productive during the day? What conditions help you do your best work?",
+      "question_type": "open_text",
+      "target_signals": ["productivity_patterns", "focus_patterns"],
+      "follow_up_triggers": ["vague_answer"],
+      "priority": 1,
+      "estimated_seconds": 40
+    },
+    {
+      "question_id": "A4_q03",
+      "question_text": "When you face a difficult problem, do you tend to think it through alone or talk it out with others?",
+      "question_type": "open_text",
+      "target_signals": ["problem_solving_approach", "collaboration_preference"],
+      "follow_up_triggers": [],
+      "priority": 1,
+      "estimated_seconds": 35
+    },
+    {
+      "question_id": "A4_q04",
+      "question_text": "How do you handle feedback or criticism of your work? Can you give me a recent example?",
+      "question_type": "open_text",
+      "target_signals": ["feedback_handling"],
+      "follow_up_triggers": ["vague_answer"],
+      "priority": 1,
+      "estimated_seconds": 40
+    },
+    {
+      "question_id": "A4_q05",
+      "question_text": "Do you prefer working in long focused blocks or short bursts with breaks? What happens to your focus over time?",
+      "question_type": "open_text",
+      "target_signals": ["focus_patterns", "productivity_patterns"],
+      "follow_up_triggers": [],
+      "priority": 2,
+      "estimated_seconds": 35
+    },
+    {
+      "question_id": "A4_q06",
+      "question_text": "In a group project, what role do you naturally gravitate towards? Leader, contributor, organizer, or something else?",
+      "question_type": "open_text",
+      "target_signals": ["collaboration_preference"],
+      "follow_up_triggers": [],
+      "priority": 2,
+      "estimated_seconds": 35
+    },
+    {
+      "question_id": "A4_q07",
+      "question_text": "Would you rather have clear instructions and a defined process, or figure things out on your own with more freedom?",
+      "question_type": "trade_off",
+      "target_signals": ["learning_style", "problem_solving_approach"],
+      "follow_up_triggers": [],
+      "priority": 2,
+      "estimated_seconds": 35
+    },
+    {
+      "question_id": "A4_q08",
+      "question_text": "How do you approach creative tasks versus analytical tasks? Does one come more naturally?",
+      "question_type": "open_text",
+      "target_signals": ["creativity_approach", "information_processing"],
+      "follow_up_triggers": [],
+      "priority": 2,
+      "estimated_seconds": 40
+    },
+    {
+      "question_id": "A4_q09",
+      "question_text": "When you're stuck on something, what do you usually do? Power through, take a break, or ask for help?",
+      "question_type": "open_text",
+      "target_signals": ["problem_solving_approach", "focus_patterns"],
+      "follow_up_triggers": [],
+      "priority": 2,
+      "estimated_seconds": 35
+    },
+    {
+      "question_id": "A4_q10",
+      "question_text": "Do you prefer learning from reading, watching, doing, or discussing with others?",
+      "question_type": "forced_choice",
+      "target_signals": ["learning_style"],
+      "follow_up_triggers": [],
+      "priority": 2,
+      "estimated_seconds": 30
+    },
+    {
+      "question_id": "A4_q11",
+      "question_text": "How do you deal with interruptions during focused work? Does it throw you off or can you easily get back in flow?",
+      "question_type": "open_text",
+      "target_signals": ["focus_patterns", "productivity_patterns"],
+      "follow_up_triggers": [],
+      "priority": 3,
+      "estimated_seconds": 35
+    },
+    {
+      "question_id": "A4_q12",
+      "question_text": "What tools or systems do you rely on to stay organized and productive?",
+      "question_type": "open_text",
+      "target_signals": ["productivity_patterns"],
+      "follow_up_triggers": [],
+      "priority": 3,
+      "estimated_seconds": 30
+    },
+    {
+      "question_id": "A4_q13",
+      "question_text": "Imagine you're given a project in a field you know nothing about. How would you tackle the first week?",
+      "question_type": "scenario",
+      "target_signals": ["learning_style", "problem_solving_approach", "information_processing"],
+      "follow_up_triggers": [],
+      "priority": 3,
+      "estimated_seconds": 45
+    },
+    {
+      "question_id": "A4_q14",
+      "question_text": "Do you tend to be a big-picture thinker or more detail-oriented? How does that show up in your work?",
+      "question_type": "open_text",
+      "target_signals": ["information_processing", "creativity_approach"],
+      "follow_up_triggers": [],
+      "priority": 3,
+      "estimated_seconds": 35
+    },
+    {
+      "question_id": "A4_q15",
+      "question_text": "What's the most effective way someone could teach you something complex? What works and what doesn't?",
+      "question_type": "open_text",
+      "target_signals": ["learning_style", "feedback_handling"],
+      "follow_up_triggers": [],
+      "priority": 3,
+      "estimated_seconds": 40
+    }
+  ]
+}

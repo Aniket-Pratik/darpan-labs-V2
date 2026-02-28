@@ -1,0 +1,156 @@
+{
+  "module_id": "M1",
+  "module_name": "Core Identity & Context",
+  "module_goal": "Establish baseline demographic context and self-concept",
+  "estimated_duration_min": 3,
+  "completion_criteria": {
+    "coverage_threshold": 0.70,
+    "confidence_threshold": 0.65,
+    "min_questions": 4
+  },
+  "signal_targets": [
+    "occupation_lifestyle_overview",
+    "age_band",
+    "living_context",
+    "self_described_personality",
+    "life_stage",
+    "daily_routine_pattern"
+  ],
+  "questions": [
+    {
+      "question_id": "M1_q01",
+      "question_text": "Can you tell me about what you do and what a typical week looks like for you?",
+      "question_type": "open_text",
+      "target_signals": ["occupation_lifestyle_overview", "daily_routine_pattern"],
+      "follow_up_triggers": ["vague_answer", "single_word"],
+      "priority": 1,
+      "estimated_seconds": 45
+    },
+    {
+      "question_id": "M1_q02",
+      "question_text": "How would you describe yourself to someone you just met?",
+      "question_type": "open_text",
+      "target_signals": ["self_described_personality"],
+      "follow_up_triggers": ["vague_answer"],
+      "priority": 1,
+      "estimated_seconds": 40
+    },
+    {
+      "question_id": "M1_q03",
+      "question_text": "Who do you live with, and what's your living situation like?",
+      "question_type": "open_text",
+      "target_signals": ["living_context", "life_stage"],
+      "follow_up_triggers": ["single_word"],
+      "priority": 1,
+      "estimated_seconds": 30
+    },
+    {
+      "question_id": "M1_q04",
+      "question_text": "What's the most important thing happening in your life right now?",
+      "question_type": "open_text",
+      "target_signals": ["life_stage"],
+      "follow_up_triggers": ["vague_answer"],
+      "priority": 1,
+      "estimated_seconds": 35
+    },
+    {
+      "question_id": "M1_q05",
+      "question_text": "If I asked your close friends to describe you in three words, what would they say?",
+      "question_type": "open_text",
+      "target_signals": ["self_described_personality"],
+      "follow_up_triggers": [],
+      "priority": 2,
+      "estimated_seconds": 30
+    },
+    {
+      "question_id": "M1_q06",
+      "question_text": "What's a typical morning look like for you?",
+      "question_type": "open_text",
+      "target_signals": ["daily_routine_pattern"],
+      "follow_up_triggers": ["vague_answer"],
+      "priority": 2,
+      "estimated_seconds": 30
+    },
+    {
+      "question_id": "M1_q07",
+      "question_text": "What age group would you say you belong to — 20s, 30s, 40s, or beyond?",
+      "question_type": "forced_choice",
+      "target_signals": ["age_band"],
+      "follow_up_triggers": [],
+      "priority": 2,
+      "estimated_seconds": 15
+    },
+    {
+      "question_id": "M1_q08",
+      "question_text": "Do you see yourself more as a city person or someone who prefers smaller towns?",
+      "question_type": "forced_choice",
+      "target_signals": ["living_context"],
+      "follow_up_triggers": [],
+      "priority": 2,
+      "estimated_seconds": 20
+    },
+    {
+      "question_id": "M1_q09",
+      "question_text": "What do you enjoy most about your current phase of life?",
+      "question_type": "open_text",
+      "target_signals": ["life_stage", "self_described_personality"],
+      "follow_up_triggers": [],
+      "priority": 3,
+      "estimated_seconds": 35
+    },
+    {
+      "question_id": "M1_q10",
+      "question_text": "Is there anything about yourself that surprises people when they first get to know you?",
+      "question_type": "open_text",
+      "target_signals": ["self_described_personality"],
+      "follow_up_triggers": [],
+      "priority": 3,
+      "estimated_seconds": 30
+    },
+    {
+      "question_id": "M1_q11",
+      "question_text": "How would you describe your work-life balance right now?",
+      "question_type": "open_text",
+      "target_signals": ["daily_routine_pattern", "life_stage"],
+      "follow_up_triggers": [],
+      "priority": 3,
+      "estimated_seconds": 30
+    },
+    {
+      "question_id": "M1_q12",
+      "question_text": "What's something you're proud of accomplishing recently?",
+      "question_type": "open_text",
+      "target_signals": ["life_stage", "self_described_personality"],
+      "follow_up_triggers": [],
+      "priority": 3,
+      "estimated_seconds": 35
+    },
+    {
+      "question_id": "M1_q13",
+      "question_text": "Do you consider yourself more of an introvert or extrovert?",
+      "question_type": "forced_choice",
+      "target_signals": ["self_described_personality"],
+      "follow_up_triggers": ["high_leverage"],
+      "priority": 2,
+      "estimated_seconds": 20
+    },
+    {
+      "question_id": "M1_q14",
+      "question_text": "What energizes you the most during your week?",
+      "question_type": "open_text",
+      "target_signals": ["self_described_personality", "daily_routine_pattern"],
+      "follow_up_triggers": [],
+      "priority": 2,
+      "estimated_seconds": 30
+    },
+    {
+      "question_id": "M1_q15",
+      "question_text": "How long have you been in your current job or role?",
+      "question_type": "open_text",
+      "target_signals": ["occupation_lifestyle_overview", "life_stage"],
+      "follow_up_triggers": [],
+      "priority": 3,
+      "estimated_seconds": 20
+    }
+  ]
+}

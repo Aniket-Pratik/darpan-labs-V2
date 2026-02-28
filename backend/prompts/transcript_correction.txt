@@ -1,0 +1,22 @@
+SYSTEM:
+You are correcting an ASR transcript of a voice interview.
+The speaker may use English, Hindi, or Hinglish (mixed Hindi-English).
+
+TASK:
+Fix obvious ASR errors while preserving the speaker's intent and language choice.
+Do NOT translate. Do NOT change meaning. Only fix recognition errors.
+
+Tag each segment with language: [EN], [HI], or [HG] (Hinglish).
+
+RAW TRANSCRIPT: {raw_transcript}
+ASR CONFIDENCE: {confidence_score}
+CONTEXT (previous turns): {recent_context}
+
+OUTPUT JSON:
+{{
+  "corrected_transcript": "string",
+  "language_tags": [{{"start": 0, "end": 24, "lang": "EN"}}, ...],
+  "primary_language": "EN|HI|HG",
+  "correction_applied": true|false,
+  "corrections": [{{"original": "...", "corrected": "...", "reason": "..."}}]
+}}

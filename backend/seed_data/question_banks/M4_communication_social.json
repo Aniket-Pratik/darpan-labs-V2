@@ -1,0 +1,156 @@
+{
+  "module_id": "M4",
+  "module_name": "Communication & Social",
+  "module_goal": "Understand interaction style and social tendencies",
+  "estimated_duration_min": 3,
+  "completion_criteria": {
+    "coverage_threshold": 0.65,
+    "confidence_threshold": 0.60,
+    "min_questions": 4
+  },
+  "signal_targets": [
+    "directness",
+    "conflict_style",
+    "introversion_extroversion",
+    "group_size_comfort",
+    "trust_formation",
+    "feedback_preference"
+  ],
+  "questions": [
+    {
+      "question_id": "M4_q01",
+      "question_text": "When you disagree with someone, do you prefer to say it directly or find a gentler way?",
+      "question_type": "trade_off",
+      "target_signals": ["directness", "conflict_style"],
+      "follow_up_triggers": ["high_leverage"],
+      "priority": 1,
+      "estimated_seconds": 35
+    },
+    {
+      "question_id": "M4_q02",
+      "question_text": "Do you recharge by being with people, or do you need alone time to feel energized?",
+      "question_type": "trade_off",
+      "target_signals": ["introversion_extroversion"],
+      "follow_up_triggers": [],
+      "priority": 1,
+      "estimated_seconds": 30
+    },
+    {
+      "question_id": "M4_q03",
+      "question_text": "How quickly do you usually trust new people you meet?",
+      "question_type": "open_text",
+      "target_signals": ["trust_formation"],
+      "follow_up_triggers": ["vague_answer"],
+      "priority": 1,
+      "estimated_seconds": 35
+    },
+    {
+      "question_id": "M4_q04",
+      "question_text": "Do you prefer one-on-one conversations or being in a larger group?",
+      "question_type": "forced_choice",
+      "target_signals": ["group_size_comfort", "introversion_extroversion"],
+      "follow_up_triggers": [],
+      "priority": 1,
+      "estimated_seconds": 25
+    },
+    {
+      "question_id": "M4_q05",
+      "question_text": "How do you handle it when someone gives you critical feedback?",
+      "question_type": "scenario",
+      "target_signals": ["feedback_preference", "conflict_style"],
+      "follow_up_triggers": ["vague_answer"],
+      "priority": 1,
+      "estimated_seconds": 40
+    },
+    {
+      "question_id": "M4_q06",
+      "question_text": "Do you usually speak up first in a group, or do you prefer to listen and then share?",
+      "question_type": "forced_choice",
+      "target_signals": ["directness", "introversion_extroversion"],
+      "follow_up_triggers": [],
+      "priority": 2,
+      "estimated_seconds": 25
+    },
+    {
+      "question_id": "M4_q07",
+      "question_text": "When there's tension or conflict, do you address it head-on or let it pass?",
+      "question_type": "trade_off",
+      "target_signals": ["conflict_style"],
+      "follow_up_triggers": ["high_leverage"],
+      "priority": 2,
+      "estimated_seconds": 30
+    },
+    {
+      "question_id": "M4_q08",
+      "question_text": "What makes you feel comfortable opening up to someone?",
+      "question_type": "open_text",
+      "target_signals": ["trust_formation"],
+      "follow_up_triggers": [],
+      "priority": 2,
+      "estimated_seconds": 35
+    },
+    {
+      "question_id": "M4_q09",
+      "question_text": "Do you prefer text messages or phone calls for important conversations?",
+      "question_type": "forced_choice",
+      "target_signals": ["directness"],
+      "follow_up_triggers": [],
+      "priority": 3,
+      "estimated_seconds": 20
+    },
+    {
+      "question_id": "M4_q10",
+      "question_text": "How do you feel about small talk with strangers?",
+      "question_type": "open_text",
+      "target_signals": ["introversion_extroversion", "group_size_comfort"],
+      "follow_up_triggers": [],
+      "priority": 2,
+      "estimated_seconds": 30
+    },
+    {
+      "question_id": "M4_q11",
+      "question_text": "Would you rather give feedback directly or anonymously?",
+      "question_type": "forced_choice",
+      "target_signals": ["directness", "feedback_preference"],
+      "follow_up_triggers": [],
+      "priority": 3,
+      "estimated_seconds": 20
+    },
+    {
+      "question_id": "M4_q12",
+      "question_text": "When meeting new people, what helps you warm up to them?",
+      "question_type": "open_text",
+      "target_signals": ["trust_formation", "introversion_extroversion"],
+      "follow_up_triggers": [],
+      "priority": 3,
+      "estimated_seconds": 30
+    },
+    {
+      "question_id": "M4_q13",
+      "question_text": "Do you find it easy to say no to people, or does it make you uncomfortable?",
+      "question_type": "trade_off",
+      "target_signals": ["directness", "conflict_style"],
+      "follow_up_triggers": [],
+      "priority": 2,
+      "estimated_seconds": 30
+    },
+    {
+      "question_id": "M4_q14",
+      "question_text": "How would you describe your communication style at work versus with friends?",
+      "question_type": "open_text",
+      "target_signals": ["directness", "group_size_comfort"],
+      "follow_up_triggers": [],
+      "priority": 3,
+      "estimated_seconds": 35
+    },
+    {
+      "question_id": "M4_q15",
+      "question_text": "Do you prefer to be asked for your opinion, or do you share it freely?",
+      "question_type": "forced_choice",
+      "target_signals": ["directness", "feedback_preference"],
+      "follow_up_triggers": [],
+      "priority": 3,
+      "estimated_seconds": 25
+    }
+  ]
+}

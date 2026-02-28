@@ -1,0 +1,157 @@
+{
+  "module_id": "M3",
+  "module_name": "Preferences & Values",
+  "module_goal": "Capture stable priorities, product/service preferences, and value trade-offs",
+  "estimated_duration_min": 4,
+  "completion_criteria": {
+    "coverage_threshold": 0.75,
+    "confidence_threshold": 0.70,
+    "min_questions": 5,
+    "min_preference_dimensions": 3
+  },
+  "signal_targets": [
+    "control_vs_convenience",
+    "price_vs_quality",
+    "privacy_vs_personalization",
+    "novelty_vs_familiarity",
+    "speed_vs_thoroughness",
+    "independence_vs_support"
+  ],
+  "questions": [
+    {
+      "question_id": "M3_q01",
+      "question_text": "When you're buying something, what matters more to you — getting the best deal or getting the best quality?",
+      "question_type": "trade_off",
+      "target_signals": ["price_vs_quality"],
+      "follow_up_triggers": ["vague_answer"],
+      "priority": 1,
+      "estimated_seconds": 35
+    },
+    {
+      "question_id": "M3_q02",
+      "question_text": "Do you prefer apps that give you lots of control, or ones that just work automatically?",
+      "question_type": "trade_off",
+      "target_signals": ["control_vs_convenience"],
+      "follow_up_triggers": ["high_leverage"],
+      "priority": 1,
+      "estimated_seconds": 30
+    },
+    {
+      "question_id": "M3_q03",
+      "question_text": "How do you feel about companies using your data to personalize your experience?",
+      "question_type": "open_text",
+      "target_signals": ["privacy_vs_personalization"],
+      "follow_up_triggers": ["vague_answer"],
+      "priority": 1,
+      "estimated_seconds": 40
+    },
+    {
+      "question_id": "M3_q04",
+      "question_text": "Do you like trying new brands and products, or do you stick with what you know works?",
+      "question_type": "trade_off",
+      "target_signals": ["novelty_vs_familiarity"],
+      "follow_up_triggers": [],
+      "priority": 1,
+      "estimated_seconds": 30
+    },
+    {
+      "question_id": "M3_q05",
+      "question_text": "When something breaks or goes wrong, do you prefer fixing it yourself or having someone else handle it?",
+      "question_type": "trade_off",
+      "target_signals": ["independence_vs_support", "control_vs_convenience"],
+      "follow_up_triggers": [],
+      "priority": 1,
+      "estimated_seconds": 30
+    },
+    {
+      "question_id": "M3_q06",
+      "question_text": "What's something you'd never compromise on when making a purchase?",
+      "question_type": "open_text",
+      "target_signals": ["price_vs_quality"],
+      "follow_up_triggers": ["high_leverage"],
+      "priority": 2,
+      "estimated_seconds": 35
+    },
+    {
+      "question_id": "M3_q07",
+      "question_text": "Do you read reviews before buying something, or do you trust your own judgment?",
+      "question_type": "trade_off",
+      "target_signals": ["independence_vs_support"],
+      "follow_up_triggers": [],
+      "priority": 2,
+      "estimated_seconds": 25
+    },
+    {
+      "question_id": "M3_q08",
+      "question_text": "Would you pay more for something that's faster or more convenient?",
+      "question_type": "scenario",
+      "target_signals": ["speed_vs_thoroughness", "price_vs_quality"],
+      "follow_up_triggers": [],
+      "priority": 2,
+      "estimated_seconds": 30
+    },
+    {
+      "question_id": "M3_q09",
+      "question_text": "How important is it that a product or service aligns with your values — like sustainability or ethics?",
+      "question_type": "open_text",
+      "target_signals": ["price_vs_quality"],
+      "follow_up_triggers": ["vague_answer"],
+      "priority": 2,
+      "estimated_seconds": 35
+    },
+    {
+      "question_id": "M3_q10",
+      "question_text": "Do you prefer detailed settings and customization, or simple defaults that work well?",
+      "question_type": "trade_off",
+      "target_signals": ["control_vs_convenience"],
+      "follow_up_triggers": [],
+      "priority": 2,
+      "estimated_seconds": 25
+    },
+    {
+      "question_id": "M3_q11",
+      "question_text": "When was the last time you tried something completely new just for the experience?",
+      "question_type": "scenario",
+      "target_signals": ["novelty_vs_familiarity"],
+      "follow_up_triggers": [],
+      "priority": 3,
+      "estimated_seconds": 35
+    },
+    {
+      "question_id": "M3_q12",
+      "question_text": "How do you feel about subscription services versus one-time purchases?",
+      "question_type": "open_text",
+      "target_signals": ["control_vs_convenience", "price_vs_quality"],
+      "follow_up_triggers": [],
+      "priority": 2,
+      "estimated_seconds": 30
+    },
+    {
+      "question_id": "M3_q13",
+      "question_text": "Would you rather have fewer features that work perfectly, or more features with occasional bugs?",
+      "question_type": "trade_off",
+      "target_signals": ["speed_vs_thoroughness", "control_vs_convenience"],
+      "follow_up_triggers": [],
+      "priority": 3,
+      "estimated_seconds": 30
+    },
+    {
+      "question_id": "M3_q14",
+      "question_text": "What makes you loyal to a brand or service?",
+      "question_type": "open_text",
+      "target_signals": ["novelty_vs_familiarity", "price_vs_quality"],
+      "follow_up_triggers": [],
+      "priority": 2,
+      "estimated_seconds": 35
+    },
+    {
+      "question_id": "M3_q15",
+      "question_text": "Is there anything you'd never share with a company, even if it meant better recommendations?",
+      "question_type": "open_text",
+      "target_signals": ["privacy_vs_personalization"],
+      "follow_up_triggers": [],
+      "priority": 3,
+      "estimated_seconds": 35
+    }
+  ]
+}

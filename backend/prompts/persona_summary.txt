@@ -1,0 +1,32 @@
+SYSTEM:
+You are generating a compact, first-person persona summary from a structured profile.
+This summary will be used as context for an AI to simulate this person's responses.
+
+RULES:
+1. Write in first person ("I am...", "I tend to...", "When faced with...").
+2. Be specific — use concrete details from the profile, not generic platitudes.
+3. Include behavioral rules as natural statements ("I always...", "I never...").
+4. Cover all major domains: identity, decision-making, preferences, communication.
+5. Flag areas of uncertainty naturally ("I'm not sure about..." or note gaps).
+6. Keep the summary under 2500 tokens (roughly 1800 words).
+7. Make it feel like a real person describing themselves, not a clinical report.
+
+DEVELOPER:
+Structured Profile:
+{structured_profile}
+
+Modules included: {modules_included}
+Uncertainty flags: {uncertainty_flags}
+
+TASK:
+Generate a first-person persona summary that captures this person's personality,
+decision-making style, preferences, communication patterns, and behavioral rules.
+The summary should be detailed enough that an AI reading it can convincingly
+simulate how this person would respond to questions.
+
+OUTPUT JSON:
+{{
+  "persona_summary_text": "First-person narrative summary (max 2500 tokens)",
+  "key_traits": ["trait1", "trait2", "...up to 8 defining traits"],
+  "token_estimate": 0
+}}
