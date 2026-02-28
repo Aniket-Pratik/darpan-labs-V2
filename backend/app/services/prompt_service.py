@@ -157,6 +157,7 @@ class PromptService:
         recent_turns: list[dict],
         cross_module_summary: str,
         sensitivity_settings: dict,
+        conversation_state: dict | None = None,
     ) -> str:
         """Format the interviewer_question.txt prompt.
 
@@ -174,6 +175,7 @@ class PromptService:
             recent_turns: Recent Q&A turns for context.
             cross_module_summary: Summary from completed modules.
             sensitivity_settings: User's sensitivity preferences.
+            conversation_state: Cumulative session memory (open loops, style markers, etc.).
 
         Returns:
             Formatted prompt ready for LLM.
@@ -183,6 +185,7 @@ class PromptService:
         captured_str = json.dumps(captured_signals)
         missing_str = json.dumps(missing_signals)
         sensitivity_str = json.dumps(sensitivity_settings)
+        conversation_state_str = json.dumps(conversation_state or {}, indent=2)
 
         return self.format_prompt(
             "interviewer_question",
@@ -199,6 +202,7 @@ class PromptService:
             recent_turns=recent_turns_str,
             cross_module_summary=cross_module_summary,
             sensitivity_settings=sensitivity_str,
+            conversation_state=conversation_state_str,
         )
 
     def _format_previous_answers(self, previous_answers: list[dict]) -> str:

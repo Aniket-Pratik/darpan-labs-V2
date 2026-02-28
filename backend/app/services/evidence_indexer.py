@@ -80,6 +80,8 @@ class EvidenceIndexerService:
                     "question_context": chunk.question_context,
                     "module_id": turn["module_id"],
                     "turn_id": turn["turn_id"],
+                    "snippet_type": getattr(chunk, "snippet_type", "paraphrase"),
+                    "emotional_valence": getattr(chunk, "emotional_valence", "neutral"),
                 })
 
         if not all_chunks:
@@ -105,6 +107,8 @@ class EvidenceIndexerService:
                 embedding=embeddings[i] if i < len(embeddings) else None,
                 snippet_metadata={
                     "question_context": chunk["question_context"],
+                    "snippet_type": chunk.get("snippet_type", "paraphrase"),
+                    "emotional_valence": chunk.get("emotional_valence", "neutral"),
                 },
             )
             db.add(snippet)
@@ -168,7 +172,7 @@ class EvidenceIndexerService:
                 prompt=prompt,
                 response_format=EvidenceChunkingResponse,
                 temperature=0.2,
-                max_tokens=500,
+                max_tokens=700,
                 metadata={"task": "evidence_chunking"},
             )
             return result.snippets
@@ -184,6 +188,15 @@ class EvidenceIndexerService:
         text = turn["answer_text"].strip()
         if len(text) < 20:
             return []
+
+        # Module-aware default category
+        module_default_category = {
+            "M1": "personality",
+            "M2": "decision_rule",
+            "M3": "preference",
+            "M4": "behavior",
+        }
+        default_cat = module_default_category.get(turn["module_id"], "context")
 
         # Simple sentence split
         sentences = []
@@ -204,7 +217,7 @@ class EvidenceIndexerService:
             if len(current) >= 2 or len(" ".join(current)) > 300:
                 chunks.append(EvidenceChunkLLM(
                     text=" ".join(current),
-                    category="context",  # Default category for heuristic
+                    category=default_cat,
                     question_context=turn["question_text"][:100],
                 ))
                 current = []
@@ -212,7 +225,7 @@ class EvidenceIndexerService:
         if current:
             chunks.append(EvidenceChunkLLM(
                 text=" ".join(current),
-                category="context",
+                category=default_cat,
                 question_context=turn["question_text"][:100],
             ))
 

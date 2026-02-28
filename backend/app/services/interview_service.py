@@ -109,6 +109,7 @@ class InterviewService:
             settings={
                 "sensitivity_settings": request.sensitivity_settings.model_dump(),
                 "modules_to_complete": request.modules_to_complete,
+                "conversation_state": self._init_conversation_state(),
             },
         )
         session.add(interview_session)
@@ -223,7 +224,7 @@ class InterviewService:
             signal_targets=self.question_bank.get_signal_targets(active_module.module_id),
         )
 
-        # Update turn with parsed data
+        # Update turn with parsed data (enriched with narrative/style extraction)
         user_turn.answer_meta = {
             "specificity_score": parsed_answer.specificity_score,
             "sentiment": parsed_answer.sentiment,
@@ -232,13 +233,44 @@ class InterviewService:
             "signals_extracted": [
                 s.model_dump() for s in parsed_answer.signals_extracted
             ],
+            "behavioral_rules": [
+                r.model_dump() for r in parsed_answer.behavioral_rules
+            ],
+            "narrative_snippets": [
+                n.model_dump() for n in parsed_answer.narrative_snippets
+            ],
+            "style_markers": [
+                m.model_dump() for m in parsed_answer.style_markers
+            ],
+            "exceptions_mentioned": parsed_answer.exceptions_mentioned,
+            "contradiction_candidates": parsed_answer.contradiction_candidates,
+            "self_descriptors": parsed_answer.self_descriptors,
+            "open_loops": [
+                ol.model_dump() for ol in parsed_answer.open_loops
+            ],
+            "exemplar_quality": parsed_answer.exemplar_quality,
         }
         user_turn.answer_language = parsed_answer.language
+
+        # Populate answer_structured with signal/rule index
+        user_turn.answer_structured = {
+            "signals": {
+                s.signal: {"value": s.value, "confidence": s.confidence}
+                for s in parsed_answer.signals_extracted
+            },
+            "rules": [r.model_dump() for r in parsed_answer.behavioral_rules],
+        }
 
         # Update module state
         await self.module_state.update_module_after_answer(
             session, active_module, parsed_answer
         )
+
+        # Update conversation memory
+        interview = await self._get_interview_session(session, interview_session_id)
+        if interview:
+            self._update_conversation_state(interview, parsed_answer, request.answer_text)
+            await session.flush()
 
         logger.debug(f"Submitted answer for turn {turn_index}")
 
@@ -655,6 +687,9 @@ class InterviewService:
         sensitivity_settings = (interview.settings or {}).get(
             "sensitivity_settings", {}
         )
+        conversation_state = (interview.settings or {}).get(
+            "conversation_state", {}
+        )
 
         # Get module info
         target_signals = self.question_bank.get_signal_targets(module.module_id)
@@ -677,6 +712,7 @@ class InterviewService:
                 recent_turns=recent_turns,
                 cross_module_summary=cross_module_summary,
                 sensitivity_settings=sensitivity_settings,
+                conversation_state=conversation_state,
             )
 
             response = await self.llm_client.generate(
@@ -794,6 +830,7 @@ class InterviewService:
                 "is_followup": question_result.is_followup,
                 "rationale": question_result.rationale,
                 "acknowledgment_text": question_result.acknowledgment_text,
+                "question_intent": question_result.question_intent,
             },
         )
         session.add(turn)
@@ -1068,6 +1105,96 @@ class InterviewService:
             module_summary="All interview modules completed successfully.",
         )
 
+    # ========== Conversation State Methods ==========
+
+    @staticmethod
+    def _init_conversation_state() -> dict:
+        """Create initial conversation state for a new session."""
+        return {
+            "themes": [],
+            "style_hypothesis": [],
+            "open_loops": [],
+            "notable_quotes": [],
+            "engagement_trend": [],
+            "follow_up_count": 0,
+            "contradiction_log": [],
+            "self_descriptors": [],
+        }
+
+    @staticmethod
+    def _update_conversation_state(
+        interview: InterviewSession,
+        parsed_answer: "ParsedAnswer",
+        answer_text: str,
+    ) -> None:
+        """Update cumulative conversation state after an answer.
+
+        Merges new open_loops, style_markers, notable_quotes,
+        self_descriptors, and contradictions into session settings.
+
+        Args:
+            interview: The interview session to update.
+            parsed_answer: Parsed answer with extracted data.
+            answer_text: Raw answer text for engagement tracking.
+        """
+        settings = interview.settings or {}
+        state = settings.get("conversation_state", InterviewService._init_conversation_state())
+
+        # Merge open loops (cap at 10)
+        existing_topics = {ol["topic"] for ol in state.get("open_loops", [])}
+        for ol in parsed_answer.open_loops:
+            if ol.topic not in existing_topics:
+                state["open_loops"].append(ol.model_dump())
+                existing_topics.add(ol.topic)
+        state["open_loops"] = state["open_loops"][-10:]
+
+        # Merge style markers / hypothesis (cap at 15)
+        existing_markers = {m["marker"] for m in state.get("style_hypothesis", [])}
+        for sm in parsed_answer.style_markers:
+            if sm.marker not in existing_markers:
+                state["style_hypothesis"].append(sm.model_dump())
+                existing_markers.add(sm.marker)
+        state["style_hypothesis"] = state["style_hypothesis"][-15:]
+
+        # Merge notable quotes — keep top 10 by exemplar_quality
+        for ns in parsed_answer.narrative_snippets:
+            state["notable_quotes"].append({
+                **ns.model_dump(),
+                "exemplar_quality": parsed_answer.exemplar_quality,
+            })
+        state["notable_quotes"] = sorted(
+            state["notable_quotes"],
+            key=lambda q: q.get("exemplar_quality", 0),
+            reverse=True,
+        )[:10]
+
+        # Merge self-descriptors (cap at 20)
+        existing_desc = set(state.get("self_descriptors", []))
+        for sd in parsed_answer.self_descriptors:
+            if sd not in existing_desc:
+                state["self_descriptors"].append(sd)
+                existing_desc.add(sd)
+        state["self_descriptors"] = state["self_descriptors"][-20:]
+
+        # Merge contradiction candidates (cap at 10)
+        for cc in parsed_answer.contradiction_candidates:
+            if cc not in state.get("contradiction_log", []):
+                state["contradiction_log"].append(cc)
+        state["contradiction_log"] = state["contradiction_log"][-10:]
+
+        # Track engagement trend (word count, cap at 20)
+        word_count = len(answer_text.split()) if answer_text else 0
+        state["engagement_trend"].append(word_count)
+        state["engagement_trend"] = state["engagement_trend"][-20:]
+
+        # Track follow-up count
+        if parsed_answer.needs_followup:
+            state["follow_up_count"] = state.get("follow_up_count", 0) + 1
+
+        # Write back to settings (triggers JSONB update)
+        settings["conversation_state"] = state
+        interview.settings = settings
+
     # ========== Module-Based Onboarding Methods ==========
 
     async def get_user_modules(
@@ -1207,6 +1334,7 @@ class InterviewService:
                 "sensitivity_settings": {},
                 "modules_to_complete": [request.module_id],
                 "single_module_mode": True,
+                "conversation_state": self._init_conversation_state(),
             },
         )
         session.add(interview_session)

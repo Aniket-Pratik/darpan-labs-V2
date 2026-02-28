@@ -19,6 +19,10 @@ from app.schemas.llm_responses import (
     EvidenceChunkLLM,
     TwinResponseLLM,
     EvidenceUsedLLM,
+    ConditionalRuleLLM,
+    VoiceSignatureLLM,
+    InternalTensionLLM,
+    NarrativeMemoryLLM,
 )
 from app.schemas.twin import (
     TwinGenerateRequest,
@@ -45,6 +49,13 @@ class TestProfileExtractionSchema:
         assert profile.personality.self_description == ""
         assert profile.decision_making.behavioral_rules == []
         assert profile.uncertainty_flags == []
+        # New enrichment fields default to empty
+        assert profile.behavioral_rules == []
+        assert profile.voice_signature.tone_descriptors == []
+        assert profile.voice_signature.formality_level == "mixed"
+        assert profile.tensions == []
+        assert profile.narrative_memories == []
+        assert profile.exemplar_quotes == []
 
     def test_full_profile(self):
         """A full profile with all fields should validate."""
@@ -85,6 +96,42 @@ class TestProfileExtractionSchema:
                 social_energy="introvert",
             ),
             uncertainty_flags=["spending_behavior", "health"],
+            behavioral_rules=[
+                ConditionalRuleLLM(
+                    condition="price > $500",
+                    behavior="compare at least 3 alternatives",
+                    domain="spending",
+                    confidence=0.9,
+                    source_quote="I always compare at least three options",
+                ),
+            ],
+            voice_signature=VoiceSignatureLLM(
+                tone_descriptors=["measured", "analytical", "warm"],
+                characteristic_phrases=["honestly", "the thing is"],
+                hedging_style="adds 'I think' before opinions",
+                explanation_style="concrete examples from personal life",
+                formality_level="casual",
+            ),
+            tensions=[
+                InternalTensionLLM(
+                    tension="Values spontaneity but always plans vacations",
+                    domain_a="lifestyle",
+                    domain_b="travel",
+                    resolution_hint="Distinguishes daily life from high-stakes",
+                ),
+            ],
+            narrative_memories=[
+                NarrativeMemoryLLM(
+                    memory="Grandmother teaching them to cook dal",
+                    domain="identity",
+                    emotional_tone="warm",
+                    significance="Food tied to family identity",
+                    source_module="M1",
+                ),
+            ],
+            exemplar_quotes=[
+                "I'd rather spend two hours researching than regret a purchase for two years",
+            ],
         )
         assert profile.demographics.age_band == "25-34"
         assert len(profile.personality.ocean_estimates) == 2
@@ -92,6 +139,16 @@ class TestProfileExtractionSchema:
         assert len(profile.decision_making.behavioral_rules) == 1
         assert profile.preferences.dimensions[0].axis == "price_vs_quality"
         assert len(profile.uncertainty_flags) == 2
+        # New enrichment fields
+        assert len(profile.behavioral_rules) == 1
+        assert profile.behavioral_rules[0].domain == "spending"
+        assert profile.voice_signature.formality_level == "casual"
+        assert len(profile.voice_signature.tone_descriptors) == 3
+        assert len(profile.tensions) == 1
+        assert profile.tensions[0].domain_a == "lifestyle"
+        assert len(profile.narrative_memories) == 1
+        assert profile.narrative_memories[0].emotional_tone == "warm"
+        assert len(profile.exemplar_quotes) == 1
 
     def test_ocean_score_bounds(self):
         """OCEAN scores must be 0.0-1.0."""
@@ -174,9 +231,30 @@ class TestEvidenceChunkingSchema:
 
     def test_valid_categories(self):
         """All valid categories should pass."""
-        for cat in ["personality", "preference", "behavior", "context", "decision_rule"]:
+        for cat in [
+            "personality", "preference", "behavior", "context", "decision_rule",
+            "conditional_rule", "voice_exemplar", "contradiction",
+        ]:
             chunk = EvidenceChunkLLM(text="test", category=cat, question_context="")
             assert chunk.category == cat
+
+    def test_snippet_type_and_emotional_valence(self):
+        """Test snippet_type and emotional_valence fields."""
+        chunk = EvidenceChunkLLM(
+            text="I always check reviews",
+            category="decision_rule",
+            question_context="shopping habits",
+            snippet_type="direct_quote",
+            emotional_valence="positive",
+        )
+        assert chunk.snippet_type == "direct_quote"
+        assert chunk.emotional_valence == "positive"
+
+    def test_snippet_type_defaults(self):
+        """snippet_type defaults to paraphrase, emotional_valence to neutral."""
+        chunk = EvidenceChunkLLM(text="test", category="context", question_context="")
+        assert chunk.snippet_type == "paraphrase"
+        assert chunk.emotional_valence == "neutral"
 
     def test_empty_snippets(self):
         """Empty snippets list should be valid."""
@@ -284,7 +362,7 @@ class TestQualityLabel:
 
 
 class TestQualityScore:
-    """Test quality score calculation."""
+    """Test interview quality score calculation (component of blended score)."""
 
     def setup_method(self):
         self.service = TwinGenerationService()
@@ -516,7 +594,7 @@ class TestEvidenceHeuristic:
         chunks = service._heuristic_chunk(turn)
         assert len(chunks) >= 1
         for chunk in chunks:
-            assert chunk.category == "context"
+            assert chunk.category == "personality"  # M1 -> personality
             assert len(chunk.text) > 0
 
     def test_heuristic_skips_short_text(self):
@@ -544,3 +622,487 @@ class TestEvidenceHeuristic:
         }
         chunks = service._heuristic_chunk(turn)
         assert len(chunks) >= 1
+
+    def test_heuristic_module_aware_categories(self):
+        """Heuristic should use module-aware default categories."""
+        from app.services.evidence_indexer import EvidenceIndexerService
+        service = EvidenceIndexerService()
+
+        module_expected = {
+            "M1": "personality",
+            "M2": "decision_rule",
+            "M3": "preference",
+            "M4": "behavior",
+            "A1": "context",  # Add-ons default to context
+        }
+        for module_id, expected_cat in module_expected.items():
+            turn = {
+                "turn_id": uuid4(),
+                "module_id": module_id,
+                "question_text": "Tell me more",
+                "answer_text": "I enjoy exploring new ideas and thinking deeply about problems in my daily life.",
+            }
+            chunks = service._heuristic_chunk(turn)
+            assert len(chunks) >= 1
+            assert chunks[0].category == expected_cat, (
+                f"Module {module_id} should default to {expected_cat}"
+            )
+
+
+# ============================================================
+# Enrichment Schema Tests
+# ============================================================
+
+
+class TestEnrichmentSchemas:
+    """Test new enrichment Pydantic schemas."""
+
+    def test_conditional_rule_valid(self):
+        """ConditionalRuleLLM should validate with all fields."""
+        rule = ConditionalRuleLLM(
+            condition="price > $500",
+            behavior="compare at least 3 options",
+            domain="spending",
+            confidence=0.9,
+            source_quote="I always compare at least three options",
+        )
+        assert rule.domain == "spending"
+        assert rule.confidence == 0.9
+
+    def test_conditional_rule_confidence_bounds(self):
+        """Confidence must be 0.0-1.0."""
+        with pytest.raises(Exception):
+            ConditionalRuleLLM(
+                condition="test", behavior="test", domain="test",
+                confidence=1.5, source_quote="",
+            )
+
+    def test_voice_signature_defaults(self):
+        """VoiceSignatureLLM should have sensible defaults."""
+        voice = VoiceSignatureLLM()
+        assert voice.tone_descriptors == []
+        assert voice.formality_level == "mixed"
+        assert voice.hedging_style == ""
+
+    def test_voice_signature_full(self):
+        """VoiceSignatureLLM with all fields."""
+        voice = VoiceSignatureLLM(
+            tone_descriptors=["warm", "analytical", "self-deprecating"],
+            characteristic_phrases=["honestly", "the thing is"],
+            hedging_style="adds 'I think'",
+            explanation_style="concrete examples",
+            formality_level="casual",
+        )
+        assert len(voice.tone_descriptors) == 3
+        assert voice.formality_level == "casual"
+
+    def test_internal_tension_valid(self):
+        """InternalTensionLLM should validate."""
+        tension = InternalTensionLLM(
+            tension="Values spontaneity but plans everything",
+            domain_a="lifestyle",
+            domain_b="travel",
+            resolution_hint="Distinguishes daily vs high-stakes",
+        )
+        assert tension.domain_a == "lifestyle"
+
+    def test_narrative_memory_valid(self):
+        """NarrativeMemoryLLM should validate."""
+        memory = NarrativeMemoryLLM(
+            memory="Grandmother taught me to cook dal",
+            domain="identity",
+            emotional_tone="warm",
+            significance="Food is tied to family",
+            source_module="M1",
+        )
+        assert memory.emotional_tone == "warm"
+        assert memory.source_module == "M1"
+
+    def test_narrative_memory_defaults(self):
+        """NarrativeMemoryLLM defaults."""
+        memory = NarrativeMemoryLLM(memory="Some memory")
+        assert memory.domain == ""
+        assert memory.emotional_tone == "neutral"
+
+
+class TestEnrichedPersonaSummarySchema:
+    """Test PersonaSummaryResponse with simulation_notes."""
+
+    def test_simulation_notes_default(self):
+        """simulation_notes defaults to empty list."""
+        summary = PersonaSummaryResponse(
+            persona_summary_text="I am a person.",
+            key_traits=["analytical"],
+        )
+        assert summary.simulation_notes == []
+
+    def test_simulation_notes_with_data(self):
+        """simulation_notes with data."""
+        summary = PersonaSummaryResponse(
+            persona_summary_text="I am a person.",
+            key_traits=["analytical"],
+            simulation_notes=[
+                "Gets irritated when asked to justify emotional decisions with data",
+                "Always mentions family when discussing lifestyle",
+            ],
+        )
+        assert len(summary.simulation_notes) == 2
+
+
+# ============================================================
+# Simulation Readiness Tests
+# ============================================================
+
+
+class TestSimulationReadiness:
+    """Test _calculate_simulation_readiness scoring."""
+
+    def setup_method(self):
+        self.service = TwinGenerationService()
+
+    def _make_snippet_mock(self, snippet_type="paraphrase"):
+        """Create a mock snippet with snippet_metadata."""
+        mock = MagicMock()
+        mock.snippet_metadata = {"snippet_type": snippet_type}
+        return mock
+
+    def test_rich_profile_high_score(self):
+        """A rich profile should score high across all dimensions."""
+        profile = {
+            "behavioral_rules": [
+                {"condition": f"cond{i}", "behavior": f"beh{i}", "domain": f"dom{i}",
+                 "confidence": 0.8, "source_quote": f"quote{i}"}
+                for i in range(10)
+            ],
+            "voice_signature": {
+                "tone_descriptors": ["warm", "analytical", "measured"],
+                "characteristic_phrases": ["honestly", "the thing is"],
+                "hedging_style": "adds 'I think'",
+                "explanation_style": "concrete examples",
+            },
+            "tensions": [{"tension": "test tension"}],
+            "narrative_memories": [
+                {"memory": f"memory{i}", "domain": f"dom{i}", "emotional_tone": "warm"}
+                for i in range(5)
+            ],
+        }
+        snippets = [self._make_snippet_mock("direct_quote") for _ in range(10)]
+        modules = ["M1", "M2", "M3", "M4"]
+
+        result = self.service._calculate_simulation_readiness(profile, snippets, modules)
+
+        assert result["rule_density"] == 1.0
+        assert result["voice_capture"] == 1.0
+        assert result["grounding_ratio"] == 1.0
+        assert result["tension_coverage"] == 1.0
+        assert result["narrative_richness"] > 0.8
+        assert result["overall"] > 0.8
+
+    def test_minimal_profile_low_score(self):
+        """An empty profile should score low."""
+        profile = {}
+        snippets = []
+        modules = ["M1", "M2", "M3", "M4"]
+
+        result = self.service._calculate_simulation_readiness(profile, snippets, modules)
+
+        assert result["rule_density"] == 0.0
+        assert result["voice_capture"] == 0.0
+        assert result["grounding_ratio"] == 0.0
+        assert result["narrative_richness"] == 0.0
+        assert result["tension_coverage"] == 0.5  # < 6 modules, no tensions
+        assert result["overall"] < 0.2
+
+    def test_no_tensions_many_modules(self):
+        """6+ modules with no tensions should give low tension_coverage."""
+        profile = {}
+        modules = ["M1", "M2", "M3", "M4", "A1", "A2"]
+
+        result = self.service._calculate_simulation_readiness(profile, [], modules)
+        assert result["tension_coverage"] == 0.3
+
+    def test_all_components_present_in_output(self):
+        """All 5 component scores and overall must be in output."""
+        result = self.service._calculate_simulation_readiness({}, [], ["M1"])
+        assert "rule_density" in result
+        assert "voice_capture" in result
+        assert "grounding_ratio" in result
+        assert "narrative_richness" in result
+        assert "tension_coverage" in result
+        assert "overall" in result
+
+    def test_grounding_ratio_partial(self):
+        """Partial direct quotes should give partial grounding score."""
+        snippets = [
+            self._make_snippet_mock("direct_quote"),
+            self._make_snippet_mock("paraphrase"),
+            self._make_snippet_mock("paraphrase"),
+            self._make_snippet_mock("paraphrase"),
+            self._make_snippet_mock("paraphrase"),
+        ]
+        result = self.service._calculate_simulation_readiness(
+            {}, snippets, ["M1"]
+        )
+        # 1/5 = 0.2, target 0.3, so 0.2/0.3 ≈ 0.667
+        assert 0.6 < result["grounding_ratio"] < 0.7
+
+
+# ============================================================
+# Voice/Rules Assembly Tests
+# ============================================================
+
+
+class TestVoiceRulesAssembly:
+    """Test _assemble_voice_rules_reference."""
+
+    def setup_method(self):
+        self.service = TwinGenerationService()
+
+    def test_full_profile_assembly(self):
+        """Assembly with full data produces all sections."""
+        profile = {
+            "voice_signature": {
+                "tone_descriptors": ["warm", "measured"],
+                "characteristic_phrases": ["honestly", "the thing is"],
+                "hedging_style": "adds 'I think'",
+                "explanation_style": "stories",
+            },
+            "behavioral_rules": [
+                {"condition": "price > $500", "behavior": "compare 3 options", "confidence": 0.9},
+            ],
+            "tensions": [
+                {"tension": "Values spontaneity but plans everything"},
+            ],
+            "selected_narrative_memories": [
+                {"memory": "Grandmother cooking dal", "emotional_tone": "warm", "domain": "identity"},
+            ],
+            "ranked_exemplars": [
+                {"quote": "I'd rather research than regret"},
+            ],
+        }
+
+        text = self.service._assemble_voice_rules_reference(profile)
+        assert "VOICE:" in text
+        assert "warm, measured" in text
+        assert "RULES:" in text
+        assert "TENSIONS:" in text
+        assert "NARRATIVE MEMORIES:" in text
+        assert "EXEMPLARS:" in text
+
+    def test_empty_profile_assembly(self):
+        """Empty profile produces empty string."""
+        text = self.service._assemble_voice_rules_reference({})
+        assert text == ""
+
+    def test_partial_data(self):
+        """Profile with only voice data."""
+        profile = {
+            "voice_signature": {
+                "tone_descriptors": ["analytical"],
+            },
+        }
+        text = self.service._assemble_voice_rules_reference(profile)
+        assert "VOICE:" in text
+        assert "analytical" in text
+        assert "RULES:" not in text
+
+
+# ============================================================
+# Exemplar Ranking Tests
+# ============================================================
+
+
+class TestExemplarRanking:
+    """Test _rank_and_select_exemplars."""
+
+    def setup_method(self):
+        self.service = TwinGenerationService()
+
+    def test_specificity_scoring(self):
+        """Quotes with numbers/proper nouns should score higher."""
+        profile = {
+            "exemplar_quotes": [
+                "I compare at least 3 options before buying",
+                "I like to think about things",
+                "Mumbai taught me to be resilient",
+            ],
+            "behavioral_rules": [],
+        }
+        result = self.service._rank_and_select_exemplars(profile, [])
+        # The first and third should rank higher due to number/proper noun
+        quotes = [r["quote"] for r in result]
+        assert "I compare at least 3 options before buying" in quotes
+        assert "Mumbai taught me to be resilient" in quotes
+
+    def test_deduplication(self):
+        """Similar quotes should be deduplicated."""
+        profile = {
+            "exemplar_quotes": [
+                "I always compare prices before buying things",
+                "I always compare prices before I buy anything",
+                "Family is everything to me",
+            ],
+            "behavioral_rules": [],
+        }
+        result = self.service._rank_and_select_exemplars(profile, [])
+        # Should deduplicate the two similar quotes
+        assert len(result) <= 2
+
+    def test_cap_at_seven(self):
+        """Output should be capped at 7."""
+        profile = {
+            "exemplar_quotes": [f"Unique quote number {i} about topic {i*10}" for i in range(15)],
+            "behavioral_rules": [],
+        }
+        result = self.service._rank_and_select_exemplars(profile, [])
+        assert len(result) <= 7
+
+    def test_empty_quotes(self):
+        """Empty exemplar_quotes returns empty list."""
+        result = self.service._rank_and_select_exemplars({}, [])
+        assert result == []
+
+    def test_rank_assignment(self):
+        """Ranks should be sequential starting from 1."""
+        profile = {
+            "exemplar_quotes": ["Quote A about topic 1", "Quote B about topic 2", "Quote C about topic 3"],
+            "behavioral_rules": [],
+        }
+        result = self.service._rank_and_select_exemplars(profile, [])
+        ranks = [r["rank"] for r in result]
+        assert ranks == list(range(1, len(result) + 1))
+
+    def test_domain_coverage(self):
+        """Quotes covering different domains should be preferred."""
+        profile = {
+            "exemplar_quotes": [
+                "I research products for hours before buying anything over 500 dollars",
+                "My grandmother taught me to always cook from scratch at home",
+            ],
+            "behavioral_rules": [
+                {"condition": "price > $500", "behavior": "research", "domain": "spending",
+                 "confidence": 0.9, "source_quote": "I research products for hours before buying anything over 500 dollars"},
+                {"condition": "cooking", "behavior": "from scratch", "domain": "lifestyle",
+                 "confidence": 0.8, "source_quote": "My grandmother taught me to always cook from scratch at home"},
+            ],
+        }
+        result = self.service._rank_and_select_exemplars(profile, [])
+        assert len(result) == 2
+        # Both should be kept since they cover different domains
+        all_domains = []
+        for r in result:
+            all_domains.extend(r["domains"])
+        assert "spending" in all_domains or "lifestyle" in all_domains
+
+
+# ============================================================
+# Narrative Memory Selection Tests
+# ============================================================
+
+
+class TestNarrativeMemorySelection:
+    """Test _select_narrative_memories."""
+
+    def setup_method(self):
+        self.service = TwinGenerationService()
+
+    def test_deduplication(self):
+        """Overlapping memories should be deduplicated."""
+        profile = {
+            "narrative_memories": [
+                {"memory": "My grandmother taught me to cook dal in her kitchen",
+                 "domain": "identity", "emotional_tone": "warm"},
+                {"memory": "Grandmother taught me cooking dal",
+                 "domain": "identity", "emotional_tone": "warm"},
+                {"memory": "Got burned on a used car purchase",
+                 "domain": "spending", "emotional_tone": "cautious"},
+            ],
+        }
+        result = self.service._select_narrative_memories(profile)
+        # Should keep 2 (dedup the similar ones)
+        assert len(result) == 2
+
+    def test_cap_at_six(self):
+        """Output should be capped at 6."""
+        profile = {
+            "narrative_memories": [
+                {"memory": f"Unique memory number {i} about topic {i}",
+                 "domain": f"domain{i}", "emotional_tone": "neutral"}
+                for i in range(10)
+            ],
+        }
+        result = self.service._select_narrative_memories(profile)
+        assert len(result) <= 6
+
+    def test_domain_diversity_sorting(self):
+        """Memories from diverse domains should be preferred."""
+        profile = {
+            "narrative_memories": [
+                {"memory": "Memory about cooking traditions at home",
+                 "domain": "lifestyle", "emotional_tone": "warm"},
+                {"memory": "Memory about office work and deadlines",
+                 "domain": "career", "emotional_tone": "anxious"},
+                {"memory": "Another memory about cooking pasta at home",
+                 "domain": "lifestyle", "emotional_tone": "warm"},
+                {"memory": "Memory about hiking in mountains alone",
+                 "domain": "leisure", "emotional_tone": "proud"},
+            ],
+        }
+        result = self.service._select_narrative_memories(profile)
+        # First 3 should cover 3 different domains
+        first_domains = [m["domain"] for m in result[:3]]
+        assert len(set(first_domains)) >= 2
+
+    def test_empty_memories(self):
+        """Empty narrative_memories returns empty list."""
+        result = self.service._select_narrative_memories({})
+        assert result == []
+
+
+# ============================================================
+# Quality Breakdown Tests
+# ============================================================
+
+
+class TestQualityBreakdown:
+    """Test that quality_breakdown structure is correct."""
+
+    def setup_method(self):
+        self.service = TwinGenerationService()
+
+    def test_breakdown_structure(self):
+        """Verify the breakdown dict has all required keys."""
+        profile = {
+            "behavioral_rules": [{"condition": "c", "behavior": "b", "domain": "d",
+                                   "confidence": 0.5, "source_quote": "q"}],
+            "voice_signature": {},
+            "tensions": [],
+            "narrative_memories": [],
+        }
+        readiness = self.service._calculate_simulation_readiness(
+            profile, [], ["M1", "M2", "M3", "M4"]
+        )
+        interview_score = 0.75  # Simulated
+
+        # Simulate what generate_twin would build
+        breakdown = {
+            "interview_score": round(interview_score, 3),
+            "simulation_readiness": round(readiness["overall"], 3),
+            "blended_score": round(0.5 * interview_score + 0.5 * readiness["overall"], 3),
+            "components": {
+                "rule_density": readiness["rule_density"],
+                "voice_capture": readiness["voice_capture"],
+                "grounding_ratio": readiness["grounding_ratio"],
+                "narrative_richness": readiness["narrative_richness"],
+                "tension_coverage": readiness["tension_coverage"],
+            },
+        }
+
+        assert "interview_score" in breakdown
+        assert "simulation_readiness" in breakdown
+        assert "blended_score" in breakdown
+        assert "components" in breakdown
+        assert len(breakdown["components"]) == 5
+        assert breakdown["blended_score"] == round(
+            0.5 * breakdown["interview_score"] + 0.5 * breakdown["simulation_readiness"], 3
+        )

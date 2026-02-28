@@ -83,7 +83,7 @@ class ProfileBuilderService:
             prompt=prompt,
             response_format=ProfileExtractionResponse,
             temperature=0.3,  # Low temperature for factual extraction
-            max_tokens=3000,
+            max_tokens=4500,
             metadata={"task": "profile_extraction", "user_id": str(user_id)},
         )
 

@@ -68,6 +68,27 @@ Use information from completed modules to:
 - Reference their known traits to create more engaging questions
 Example: If M1 revealed they're a software engineer, an M2 scenario could be about choosing between two tech stacks rather than a generic decision.
 
+=== QUESTION INTENT SYSTEM ===
+Every question you ask must have a clear intent. Choose one:
+
+| Intent   | When to use | Question style |
+|----------|------------|----------------|
+| EXPLORE  | Early phase, multiple signals missing | Broad, story-eliciting: "Walk me through a typical weekend" |
+| DEEPEN   | Signal captured at low confidence or exemplar_quality is low | Episode-specific: "You mentioned researching — walk me through the last time you did that" |
+| CONTRAST | Signal at moderate confidence, need exceptions/nuance | Flip the script: "You said you're cautious. When are you the opposite?" |
+| CLARIFY  | Contradiction or vague answer exists | Reconcile: "Earlier you said X, but now Y — how do those fit together?" |
+| RESOLVE  | Open loop exists from earlier answers | Return to thread: "You hinted at that startup role — I'd love to hear more" |
+
+Intent selection logic:
+1. If open_loops is non-empty and no RESOLVE in last 3 questions → prefer RESOLVE
+2. If contradiction_log is non-empty → prefer CLARIFY
+3. If a captured signal has confidence < 0.6 → prefer DEEPEN
+4. If coverage < 0.4 → prefer EXPLORE
+5. If coverage >= 0.6 and captured signal has no exceptions → prefer CONTRAST
+6. Default: EXPLORE
+
+IMPORTANT: Never use the same intent 3 times in a row. Vary your approach.
+
 === RULES ===
 1. Ask ONE question per turn. Keep it conversational and natural.
 2. ALWAYS ask questions in English. The user may answer in Hindi, Hinglish, or English — that is fine, but your question MUST be in English.
@@ -88,8 +109,11 @@ Recent turns (voice transcript):
 Cross-module context (from completed modules):
 {cross_module_summary}
 
+Conversation state (cumulative session memory):
+{conversation_state}
+
 TASK:
-Generate the next interviewer turn for this module. Remember to include an acknowledgment of the user's previous answer (unless this is the first question).
+Generate the next interviewer turn for this module. Remember to include an acknowledgment of the user's previous answer (unless this is the first question). Select an appropriate question_intent based on the intent system above.
 
 OUTPUT JSON:
 {{
@@ -99,5 +123,6 @@ OUTPUT JSON:
   "question_type": "open_text | forced_choice | scenario | tradeoff | clarification",
   "target_signal": "string",
   "rationale_short": "string",
+  "question_intent": "EXPLORE | DEEPEN | CONTRAST | CLARIFY | RESOLVE",
   "module_summary": "string or null (if MODULE_COMPLETE, summarize what was learned)"
 }}

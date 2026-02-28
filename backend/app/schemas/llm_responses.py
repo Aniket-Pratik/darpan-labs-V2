@@ -9,6 +9,31 @@ from typing import Any, Literal
 from pydantic import BaseModel, Field, field_validator
 
 
+class NarrativeSnippet(BaseModel):
+    """A quote-worthy phrase from the user's answer."""
+
+    text: str = Field(description="Exact or near-exact quote from user")
+    category: Literal[
+        "anecdote", "self_description", "rule_of_thumb",
+        "preference_statement", "emotional_reveal"
+    ] = Field(description="Type of narrative snippet")
+
+
+class StyleMarker(BaseModel):
+    """A communication style observation."""
+
+    marker: str = Field(description="Style marker, e.g. 'uses_analogies', 'hedges_frequently'")
+    evidence: str = Field(description="Brief quote supporting this observation")
+
+
+class OpenLoop(BaseModel):
+    """An unresolved conversational thread worth revisiting."""
+
+    topic: str = Field(description="What the thread is about")
+    reason: str = Field(description="Why it's worth revisiting")
+    source_signal: str = Field(default="", description="Related signal if any")
+
+
 class ExtractedSignal(BaseModel):
     """A signal extracted from an answer."""
 
@@ -65,6 +90,28 @@ class ParsedAnswerResponse(BaseModel):
     language_detected: Literal["EN", "HI", "HG"] = Field(
         default="EN", description="Detected language (EN=English, HI=Hindi, HG=Hinglish)"
     )
+    narrative_snippets: list[NarrativeSnippet] = Field(
+        default_factory=list, description="Quote-worthy phrases from the answer"
+    )
+    style_markers: list[StyleMarker] = Field(
+        default_factory=list, description="Communication style observations"
+    )
+    exceptions_mentioned: list[str] = Field(
+        default_factory=list, description="'except when...' / 'unless...' patterns"
+    )
+    contradiction_candidates: list[str] = Field(
+        default_factory=list, description="Potential contradictions with earlier answers"
+    )
+    self_descriptors: list[str] = Field(
+        default_factory=list, description="'I'm the kind of person who...' statements"
+    )
+    open_loops: list[OpenLoop] = Field(
+        default_factory=list, description="Unresolved threads worth revisiting"
+    )
+    exemplar_quality: float = Field(
+        default=0.5, ge=0.0, le=1.0,
+        description="How good this answer is for twin training (0-1)"
+    )
 
     @field_validator("followup_reason", mode="before")
     @classmethod
@@ -107,6 +154,22 @@ class ModuleCompletionResponse(BaseModel):
     module_summary: str | None = Field(
         default=None, description="Summary of what was learned (if COMPLETE)"
     )
+    narrative_depth_score: float = Field(
+        default=0.0, ge=0.0, le=1.0,
+        description="How many concrete episodes/anecdotes were captured (0-1)"
+    )
+    style_coverage_score: float = Field(
+        default=0.0, ge=0.0, le=1.0,
+        description="Can we replicate their voice? (0-1)"
+    )
+    contradiction_count: int = Field(
+        default=0, ge=0,
+        description="Number of discovered tensions (positive for realism)"
+    )
+    twin_readiness_score: float = Field(
+        default=0.0, ge=0.0, le=1.0,
+        description="Composite: 0.4*coverage + 0.25*confidence + 0.2*narrative + 0.15*style"
+    )
 
 
 class AdaptiveQuestionResponse(BaseModel):
@@ -132,6 +195,9 @@ class AdaptiveQuestionResponse(BaseModel):
     question_type: str = Field(description="Type of question")
     target_signal: str = Field(description="Signal this question targets")
     rationale_short: str = Field(description="Brief rationale for asking this question")
+    question_intent: Literal["EXPLORE", "DEEPEN", "CONTRAST", "CLARIFY", "RESOLVE"] = Field(
+        default="EXPLORE", description="Intent behind this question"
+    )
     module_summary: str | None = Field(
         default=None, description="Summary if MODULE_COMPLETE"
     )
@@ -150,6 +216,13 @@ class ParsedAnswer(BaseModel):
     followup_reason: str | None
     sentiment: str
     language: str
+    narrative_snippets: list[NarrativeSnippet] = Field(default_factory=list)
+    style_markers: list[StyleMarker] = Field(default_factory=list)
+    exceptions_mentioned: list[str] = Field(default_factory=list)
+    contradiction_candidates: list[str] = Field(default_factory=list)
+    self_descriptors: list[str] = Field(default_factory=list)
+    open_loops: list[OpenLoop] = Field(default_factory=list)
+    exemplar_quality: float = 0.5
 
     @classmethod
     def from_llm_response(cls, response: ParsedAnswerResponse) -> "ParsedAnswer":
@@ -162,6 +235,13 @@ class ParsedAnswer(BaseModel):
             followup_reason=response.followup_reason,
             sentiment=response.sentiment,
             language=response.language_detected,
+            narrative_snippets=response.narrative_snippets,
+            style_markers=response.style_markers,
+            exceptions_mentioned=response.exceptions_mentioned,
+            contradiction_candidates=response.contradiction_candidates,
+            self_descriptors=response.self_descriptors,
+            open_loops=response.open_loops,
+            exemplar_quality=response.exemplar_quality,
         )
 
 
@@ -176,6 +256,10 @@ class ModuleCompletionResult(BaseModel):
     recommendation: str
     module_summary: str | None = None
     suggested_questions: list[str] = Field(default_factory=list)
+    narrative_depth_score: float = 0.0
+    style_coverage_score: float = 0.0
+    contradiction_count: int = 0
+    twin_readiness_score: float = 0.0
 
     @classmethod
     def from_llm_response(cls, response: ModuleCompletionResponse) -> "ModuleCompletionResult":
@@ -189,12 +273,55 @@ class ModuleCompletionResult(BaseModel):
             recommendation=response.recommendation,
             module_summary=response.module_summary,
             suggested_questions=response.suggested_next_questions,
+            narrative_depth_score=response.narrative_depth_score,
+            style_coverage_score=response.style_coverage_score,
+            contradiction_count=response.contradiction_count,
+            twin_readiness_score=response.twin_readiness_score,
         )
 
 
 # ============================================================
 # Phase 2: Twin Generation + Chat LLM Response Schemas
 # ============================================================
+
+
+class ConditionalRuleLLM(BaseModel):
+    """A conditional behavioral rule grounded in interview evidence."""
+
+    condition: str = Field(description="When this situation arises")
+    behavior: str = Field(description="What the person does")
+    domain: str = Field(description="Domain: decision_making, spending, lifestyle, etc.")
+    confidence: float = Field(ge=0.0, le=1.0, description="Confidence in this rule")
+    source_quote: str = Field(default="", description="Direct quote fragment grounding this rule")
+
+
+class VoiceSignatureLLM(BaseModel):
+    """How the person talks and thinks."""
+
+    tone_descriptors: list[str] = Field(default_factory=list, description="3-5 adjectives describing tone")
+    characteristic_phrases: list[str] = Field(default_factory=list, description="3-5 actual phrases they use")
+    hedging_style: str = Field(default="", description="How they qualify uncertain statements")
+    explanation_style: str = Field(default="", description="Stories / examples / abstract reasoning")
+    formality_level: str = Field(default="mixed", description="casual / mixed / formal")
+
+
+class InternalTensionLLM(BaseModel):
+    """A contradiction or tension in the person's stated views/behaviors."""
+
+    tension: str = Field(description="The contradiction")
+    domain_a: str = Field(default="", description="First domain involved")
+    domain_b: str = Field(default="", description="Second domain involved")
+    resolution_hint: str = Field(default="", description="How they reconcile this, if at all")
+
+
+class NarrativeMemoryLLM(BaseModel):
+    """A specific story, anecdote, or personal moment from the interview."""
+
+    memory: str = Field(description="What the person shared")
+    domain: str = Field(default="", description="Domain: lifestyle, identity, spending, etc.")
+    emotional_tone: str = Field(default="neutral", description="warm / conflicted / proud / etc.")
+    significance: str = Field(default="", description="Why this memory matters for understanding the person")
+    source_module: str = Field(default="", description="M1 / M3 / etc.")
 
 
 class OceanEstimateLLM(BaseModel):
@@ -272,6 +399,21 @@ class ProfileExtractionResponse(BaseModel):
     communication: ProfileCommunicationLLM = Field(default_factory=ProfileCommunicationLLM)
     domain_specific: dict[str, Any] = Field(default_factory=dict)
     uncertainty_flags: list[str] = Field(default_factory=list)
+    behavioral_rules: list[ConditionalRuleLLM] = Field(
+        default_factory=list, description="5-15 conditional behavioral rules across all domains"
+    )
+    voice_signature: VoiceSignatureLLM = Field(
+        default_factory=VoiceSignatureLLM, description="How the person talks and thinks"
+    )
+    tensions: list[InternalTensionLLM] = Field(
+        default_factory=list, description="0-5 contradictions or tensions"
+    )
+    narrative_memories: list[NarrativeMemoryLLM] = Field(
+        default_factory=list, description="3-8 memorable stories/anecdotes from the interview"
+    )
+    exemplar_quotes: list[str] = Field(
+        default_factory=list, description="5-10 most representative direct quotes"
+    )
 
 
 class PersonaSummaryResponse(BaseModel):
@@ -289,16 +431,26 @@ class PersonaSummaryResponse(BaseModel):
     token_estimate: int = Field(
         default=0, description="Estimated token count of summary"
     )
+    simulation_notes: list[str] = Field(
+        default_factory=list, description="2-5 practical tips for simulating this person"
+    )
 
 
 class EvidenceChunkLLM(BaseModel):
     """A single evidence chunk extracted from an answer."""
 
-    text: str = Field(description="The evidence snippet text (1-3 sentences)")
-    category: Literal["personality", "preference", "behavior", "context", "decision_rule"] = Field(
-        description="Category of this evidence"
-    )
+    text: str = Field(description="The evidence snippet text (1-4 sentences)")
+    category: Literal[
+        "personality", "preference", "behavior", "context", "decision_rule",
+        "conditional_rule", "voice_exemplar", "contradiction"
+    ] = Field(description="Category of this evidence")
     question_context: str = Field(default="", description="What question this answers")
+    snippet_type: Literal["direct_quote", "paraphrase", "inferred"] = Field(
+        default="paraphrase", description="Whether this is a direct quote, paraphrase, or inference"
+    )
+    emotional_valence: Literal["positive", "negative", "neutral", "mixed"] = Field(
+        default="neutral", description="Emotional tone of this snippet"
+    )
 
 
 class EvidenceChunkingResponse(BaseModel):
@@ -376,6 +528,7 @@ class AdaptiveQuestionResult(BaseModel):
     question_type: str
     target_signal: str
     rationale: str
+    question_intent: str = "EXPLORE"
     module_summary: str | None = None
     acknowledgment_text: str | None = None
     is_followup: bool = False
@@ -398,6 +551,12 @@ class AdaptiveQuestionResult(BaseModel):
         if q_type not in VALID_TYPES:
             q_type = "open_text"
 
+        # Normalize question_intent
+        VALID_INTENTS = {"EXPLORE", "DEEPEN", "CONTRAST", "CLARIFY", "RESOLVE"}
+        intent = response.question_intent.upper().strip()
+        if intent not in VALID_INTENTS:
+            intent = "EXPLORE"
+
         return cls(
             action=response.action,
             question_text=response.question_text,
@@ -406,6 +565,7 @@ class AdaptiveQuestionResult(BaseModel):
             question_type=q_type,
             target_signal=response.target_signal,
             rationale=response.rationale_short,
+            question_intent=intent,
             module_summary=response.module_summary,
             acknowledgment_text=response.acknowledgment_text,
             is_followup=response.action == "ASK_FOLLOWUP",

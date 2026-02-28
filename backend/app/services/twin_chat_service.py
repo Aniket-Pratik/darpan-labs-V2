@@ -121,9 +121,11 @@ class TwinChatService:
         evidence_str = self._format_evidence(evidence)
         history_str = self._format_chat_history(chat_history)
 
+        persona_text = self._build_enriched_persona_context(twin)
+
         prompt = self.prompt_service.format_prompt(
             "twin_response",
-            persona_summary_text=twin.persona_summary_text or "",
+            persona_summary_text=persona_text,
             retrieved_evidence=evidence_str,
             modules_included=", ".join(twin.modules_included),
             missing_modules=missing_str,
@@ -334,6 +336,59 @@ class TwinChatService:
             {"role": msg.role, "content": msg.content}
             for msg in messages
         ]
+
+    def _build_enriched_persona_context(self, twin: TwinProfile) -> str:
+        """Build enriched persona context from structured_profile_json."""
+        persona_text = twin.persona_summary_text or ""
+
+        profile = twin.structured_profile_json or {}
+        enrichments = []
+
+        # Voice signature
+        voice = profile.get("voice_signature", {})
+        if isinstance(voice, dict):
+            if voice.get("tone_descriptors"):
+                enrichments.append(f"Voice: {', '.join(voice['tone_descriptors'])}")
+            if voice.get("characteristic_phrases"):
+                phrases = ', '.join(f'"{p}"' for p in voice["characteristic_phrases"])
+                enrichments.append(f"Phrases: {phrases}")
+
+        # Top behavioral rules (up to 5)
+        rules = profile.get("behavioral_rules", [])
+        if rules:
+            rule_lines = []
+            for r in rules[:5]:
+                if isinstance(r, dict):
+                    rule_lines.append(f"- When {r.get('condition', '?')} -> {r.get('behavior', '?')}")
+            if rule_lines:
+                enrichments.append("Rules:\n" + "\n".join(rule_lines))
+
+        # Tensions
+        tensions = profile.get("tensions", [])
+        if tensions:
+            tension_lines = []
+            for t in tensions[:3]:
+                if isinstance(t, dict):
+                    tension_lines.append(f"- {t.get('tension', '?')}")
+            if tension_lines:
+                enrichments.append("Tensions:\n" + "\n".join(tension_lines))
+
+        # Ranked exemplar quotes (top 3)
+        ranked = profile.get("ranked_exemplars", [])
+        if ranked:
+            exemplar_lines = []
+            for e in ranked[:3]:
+                if isinstance(e, dict):
+                    exemplar_lines.append(f'- "{e.get("quote", "")}"')
+            if exemplar_lines:
+                enrichments.append("Exemplar quotes:\n" + "\n".join(exemplar_lines))
+
+        if enrichments:
+            enrichment_text = "\n\n".join(enrichments)
+            if len(persona_text) + len(enrichment_text) < 12000:
+                persona_text += "\n\n--- Reference ---\n" + enrichment_text
+
+        return persona_text
 
     def _format_evidence(self, evidence: list[dict]) -> str:
         """Format evidence snippets for the LLM prompt."""

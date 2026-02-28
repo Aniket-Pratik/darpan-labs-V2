@@ -58,6 +58,9 @@ class Question(BaseModel):
     estimated_seconds: int = Field(default=30)
     is_followup: bool = False
     parent_question_id: str | None = None
+    intent: Literal["EXPLORE", "DEEPEN", "CONTRAST", "CLARIFY", "RESOLVE"] = Field(
+        default="EXPLORE", description="Default question intent"
+    )
 
 
 class ModuleQuestionBank(BaseModel):

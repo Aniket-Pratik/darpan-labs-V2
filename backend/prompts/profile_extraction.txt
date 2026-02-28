@@ -1,6 +1,14 @@
 SYSTEM:
 You are extracting a structured personality/behavioral profile from interview
-transcripts to create a digital twin.
+transcripts to create a digital twin that can simulate this person convincingly.
+
+PRIORITIES (in order of importance):
+1. Conditional behavioral rules — specific if/then patterns grounded in quotes
+2. Narrative memories — stories, anecdotes, personal moments that reveal character
+3. Voice/style capture — how they talk, hedge, explain, their characteristic phrases
+4. Tensions/contradictions — where stated values conflict with actual behavior
+5. Exemplar quotes — the most representative things they said in their own words
+6. Trait dimensions — OCEAN and preference axes as secondary summary, not primary goal
 
 DEVELOPER:
 Completed modules: {completed_modules}
@@ -8,7 +16,45 @@ All interview turns (by module):
 {all_module_turns}
 
 TASK:
-Extract a comprehensive structured profile.
+Extract a comprehensive structured profile. Focus on capturing the person as a
+believable individual with specific patterns, not as a set of abstract trait scores.
+
+EXTRACTION INSTRUCTIONS:
+
+behavioral_rules (5-15 rules):
+- Extract conditional "when X happens, I do Y" patterns from their answers
+- Each rule MUST include a source_quote — a direct fragment from the interview
+- Cover all domains mentioned in the interview (decision_making, spending, lifestyle, etc.)
+- Prefer specific rules ("When a purchase is over $500, I compare at least 3 options")
+  over vague ones ("I'm careful with money")
+
+voice_signature:
+- tone_descriptors: 3-5 adjectives for how they communicate (e.g. "self-deprecating, measured, enthusiastic")
+- characteristic_phrases: 3-5 actual phrases they use repeatedly (e.g. "honestly", "the thing is")
+- hedging_style: how they qualify uncertain statements (e.g. "adds 'I think' before opinions")
+- explanation_style: do they use stories, examples, data, abstract reasoning?
+- formality_level: casual / mixed / formal
+
+tensions (0-5):
+- Find places where the person's stated values conflict with their behavior or other statements
+- Include the two domains involved and how (if at all) they reconcile the contradiction
+- Only include genuine tensions, not minor inconsistencies
+
+narrative_memories (3-8):
+- Find stories, anecdotes, or personal moments the person shared during the interview
+- These are NOT traits — they are specific memories or experiences that reveal character
+- Include the emotional tone (warm, conflicted, proud, anxious, etc.)
+- Explain why this memory matters for understanding the person
+- Tag the source module
+
+exemplar_quotes (5-10):
+- The most representative, vivid, or revealing things they said in their own words
+- Prefer specific and surprising over generic
+- These should capture the person's voice and values
+
+OCEAN estimates (secondary):
+- Fill in as a compact summary derived from behavioral evidence
+- These are supporting data, not the main extraction target
 
 OUTPUT JSON:
 {{
@@ -46,5 +92,42 @@ OUTPUT JSON:
     "social_energy": "string"
   }},
   "domain_specific": {{}},
-  "uncertainty_flags": ["domains where data is missing"]
+  "uncertainty_flags": ["domains where data is missing"],
+  "behavioral_rules": [
+    {{
+      "condition": "When stakes are irreversible",
+      "behavior": "I slow down and research exhaustively",
+      "domain": "decision_making",
+      "confidence": 0.9,
+      "source_quote": "I'd rather spend two hours researching than regret it"
+    }}
+  ],
+  "voice_signature": {{
+    "tone_descriptors": ["self-deprecating", "measured", "enthusiastic"],
+    "characteristic_phrases": ["honestly", "the thing is", "I just feel like"],
+    "hedging_style": "adds 'I think' before opinions",
+    "explanation_style": "concrete examples from personal life",
+    "formality_level": "casual"
+  }},
+  "tensions": [
+    {{
+      "tension": "Values spontaneity but always plans vacations weeks ahead",
+      "domain_a": "lifestyle",
+      "domain_b": "travel",
+      "resolution_hint": "Distinguishes between daily life and high-stakes experiences"
+    }}
+  ],
+  "narrative_memories": [
+    {{
+      "memory": "Talked about grandmother teaching them to cook dal",
+      "domain": "identity",
+      "emotional_tone": "warm",
+      "significance": "Food is tied to family identity and comfort",
+      "source_module": "M1"
+    }}
+  ],
+  "exemplar_quotes": [
+    "I'd rather spend two hours researching than regret a purchase for two years",
+    "Honestly, I just go with my gut when it comes to people"
+  ]
 }}

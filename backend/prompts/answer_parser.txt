@@ -32,6 +32,15 @@ Expected output:
     {{"signal": "information_needs", "value": "High information needs — uses multiple sources (YouTube, Reddit, spreadsheets) before deciding", "confidence": 0.8}}
   ]
 - needs_followup: false
+- narrative_snippets: [
+    {{"text": "I'll spend a few days reading reviews on YouTube and Reddit, compare specs in a spreadsheet, and then wait for a sale", "category": "rule_of_thumb"}},
+    {{"text": "I think the only exception is books; I'll just grab those without thinking", "category": "preference_statement"}}
+  ]
+- style_markers: [{{"marker": "hedges_frequently", "evidence": "I'm pretty methodical"}}]
+- exceptions_mentioned: ["Exception for books — buys impulsively without research"]
+- self_descriptors: ["I'm pretty methodical about it"]
+- open_loops: []
+- exemplar_quality: 0.85
 
 Example 2 — Vague answer (weak signal, follow-up needed):
 Question: "How do you usually make decisions when you're unsure?"
@@ -43,6 +52,12 @@ Expected output:
   ]
 - needs_followup: true
 - followup_reason: "vague"
+- narrative_snippets: []
+- style_markers: [{{"marker": "hedges_frequently", "evidence": "I guess"}}]
+- exceptions_mentioned: []
+- self_descriptors: []
+- open_loops: [{{"topic": "decision-making process details", "reason": "Said 'what feels right' but no specifics about how or when", "source_signal": "gut_vs_data"}}]
+- exemplar_quality: 0.15
 
 Example 3 — Hinglish answer (indirect signals):
 Question: "When you disagree with someone at work, how do you handle it?"
@@ -56,6 +71,12 @@ Expected output:
   ]
 - language_detected: "HG"
 - needs_followup: false
+- narrative_snippets: [{{"text": "Group mein toh kabhi nahi bolunga against someone", "category": "rule_of_thumb"}}]
+- style_markers: []
+- exceptions_mentioned: []
+- self_descriptors: []
+- open_loops: [{{"topic": "private conflict resolution approach", "reason": "Says they handle it privately afterward — what does that look like?", "source_signal": "conflict_style"}}]
+- exemplar_quality: 0.7
 
 === SIGNAL VALUE QUALITY GUIDE ===
 Write signal values that are SPECIFIC and BEHAVIORAL. Preserve the detail from the user's answer.
@@ -106,6 +127,40 @@ M4 — Communication & Social:
 
 IMPORTANT: Only extract signals whose names appear in the valid signal list for this module. A single answer often reveals multiple signals — extract all that apply.
 
+=== NARRATIVE & STYLE EXTRACTION ===
+
+In addition to signals, extract the following to build a richer twin:
+
+1. **narrative_snippets**: Quote-worthy phrases that reveal personality, stories, or strong opinions. Tag each with a category:
+   - "anecdote" — a specific episode or story ("Last year I quit my job to...")
+   - "self_description" — how they see themselves ("I'm the kind of person who...")
+   - "rule_of_thumb" — personal heuristics ("I never buy anything without sleeping on it")
+   - "preference_statement" — clear preference expression ("I'd always rather have quality over quantity")
+   - "emotional_reveal" — moments of vulnerability or strong emotion ("That really frustrated me because...")
+
+2. **style_markers**: How the person communicates, not what they say. Examples:
+   - "uses_analogies" — explains through comparisons
+   - "hedges_frequently" — uses "maybe", "I guess", "kind of", "pretty much"
+   - "gives_concrete_numbers" — provides specific figures and quantities
+   - "verbose" — gives long, detailed responses
+   - "terse" — gives short, minimal responses
+   - "storyteller" — naturally tells stories/anecdotes
+   - "systematic_thinker" — organizes thoughts in lists or categories
+
+3. **exceptions_mentioned**: "Except when...", "Unless...", "But not for..." patterns. These are gold for realistic twin behavior.
+
+4. **contradiction_candidates**: If this answer seems to contradict something from previous_answers, note it. E.g., "Said they're risk-averse but describes quitting a stable job impulsively."
+
+5. **self_descriptors**: Any "I'm...", "I tend to be...", "I consider myself..." phrases. Extract the full phrase.
+
+6. **open_loops**: Topics the user hinted at but didn't fully explore. E.g., "mentioned a startup role but didn't explain why they left." These become future question targets.
+
+7. **exemplar_quality**: Rate 0.0-1.0 how good this answer is for twin training:
+   - 0.0-0.3: Vague, generic, could be anyone
+   - 0.4-0.6: Some specificity, but missing concrete details or episodes
+   - 0.7-0.8: Good — specific, personal, contains at least one concrete detail
+   - 0.9-1.0: Excellent — vivid, specific, contains anecdotes, exceptions, or emotional depth
+
 OUTPUT JSON:
 {{
   "specificity_score": 0.0-1.0,
@@ -118,5 +173,18 @@ OUTPUT JSON:
   "needs_followup": true|false,
   "followup_reason": "vague" | "contradiction" | "high_leverage" | null,
   "sentiment": "positive|neutral|negative|mixed",
-  "language_detected": "EN|HI|HG"
+  "language_detected": "EN|HI|HG",
+  "narrative_snippets": [
+    {{"text": "exact or near-exact quote", "category": "anecdote|self_description|rule_of_thumb|preference_statement|emotional_reveal"}}
+  ],
+  "style_markers": [
+    {{"marker": "style_marker_name", "evidence": "brief quote supporting this"}}
+  ],
+  "exceptions_mentioned": ["exception pattern 1"],
+  "contradiction_candidates": ["description of contradiction"],
+  "self_descriptors": ["I'm the kind of person who..."],
+  "open_loops": [
+    {{"topic": "what the thread is about", "reason": "why worth revisiting", "source_signal": "related signal or empty"}}
+  ],
+  "exemplar_quality": 0.0-1.0
 }}

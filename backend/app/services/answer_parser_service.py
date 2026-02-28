@@ -5,7 +5,13 @@ import re
 from typing import TYPE_CHECKING
 
 from app.llm import LLMClient, get_llm_client
-from app.schemas.llm_responses import ExtractedSignal, ParsedAnswer, ParsedAnswerResponse
+from app.schemas.llm_responses import (
+    ExtractedSignal,
+    NarrativeSnippet,
+    ParsedAnswer,
+    ParsedAnswerResponse,
+    StyleMarker,
+)
 from app.services.prompt_service import PromptService, get_prompt_service
 
 if TYPE_CHECKING:
@@ -95,7 +101,8 @@ class AnswerParserService:
         """Fallback heuristic parsing when LLM fails.
 
         Extracts the target signal when the answer has enough substance,
-        so coverage can progress even without the LLM.
+        so coverage can progress even without the LLM. Also extracts
+        basic style markers, self-descriptors, and exemplar quality.
 
         Args:
             answer_text: The user's answer.
@@ -118,10 +125,52 @@ class AnswerParserService:
                     confidence=min(specificity, 0.7),
                 )
             )
+
+        # Heuristic style markers from word count
+        style_markers: list[StyleMarker] = []
+        word_count = len(answer_text.split()) if answer_text else 0
+        if word_count >= 80:
+            style_markers.append(
+                StyleMarker(marker="verbose", evidence=f"Answer is {word_count} words")
+            )
+        elif word_count <= 10 and answer_text and answer_text.strip():
+            style_markers.append(
+                StyleMarker(marker="terse", evidence=f"Answer is only {word_count} words")
+            )
+
+        # Regex-extract self-descriptors
+        self_descriptors: list[str] = []
+        if answer_text:
+            descriptor_patterns = [
+                r"I'?m\s+(?:the\s+kind\s+of\s+person\s+who|someone\s+who|a\s+\w+\s+person)",
+                r"I\s+tend\s+to\s+be\s+\w+",
+                r"I'?m\s+(?:pretty|very|quite|really|fairly)\s+\w+",
+                r"I\s+consider\s+myself\s+\w+",
+            ]
+            for pattern in descriptor_patterns:
+                matches = re.findall(pattern, answer_text, re.IGNORECASE)
+                self_descriptors.extend(matches)
+
+        # Heuristic narrative snippets — detect anecdotes via past tense
+        narrative_snippets: list[NarrativeSnippet] = []
+        if answer_text and re.search(
+            r"\b(last\s+(time|year|month|week)|once\s+I|I\s+remember|there\s+was\s+a\s+time)\b",
+            answer_text,
+            re.IGNORECASE,
+        ):
+            narrative_snippets.append(
+                NarrativeSnippet(text=answer_text[:200], category="anecdote")
+            )
+
+        # Exemplar quality = min(specificity, 0.5) for heuristic path
+        exemplar_quality = min(specificity, 0.5)
+
         logger.info(
             f"Heuristic parse for {target_signal}: "
             f"specificity={specificity:.2f}, "
-            f"signals={[s.signal for s in signals]}"
+            f"signals={[s.signal for s in signals]}, "
+            f"style={[m.marker for m in style_markers]}, "
+            f"self_desc={self_descriptors}"
         )
 
         return ParsedAnswer(
@@ -132,6 +181,10 @@ class AnswerParserService:
             followup_reason="vague" if needs_followup else None,
             sentiment="neutral",
             language=language,
+            narrative_snippets=narrative_snippets,
+            style_markers=style_markers,
+            self_descriptors=self_descriptors,
+            exemplar_quality=exemplar_quality,
         )
 
     def calculate_heuristic_specificity(self, answer_text: str) -> float:

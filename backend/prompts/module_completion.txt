@@ -27,15 +27,36 @@ Confidence calculation:
 - confidence_score = average confidence across ALL required signals (including missing ones as 0.0)
 - This means missing signals actively drag down the confidence score
 
+=== MULTI-FACTOR EVALUATION ===
+
+In addition to signal coverage and confidence, evaluate twin readiness across these dimensions:
+
+1. **narrative_depth_score** (0-1): How many concrete episodes and anecdotes were captured?
+   - 0.0-0.3: Mostly abstract/generic answers, few specific stories
+   - 0.4-0.6: Some concrete examples but missing depth
+   - 0.7-1.0: Rich with specific anecdotes, episodes, and emotional moments
+
+2. **style_coverage_score** (0-1): Can we replicate their communication voice?
+   - 0.0-0.3: Not enough data to characterize their style
+   - 0.4-0.6: Some style markers observed but not consistent
+   - 0.7-1.0: Clear communication patterns, vocabulary tendencies, and hedging/directness style
+
+3. **contradiction_count**: Number of discovered tensions between answers. This is POSITIVE — contradictions make twins more realistic and human.
+
+4. **twin_readiness_score**: Composite score calculated as:
+   `0.4 * coverage_score + 0.25 * confidence_score + 0.2 * narrative_depth_score + 0.15 * style_coverage_score`
+
 === RECOMMENDATION LOGIC ===
 
 COMPLETE — recommend when:
-- coverage >= threshold AND confidence >= threshold
+- twin_readiness_score >= 0.65
+- OR coverage >= threshold AND confidence >= threshold (legacy path)
 - OR coverage >= threshold with only 1-2 low-priority signals missing and confidence is close to threshold (within 0.05)
 - The user has provided enough information to build a meaningful profile for this module
 
 ASK_MORE — recommend when:
-- Important signals are still missing (especially core signals for the module)
+- twin_readiness_score < 0.65 AND important signals are still missing
+- narrative_depth_score < 0.4 (need more concrete episodes)
 - The user seems engaged and willing to continue
 - Fewer than 8 questions have been asked
 - Include 2-3 specific suggested_next_questions targeting the most important missing signals
@@ -83,5 +104,9 @@ OUTPUT JSON:
   ],
   "recommendation": "COMPLETE" | "ASK_MORE" | "SKIP_OPTIONAL",
   "suggested_next_questions": [],
-  "module_summary": "string or null (if COMPLETE, summarize what was learned)"
+  "module_summary": "string or null (if COMPLETE, summarize what was learned)",
+  "narrative_depth_score": 0.0-1.0,
+  "style_coverage_score": 0.0-1.0,
+  "contradiction_count": 0,
+  "twin_readiness_score": 0.0-1.0
 }}

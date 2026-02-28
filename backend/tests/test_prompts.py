@@ -115,6 +115,55 @@ class TestProfileExtractionPrompt:
         content = (PROMPTS_PATH / "profile_extraction.txt").read_text()
         assert "profile" in content.lower() or "twin" in content.lower()
 
+    def test_has_enrichment_sections(self):
+        """Test that prompt includes enrichment extraction instructions."""
+        content = (PROMPTS_PATH / "profile_extraction.txt").read_text()
+        assert "behavioral_rules" in content
+        assert "voice_signature" in content
+        assert "tensions" in content
+        assert "narrative_memories" in content
+        assert "exemplar_quotes" in content
+        assert "PRIORITIES" in content
+
+
+class TestPersonaSummaryPrompt:
+    """Tests for persona_summary.txt prompt enrichments."""
+
+    def test_has_simulation_notes(self):
+        """Test that prompt asks for simulation_notes."""
+        content = (PROMPTS_PATH / "persona_summary.txt").read_text()
+        assert "simulation_notes" in content
+
+    def test_has_enrichment_references(self):
+        """Test that prompt references enriched profile data."""
+        content = (PROMPTS_PATH / "persona_summary.txt").read_text()
+        assert "behavioral_rules" in content or "behavioral rules" in content
+        assert "voice_signature" in content or "voice" in content.lower()
+        assert "tension" in content.lower()
+        assert "narrative_memories" in content or "narrative memories" in content.lower()
+
+
+class TestEvidenceChunkingPrompt:
+    """Tests for evidence_chunking.txt prompt enrichments."""
+
+    def test_has_new_categories(self):
+        """Test that prompt includes new evidence categories."""
+        content = (PROMPTS_PATH / "evidence_chunking.txt").read_text()
+        assert "conditional_rule" in content
+        assert "voice_exemplar" in content
+        assert "contradiction" in content
+
+    def test_has_snippet_type(self):
+        """Test that prompt includes snippet_type field."""
+        content = (PROMPTS_PATH / "evidence_chunking.txt").read_text()
+        assert "snippet_type" in content
+        assert "direct_quote" in content
+
+    def test_has_emotional_valence(self):
+        """Test that prompt includes emotional_valence field."""
+        content = (PROMPTS_PATH / "evidence_chunking.txt").read_text()
+        assert "emotional_valence" in content
+
 
 class TestTwinResponsePrompt:
     """Tests for twin_response.txt prompt."""
@@ -130,6 +179,16 @@ class TestTwinResponsePrompt:
         content = (PROMPTS_PATH / "twin_response.txt").read_text()
         assert "confidence" in content.lower()
 
+    def test_has_voice_matching_rule(self):
+        """Test that prompt includes voice/style matching rule."""
+        content = (PROMPTS_PATH / "twin_response.txt").read_text()
+        assert "speaking style" in content.lower() or "characteristic phrases" in content.lower()
+
+    def test_has_tension_rule(self):
+        """Test that prompt includes tension acknowledgment rule."""
+        content = (PROMPTS_PATH / "twin_response.txt").read_text()
+        assert "contradiction" in content.lower() or "tension" in content.lower()
+
 
 class TestExperimentResponsePrompt:
     """Tests for experiment_response.txt prompt."""
@@ -139,6 +198,11 @@ class TestExperimentResponsePrompt:
         file_path = PROMPTS_PATH / "experiment_response.txt"
         content = file_path.read_text()
         assert len(content) > 100, "Experiment response prompt should have substantial content"
+
+    def test_has_voice_matching_rule(self):
+        """Test that prompt includes voice/style matching rule."""
+        content = (PROMPTS_PATH / "experiment_response.txt").read_text()
+        assert "speaking style" in content.lower() or "tone" in content.lower()
 
 
 class TestTranscriptCorrectionPrompt:

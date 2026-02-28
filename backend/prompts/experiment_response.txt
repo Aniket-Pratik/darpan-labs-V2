@@ -9,6 +9,8 @@ RULES:
 4. Do not invent traits not supported by evidence.
 5. Answer in first person, naturally.
 6. Be specific — avoid generic responses.
+7. Respond in a way consistent with the persona's speaking style and tone,
+   not just their stated preferences.
 
 DEVELOPER:
 Experiment type: {experiment_type}

@@ -1,6 +1,7 @@
 """Twin generation orchestrator — coordinates the full twin creation pipeline."""
 
 import logging
+import re
 import time
 from uuid import UUID
 
@@ -121,25 +122,57 @@ class TwinGenerationService:
                 db=db,
             )
 
-            # 7. Calculate quality metrics
+            # 7. Enrichment: rank exemplars and select narrative memories
+            ranked_exemplars = self._rank_and_select_exemplars(profile_dict, snippets)
+            profile_dict["ranked_exemplars"] = ranked_exemplars
+
+            selected_memories = self._select_narrative_memories(profile_dict)
+            profile_dict["selected_narrative_memories"] = selected_memories
+
+            # 8. Assemble voice/rules reference text
+            voice_rules_text = self._assemble_voice_rules_reference(profile_dict)
+
+            # 9. Calculate quality metrics
             coverage_confidence = await self._build_coverage_confidence(
                 user_id, modules_to_include, db
             )
-            quality_score = self._calculate_quality_score(coverage_confidence)
+            interview_score = self._calculate_quality_score(coverage_confidence)
 
-            # 8. Update twin profile
+            # 10. Calculate simulation readiness
+            readiness = self._calculate_simulation_readiness(
+                profile_dict, snippets, modules_to_include
+            )
+            readiness_overall = readiness["overall"]
+
+            # 11. Blend quality score: 50% interview + 50% simulation readiness
+            blended = 0.5 * interview_score + 0.5 * readiness_overall
+
+            # 12. Update twin profile
             elapsed = time.time() - start_time
             twin.status = "ready"
             twin.structured_profile_json = profile_dict
             twin.persona_summary_text = persona_response.persona_summary_text
-            twin.persona_full_text = None  # Could add extended narrative later
-            twin.quality_score = quality_score
+            twin.persona_full_text = voice_rules_text or None
+            twin.quality_score = round(blended, 3)
             twin.coverage_confidence = coverage_confidence
             twin.extraction_meta = {
                 "completion_time_sec": round(elapsed, 1),
                 "evidence_snippets_count": len(snippets),
                 "key_traits": persona_response.key_traits,
                 "uncertainty_flags": profile_response.uncertainty_flags,
+                "simulation_notes": getattr(persona_response, "simulation_notes", []),
+                "quality_breakdown": {
+                    "interview_score": round(interview_score, 3),
+                    "simulation_readiness": round(readiness_overall, 3),
+                    "blended_score": round(blended, 3),
+                    "components": {
+                        "rule_density": readiness["rule_density"],
+                        "voice_capture": readiness["voice_capture"],
+                        "grounding_ratio": readiness["grounding_ratio"],
+                        "narrative_richness": readiness["narrative_richness"],
+                        "tension_coverage": readiness["tension_coverage"],
+                    },
+                },
             }
 
             await db.flush()
@@ -253,6 +286,294 @@ class TwinGenerationService:
             }
 
         return {"by_module": by_module, "by_domain": by_domain}
+
+    def _rank_and_select_exemplars(
+        self, profile_dict: dict, snippets: list
+    ) -> list[dict]:
+        """Rank and select top exemplar quotes deterministically.
+
+        Ranking heuristic per quote:
+        - specificity (+2): contains a number, proper noun, or concrete detail
+        - uniqueness (+1): not substantially similar to already selected exemplars
+        - domain_coverage (+1): covers a domain not yet represented
+        - length_penalty (-1): too short (<10 words) or too long (>50 words)
+
+        Returns top 7 ranked exemplars.
+        """
+        exemplar_quotes = profile_dict.get("exemplar_quotes", [])
+        if not exemplar_quotes:
+            return []
+
+        # Infer domains from behavioral rules for each quote
+        rules = profile_dict.get("behavioral_rules", [])
+        rule_domains = {r.get("source_quote", ""): r.get("domain", "") for r in rules if isinstance(r, dict)}
+
+        scored = []
+        for quote in exemplar_quotes:
+            if not isinstance(quote, str) or not quote.strip():
+                continue
+            score = 0
+            domains = []
+
+            # Specificity: contains numbers, proper nouns (capitalized words), or concrete details
+            if re.search(r'\d', quote):
+                score += 2
+            elif re.search(r'\b[A-Z][a-z]{2,}', quote):
+                score += 2
+
+            # Length penalty
+            word_count = len(quote.split())
+            if word_count < 10 or word_count > 50:
+                score -= 1
+
+            # Domain from matching rule
+            for src, domain in rule_domains.items():
+                if src and src in quote:
+                    domains.append(domain)
+
+            scored.append({"quote": quote, "score": score, "domains": domains})
+
+        # Uniqueness and domain coverage pass
+        selected = []
+        covered_domains: set[str] = set()
+        for item in sorted(scored, key=lambda x: x["score"], reverse=True):
+            if len(selected) >= 7:
+                break
+
+            # Check uniqueness against already selected (word overlap < 50%)
+            words = set(item["quote"].lower().split())
+            is_duplicate = False
+            for sel in selected:
+                sel_words = set(sel["quote"].lower().split())
+                if len(words) > 0 and len(words & sel_words) / len(words) > 0.5:
+                    is_duplicate = True
+                    break
+            if is_duplicate:
+                continue
+
+            # Domain coverage bonus
+            new_domains = [d for d in item["domains"] if d and d not in covered_domains]
+            if new_domains:
+                item["score"] += 1
+
+            covered_domains.update(item["domains"])
+            selected.append(item)
+
+        # Re-sort by final score and assign ranks
+        selected.sort(key=lambda x: x["score"], reverse=True)
+        result = []
+        for i, item in enumerate(selected):
+            result.append({
+                "quote": item["quote"],
+                "rank": i + 1,
+                "score": item["score"],
+                "domains": item["domains"],
+            })
+
+        return result
+
+    def _select_narrative_memories(self, profile_dict: dict) -> list[dict]:
+        """Select and deduplicate narrative memories.
+
+        - Deduplicate by checking pairwise word overlap (>60% → drop shorter one)
+        - Cap at 6 memories
+        - Sort by domain diversity first, then emotional variety
+        """
+        memories = profile_dict.get("narrative_memories", [])
+        if not memories:
+            return []
+
+        # Ensure we have dicts
+        mem_dicts = []
+        for m in memories:
+            if isinstance(m, dict):
+                mem_dicts.append(m)
+
+        # Deduplicate by word overlap
+        deduped = []
+        for mem in mem_dicts:
+            words = set(mem.get("memory", "").lower().split())
+            is_dup = False
+            for i, existing in enumerate(deduped):
+                ex_words = set(existing.get("memory", "").lower().split())
+                if len(words) > 0 and len(ex_words) > 0:
+                    overlap = len(words & ex_words) / min(len(words), len(ex_words))
+                    if overlap > 0.6:
+                        # Keep the longer one
+                        if len(mem.get("memory", "")) > len(existing.get("memory", "")):
+                            deduped[i] = mem
+                        is_dup = True
+                        break
+            if not is_dup:
+                deduped.append(mem)
+
+        # Sort by domain diversity then emotional variety
+        seen_domains: set[str] = set()
+        seen_tones: set[str] = set()
+        priority = []
+        remaining = []
+
+        for mem in deduped:
+            domain = mem.get("domain", "")
+            tone = mem.get("emotional_tone", "")
+            if domain not in seen_domains:
+                priority.append(mem)
+                seen_domains.add(domain)
+                seen_tones.add(tone)
+            elif tone not in seen_tones:
+                priority.append(mem)
+                seen_tones.add(tone)
+            else:
+                remaining.append(mem)
+
+        result = (priority + remaining)[:6]
+        return result
+
+    def _assemble_voice_rules_reference(self, profile_dict: dict) -> str:
+        """Assemble a compact text reference from enriched profile data.
+
+        Deterministic — no LLM call. Stored in persona_full_text as a convenience view.
+        """
+        lines = []
+
+        # Voice
+        voice = profile_dict.get("voice_signature", {})
+        if isinstance(voice, dict) and any(voice.values()):
+            lines.append("VOICE:")
+            if voice.get("tone_descriptors"):
+                lines.append(f"- Tone: {', '.join(voice['tone_descriptors'])}")
+            if voice.get("characteristic_phrases"):
+                phrases = ', '.join(f'"{p}"' for p in voice["characteristic_phrases"])
+                lines.append(f"- Phrases: {phrases}")
+            if voice.get("hedging_style"):
+                lines.append(f"- Hedging: {voice['hedging_style']}")
+            if voice.get("explanation_style"):
+                lines.append(f"- Explains by: {voice['explanation_style']}")
+
+        # Rules
+        rules = profile_dict.get("behavioral_rules", [])
+        if rules:
+            lines.append("")
+            lines.append("RULES:")
+            for r in rules:
+                if isinstance(r, dict):
+                    conf = r.get("confidence", 0)
+                    lines.append(f"- When {r.get('condition', '?')} -> {r.get('behavior', '?')} ({conf})")
+
+        # Tensions
+        tensions = profile_dict.get("tensions", [])
+        if tensions:
+            lines.append("")
+            lines.append("TENSIONS:")
+            for t in tensions:
+                if isinstance(t, dict):
+                    lines.append(f"- {t.get('tension', '?')}")
+
+        # Narrative memories
+        selected_memories = profile_dict.get("selected_narrative_memories", [])
+        if selected_memories:
+            lines.append("")
+            lines.append("NARRATIVE MEMORIES:")
+            for m in selected_memories:
+                if isinstance(m, dict):
+                    tone = m.get("emotional_tone", "")
+                    domain = m.get("domain", "")
+                    lines.append(f"- {m.get('memory', '?')} [{tone}, {domain}]")
+
+        # Exemplars
+        ranked = profile_dict.get("ranked_exemplars", [])
+        if ranked:
+            lines.append("")
+            lines.append("EXEMPLARS:")
+            for e in ranked[:5]:
+                if isinstance(e, dict):
+                    lines.append(f'- "{e.get("quote", "")}"')
+
+        return "\n".join(lines) if lines else ""
+
+    def _calculate_simulation_readiness(
+        self,
+        profile_dict: dict,
+        snippets: list,
+        modules: list[str],
+    ) -> dict:
+        """Calculate simulation readiness across 5 dimensions.
+
+        All calculated deterministically, no LLM call.
+        Returns component scores and overall blended score.
+        """
+        # 1. Rule density: min(1.0, num_rules / 8)
+        rules = profile_dict.get("behavioral_rules", [])
+        rule_density = min(1.0, len(rules) / 8)
+
+        # 2. Voice capture: proportion of voice_signature checks satisfied
+        voice = profile_dict.get("voice_signature", {})
+        if not isinstance(voice, dict):
+            voice = {}
+        voice_checks = 0
+        if len(voice.get("tone_descriptors", [])) >= 3:
+            voice_checks += 1
+        if len(voice.get("characteristic_phrases", [])) >= 2:
+            voice_checks += 1
+        if voice.get("explanation_style"):
+            voice_checks += 1
+        if voice.get("hedging_style"):
+            voice_checks += 1
+        voice_capture = voice_checks / 4
+
+        # 3. Grounding ratio: proportion of direct_quote snippets / 0.3 target
+        total_snippets = len(snippets) if snippets else 0
+        if total_snippets > 0:
+            direct_count = sum(
+                1 for s in snippets
+                if hasattr(s, 'snippet_metadata') and
+                isinstance(s.snippet_metadata, dict) and
+                s.snippet_metadata.get("snippet_type") == "direct_quote"
+            )
+            ratio = direct_count / total_snippets
+            grounding_ratio = min(1.0, ratio / 0.3)
+        else:
+            grounding_ratio = 0.0
+
+        # 4. Tension coverage
+        tensions = profile_dict.get("tensions", [])
+        if tensions:
+            tension_coverage = 1.0
+        elif len(modules) < 6:
+            tension_coverage = 0.5
+        else:
+            tension_coverage = 0.3
+
+        # 5. Narrative richness: min(1.0, num_memories / 4) * diversity_bonus
+        memories = profile_dict.get("narrative_memories", [])
+        num_memories = len(memories)
+        if num_memories > 0:
+            base = min(1.0, num_memories / 4)
+            unique_domains = len({
+                m.get("domain", "") for m in memories if isinstance(m, dict)
+            })
+            diversity_bonus = min(1.0, unique_domains / num_memories) if num_memories > 0 else 0
+            narrative_richness = base * diversity_bonus
+        else:
+            narrative_richness = 0.0
+
+        # Overall blended score
+        overall = (
+            0.30 * rule_density
+            + 0.20 * voice_capture
+            + 0.20 * grounding_ratio
+            + 0.15 * narrative_richness
+            + 0.15 * tension_coverage
+        )
+
+        return {
+            "rule_density": round(rule_density, 3),
+            "voice_capture": round(voice_capture, 3),
+            "grounding_ratio": round(grounding_ratio, 3),
+            "narrative_richness": round(narrative_richness, 3),
+            "tension_coverage": round(tension_coverage, 3),
+            "overall": round(overall, 3),
+        }
 
     def _calculate_quality_score(self, coverage_confidence: dict) -> float:
         """Calculate overall quality score as weighted average of module scores."""
