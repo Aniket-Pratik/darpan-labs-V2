@@ -11,7 +11,7 @@ import {
 } from '@/lib/adminApi';
 import { useAuthStore } from '@/store/authStore';
 
-const MODULE_IDS = ['M1', 'M2', 'M3', 'M4', 'A1', 'A2', 'A3', 'A4'];
+const MODULE_IDS = ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8'];
 
 export default function AdminPage() {
   const [data, setData] = useState<AdminUserListResponse | null>(null);

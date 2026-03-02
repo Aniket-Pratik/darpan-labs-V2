@@ -195,21 +195,26 @@ export function useVoice({
       });
       streamRef.current = stream;
 
-      // Create AudioContext at 16kHz
-      const audioContext = new AudioContext({ sampleRate: 16000 });
+      // Create AudioContext — use device's native sample rate, we'll resample later
+      const audioContext = new AudioContext();
       audioContextRef.current = audioContext;
+      const nativeSampleRate = audioContext.sampleRate;
 
       const source = audioContext.createMediaStreamSource(stream);
 
-      // Capture PCM chunks into buffer (1024 samples at 16kHz = 64ms per chunk)
-      const processor = audioContext.createScriptProcessor(1024, 1, 1);
+      // Capture PCM chunks and resample to 16kHz for Whisper
+      const processor = audioContext.createScriptProcessor(4096, 1, 1);
       processorRef.current = processor;
 
       processor.onaudioprocess = (event) => {
         const float32 = event.inputBuffer.getChannelData(0);
-        const pcm16 = new Int16Array(float32.length);
-        for (let i = 0; i < float32.length; i++) {
-          const s = Math.max(-1, Math.min(1, float32[i]));
+        // Resample from native rate to 16kHz
+        const ratio = nativeSampleRate / 16000;
+        const outLength = Math.floor(float32.length / ratio);
+        const pcm16 = new Int16Array(outLength);
+        for (let i = 0; i < outLength; i++) {
+          const srcIndex = Math.floor(i * ratio);
+          const s = Math.max(-1, Math.min(1, float32[srcIndex]));
           pcm16[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
         }
         chunksRef.current.push(pcm16);

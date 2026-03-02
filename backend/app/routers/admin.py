@@ -29,13 +29,13 @@ logger = logging.getLogger(__name__)
 
 MODULE_NAMES = {
     "M1": "Core Identity & Context",
-    "M2": "Decision Logic & Risk",
-    "M3": "Preferences & Values",
-    "M4": "Communication & Social",
-    "A1": "Lifestyle & Routines",
-    "A2": "Spending & Financial Behavior",
-    "A3": "Career & Growth Aspirations",
-    "A4": "Work & Learning Style",
+    "M2": "Preferences & Values",
+    "M3": "Purchase Decision Logic",
+    "M4": "Lifestyle & Grooming",
+    "M5": "Sensory & Aesthetic Preferences",
+    "M6": "Body Wash Deep-Dive",
+    "M7": "Media & Influence",
+    "M8": "Concept Test",
 }
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
