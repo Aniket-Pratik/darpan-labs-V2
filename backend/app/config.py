@@ -6,6 +6,7 @@ All settings are loaded from environment variables.
 from functools import lru_cache
 from typing import Optional
 
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -71,6 +72,15 @@ class Settings(BaseSettings):
     s3_bucket: Optional[str] = None
     s3_region: str = "us-east-1"
     audio_retention_days: int = 7
+
+    @model_validator(mode="after")
+    def ensure_asyncpg_driver(self):
+        """Railway provides postgresql:// but we need postgresql+asyncpg://"""
+        if self.database_url.startswith("postgresql://"):
+            self.database_url = self.database_url.replace(
+                "postgresql://", "postgresql+asyncpg://", 1
+            )
+        return self
 
     @property
     def database_url_sync(self) -> str:

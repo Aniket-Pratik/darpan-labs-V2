@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  output: 'standalone',
   webpack: (config, { isServer }) => {
     // Exclude onnxruntime-web from server-side bundling
     if (isServer) {
