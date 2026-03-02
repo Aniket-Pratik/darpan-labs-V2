@@ -280,221 +280,6 @@ class ModuleCompletionResult(BaseModel):
         )
 
 
-# ============================================================
-# Phase 2: Twin Generation + Chat LLM Response Schemas
-# ============================================================
-
-
-class ConditionalRuleLLM(BaseModel):
-    """A conditional behavioral rule grounded in interview evidence."""
-
-    condition: str = Field(description="When this situation arises")
-    behavior: str = Field(description="What the person does")
-    domain: str = Field(description="Domain: decision_making, spending, lifestyle, etc.")
-    confidence: float = Field(ge=0.0, le=1.0, description="Confidence in this rule")
-    source_quote: str = Field(default="", description="Direct quote fragment grounding this rule")
-
-
-class VoiceSignatureLLM(BaseModel):
-    """How the person talks and thinks."""
-
-    tone_descriptors: list[str] = Field(default_factory=list, description="3-5 adjectives describing tone")
-    characteristic_phrases: list[str] = Field(default_factory=list, description="3-5 actual phrases they use")
-    hedging_style: str = Field(default="", description="How they qualify uncertain statements")
-    explanation_style: str = Field(default="", description="Stories / examples / abstract reasoning")
-    formality_level: str = Field(default="mixed", description="casual / mixed / formal")
-
-
-class InternalTensionLLM(BaseModel):
-    """A contradiction or tension in the person's stated views/behaviors."""
-
-    tension: str = Field(description="The contradiction")
-    domain_a: str = Field(default="", description="First domain involved")
-    domain_b: str = Field(default="", description="Second domain involved")
-    resolution_hint: str = Field(default="", description="How they reconcile this, if at all")
-
-
-class NarrativeMemoryLLM(BaseModel):
-    """A specific story, anecdote, or personal moment from the interview."""
-
-    memory: str = Field(description="What the person shared")
-    domain: str = Field(default="", description="Domain: lifestyle, identity, spending, etc.")
-    emotional_tone: str = Field(default="neutral", description="warm / conflicted / proud / etc.")
-    significance: str = Field(default="", description="Why this memory matters for understanding the person")
-    source_module: str = Field(default="", description="M1 / M3 / etc.")
-
-
-class OceanEstimateLLM(BaseModel):
-    """OCEAN trait estimate from profile extraction."""
-
-    score: float = Field(ge=0.0, le=1.0, description="Trait score (0=low, 1=high)")
-    confidence: float = Field(ge=0.0, le=1.0, description="Confidence in this estimate")
-    evidence: str = Field(default="", description="Supporting evidence from interview")
-
-
-class ProfileDemographicsLLM(BaseModel):
-    """Demographics section from profile extraction."""
-
-    age_band: str = Field(default="unknown", description="Age range estimate")
-    occupation_type: str = Field(default="unknown", description="Type of occupation")
-    living_context: str = Field(default="unknown", description="Living situation")
-    life_stage: str = Field(default="unknown", description="Current life stage")
-
-
-class ProfilePersonalityLLM(BaseModel):
-    """Personality section from profile extraction."""
-
-    self_description: str = Field(default="", description="How the person describes themselves")
-    ocean_estimates: dict[str, OceanEstimateLLM] = Field(
-        default_factory=dict,
-        description="OCEAN personality estimates (openness, conscientiousness, extraversion, agreeableness, neuroticism)",
-    )
-
-
-class ProfileDecisionMakingLLM(BaseModel):
-    """Decision-making section from profile extraction."""
-
-    speed_vs_deliberation: str = Field(default="", description="Fast vs careful decision style")
-    gut_vs_data: str = Field(default="", description="Intuition vs data-driven")
-    risk_appetite: str = Field(default="", description="Risk tolerance level")
-    behavioral_rules: list[BehavioralRule] = Field(
-        default_factory=list, description="If-then behavioral rules"
-    )
-
-
-class PreferenceDimensionLLM(BaseModel):
-    """A preference dimension from profile extraction."""
-
-    axis: str = Field(description="Preference axis name")
-    leaning: str = Field(description="Which direction the person leans")
-    strength: float = Field(ge=0.0, le=1.0, description="Strength of preference")
-
-
-class ProfilePreferencesLLM(BaseModel):
-    """Preferences section from profile extraction."""
-
-    dimensions: list[PreferenceDimensionLLM] = Field(
-        default_factory=list, description="Preference dimensions"
-    )
-
-
-class ProfileCommunicationLLM(BaseModel):
-    """Communication section from profile extraction."""
-
-    directness: str = Field(default="", description="Communication directness style")
-    conflict_style: str = Field(default="", description="How they handle conflict")
-    social_energy: str = Field(default="", description="Introvert/extrovert tendency")
-
-
-class ProfileExtractionResponse(BaseModel):
-    """LLM response from profile_extraction.txt prompt.
-
-    Used to extract structured personality/behavioral profile from interview transcripts.
-    """
-
-    demographics: ProfileDemographicsLLM = Field(default_factory=ProfileDemographicsLLM)
-    personality: ProfilePersonalityLLM = Field(default_factory=ProfilePersonalityLLM)
-    decision_making: ProfileDecisionMakingLLM = Field(default_factory=ProfileDecisionMakingLLM)
-    preferences: ProfilePreferencesLLM = Field(default_factory=ProfilePreferencesLLM)
-    communication: ProfileCommunicationLLM = Field(default_factory=ProfileCommunicationLLM)
-    domain_specific: dict[str, Any] = Field(default_factory=dict)
-    uncertainty_flags: list[str] = Field(default_factory=list)
-    behavioral_rules: list[ConditionalRuleLLM] = Field(
-        default_factory=list, description="5-15 conditional behavioral rules across all domains"
-    )
-    voice_signature: VoiceSignatureLLM = Field(
-        default_factory=VoiceSignatureLLM, description="How the person talks and thinks"
-    )
-    tensions: list[InternalTensionLLM] = Field(
-        default_factory=list, description="0-5 contradictions or tensions"
-    )
-    narrative_memories: list[NarrativeMemoryLLM] = Field(
-        default_factory=list, description="3-8 memorable stories/anecdotes from the interview"
-    )
-    exemplar_quotes: list[str] = Field(
-        default_factory=list, description="5-10 most representative direct quotes"
-    )
-
-
-class PersonaSummaryResponse(BaseModel):
-    """LLM response from persona_summary.txt prompt.
-
-    Used to generate a compact natural-language persona summary.
-    """
-
-    persona_summary_text: str = Field(
-        description="First-person persona summary, max 2500 tokens"
-    )
-    key_traits: list[str] = Field(
-        default_factory=list, description="Top 5-8 defining traits"
-    )
-    token_estimate: int = Field(
-        default=0, description="Estimated token count of summary"
-    )
-    simulation_notes: list[str] = Field(
-        default_factory=list, description="2-5 practical tips for simulating this person"
-    )
-
-
-class EvidenceChunkLLM(BaseModel):
-    """A single evidence chunk extracted from an answer."""
-
-    text: str = Field(description="The evidence snippet text (1-4 sentences)")
-    category: Literal[
-        "personality", "preference", "behavior", "context", "decision_rule",
-        "conditional_rule", "voice_exemplar", "contradiction"
-    ] = Field(description="Category of this evidence")
-    question_context: str = Field(default="", description="What question this answers")
-    snippet_type: Literal["direct_quote", "paraphrase", "inferred"] = Field(
-        default="paraphrase", description="Whether this is a direct quote, paraphrase, or inference"
-    )
-    emotional_valence: Literal["positive", "negative", "neutral", "mixed"] = Field(
-        default="neutral", description="Emotional tone of this snippet"
-    )
-
-
-class EvidenceChunkingResponse(BaseModel):
-    """LLM response for evidence chunking from a single answer."""
-
-    snippets: list[EvidenceChunkLLM] = Field(
-        default_factory=list, description="Evidence snippets extracted from the answer"
-    )
-
-
-class EvidenceUsedLLM(BaseModel):
-    """Evidence reference in a twin response."""
-
-    snippet_id: str = Field(description="ID of the evidence snippet used")
-    why: str = Field(description="Why this evidence is relevant")
-
-
-class TwinResponseLLM(BaseModel):
-    """LLM response from twin_response.txt prompt.
-
-    Used for twin chat responses and experiment responses.
-    """
-
-    response_text: str = Field(description="First-person response as the twin")
-    confidence_score: float = Field(
-        ge=0.0, le=1.0, description="Confidence in this response"
-    )
-    confidence_label: Literal["low", "medium", "high"] = Field(
-        description="Confidence band"
-    )
-    uncertainty_reason: str | None = Field(
-        default=None, description="Why confidence is limited"
-    )
-    evidence_used: list[EvidenceUsedLLM] = Field(
-        default_factory=list, description="Evidence snippets used"
-    )
-    coverage_gaps: list[str] = Field(
-        default_factory=list, description="Missing module domains"
-    )
-    suggested_module: str | None = Field(
-        default=None, description="Module to complete for better answer"
-    )
-
-
 class CorrectedTranscript(BaseModel):
     """LLM response from transcript_correction.txt prompt.
 
@@ -515,6 +300,46 @@ class CorrectedTranscript(BaseModel):
     corrections: list[dict] = Field(
         default_factory=list,
         description="List of corrections [{original, corrected, reason}]",
+    )
+
+
+class AnswerSatisfactionResponse(BaseModel):
+    """LLM response from answer_satisfaction.txt prompt.
+
+    Used to judge if a user's answer is satisfactory or needs follow-up.
+    """
+
+    satisfactory: bool = Field(description="Whether the answer is satisfactory")
+    reason: str | None = Field(
+        default=None, description="Reason if not satisfactory"
+    )
+
+
+class FollowUpProbeResponse(BaseModel):
+    """LLM response from followup_probe.txt prompt.
+
+    Used when the user gives a vague answer and we need to probe deeper.
+    """
+
+    acknowledgment_text: str = Field(
+        description="1-2 sentences referencing the user's answer"
+    )
+    followup_question: str = Field(
+        description="Targeted probe for detail"
+    )
+    followup_intent: Literal["DEEPEN", "CLARIFY"] = Field(
+        default="DEEPEN", description="Intent behind the follow-up"
+    )
+
+
+class AcknowledgmentResponse(BaseModel):
+    """LLM response from acknowledgment.txt prompt.
+
+    Used for warm transitions between satisfied answers and the next question.
+    """
+
+    acknowledgment_text: str = Field(
+        description="Brief warm acknowledgment of the user's answer"
     )
 
 
@@ -544,8 +369,15 @@ class AdaptiveQuestionResult(BaseModel):
             "clarification": "open_text",
             "follow_up": "open_text",
             "followup": "open_text",
+            "forced_choice": "single_select",
+            "likert": "scale",
         }
-        VALID_TYPES = {"open_text", "forced_choice", "scenario", "trade_off", "likert"}
+        VALID_TYPES = {
+            "open_text", "numeric", "single_select", "multi_select",
+            "scale", "scale_open", "rank_order", "matrix_scale", "matrix_premium",
+            # Legacy types
+            "forced_choice", "scenario", "trade_off", "likert",
+        }
         q_type = response.question_type.lower().strip()
         q_type = QUESTION_TYPE_MAP.get(q_type, q_type)
         if q_type not in VALID_TYPES:

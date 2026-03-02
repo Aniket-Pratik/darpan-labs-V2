@@ -1,14 +1,10 @@
 """
-End-to-end test: Phase 0 → Phase 1 → Phase 2.
+End-to-end test: Phase 0 → Phase 1 (Interview Pipeline).
 
 Tests the full user journey:
   1. Health check (P0)
   2. Create user + start interview modules (P1)
-  3. Complete all 4 mandatory modules with answers (P1)
-  4. Check twin eligibility (P1)
-  5. Generate digital twin (P2)
-  6. Chat with twin (P2)
-  7. Get chat history (P2)
+  3. Complete all 7 mandatory modules with answers (P1)
 
 Run with: python tests/test_e2e_flow.py
 """
@@ -128,20 +124,44 @@ async def main():
                 "I prefer to be thorough rather than fast. Whether it's cooking, coding, or shopping, I'd rather take extra time to do it right than rush and end up with a mediocre result. Speed is only important when there's a real deadline.",
                 "I prefer figuring things out on my own. I'll read documentation, watch tutorials, and troubleshoot before asking someone for help. But for major life decisions, I do consult close friends or family for a second opinion.",
             ],
-            # M4 signals: directness, conflict_style, introversion_extroversion,
-            #             group_size_comfort, trust_formation, feedback_preference
+            # M4 signals: bathing_routine, skin_concerns, grooming_habits
             "M4": [
-                "When I disagree with someone, I prefer to be direct about it but in a respectful way. I won't sugarcoat my opinion but I try to be constructive. In serious conflicts, I stay logical rather than emotional and focus on finding a solution.",
-                "I definitely need alone time to recharge. After a full day of meetings and socializing, I need at least an hour by myself to decompress. I enjoy being with people but I'm clearly an introvert who gets drained by large gatherings.",
-                "I'm slow to trust new people. I need to see how someone behaves across multiple interactions — whether they follow through on promises and stay consistent. But once I trust someone, I'm very loyal and open.",
-                "I strongly prefer one-on-one conversations or small groups of 3-4 people. In larger groups I tend to go quiet and just observe. I feel like the most meaningful conversations happen in intimate settings.",
-                "When someone gives me critical feedback, my first reaction is to feel a bit defensive internally, but I've trained myself not to show it. I take time to process it privately, then come back with a clear head. I actually value honest feedback — it helps me grow.",
-                "I prefer written communication over phone calls. I like having time to think about my response. In person, I'm a good listener — I ask follow-up questions rather than dominating the conversation.",
+                "I shower twice a day — once in the morning before work and once in the evening after my gym session. My morning shower is quick, about 5 minutes, while the evening one is longer and more relaxing.",
+                "My main skin concern is dryness, especially during winter. My skin gets flaky on my arms and legs. I've tried various moisturizing body washes but haven't found the perfect one yet.",
+                "I use a loofah with my body wash. I prefer something that lathers well because it feels like it's cleaning better. I also use a separate face wash — never body wash on my face.",
+                "My grooming routine is pretty basic — body wash, shampoo, face wash, deodorant. I don't use too many products. I keep it simple but I care about the quality of what I use.",
+                "After showering I always apply moisturizer, especially in winter. I prefer unscented or lightly scented moisturizers. My skin is sensitive so I avoid anything too harsh.",
+                "I'd say I spend about 15 minutes total on my bathing and grooming routine each morning. I like efficiency but I don't want to rush through it.",
+            ],
+            # M5 signals: fragrance_preferences, texture_preferences, sensory_priorities
+            "M5": [
+                "For body wash, I prefer fresh, clean scents — like mint, eucalyptus, or ocean breeze. I don't like anything too sweet or floral. The scent shouldn't be overpowering, just subtle and refreshing.",
+                "Texture-wise, I like a gel body wash that's not too thick and not too watery. It should spread easily and lather well. I've tried cream-based body washes but they don't feel as clean to me.",
+                "Lather is important to me. I want a rich, foamy lather that covers well. If a body wash doesn't lather much, I end up using more product and it feels wasteful.",
+                "I don't care much about packaging design but I do prefer bottles that are easy to use in the shower — good grip, flip-top cap. Pump bottles are even better.",
+                "The after-feel matters a lot. I don't want to feel sticky or like there's a residue. I want my skin to feel clean, smooth, and slightly moisturized after rinsing off.",
+            ],
+            # M6 signals: current_brands, satisfaction, pain_points, switching_behavior
+            "M6": [
+                "I currently use Dove Men+Care body wash. I've been using it for about a year. Before that I tried Nivea and Old Spice. I switched from Nivea because it was drying out my skin.",
+                "I'm fairly satisfied with Dove — maybe 7 out of 10. It moisturizes well and the scent is pleasant. But I wish the lather was richer and the bottle design was better for gripping in the shower.",
+                "My biggest pain point is finding a body wash that balances cleaning power with moisturizing. Most that clean well are too drying, and the moisturizing ones don't feel clean enough. I want both.",
+                "Price matters but it's not the top factor. I typically spend 300-400 rupees on a body wash bottle. I'd pay up to 500 if the product was noticeably better.",
+                "I usually buy body wash at the supermarket. Sometimes online if there's a good deal. I don't have strong brand loyalty — I'm open to switching if something better comes along.",
+                "The ideal body wash for me would have a fresh subtle scent, rich lather, moisturizing formula, and come in a practical bottle with a pump. If a brand offered all of that, I'd switch immediately.",
+            ],
+            # M7 signals: media_consumption, influence_sources, discovery_channels
+            "M7": [
+                "I discover new personal care products mostly through YouTube reviews and Reddit discussions. I follow a couple of grooming channels that do honest product comparisons.",
+                "I trust peer reviews over celebrity endorsements. If a product has good ratings on Amazon with detailed reviews, that carries more weight than a Bollywood actor promoting it.",
+                "Social media ads sometimes catch my attention but I rarely buy directly from an ad. I'll note the product and then research it independently before purchasing.",
+                "Friends' recommendations are powerful for me. If a close friend says 'try this body wash, it's great,' I'll almost certainly try it. Word of mouth is my most trusted source.",
+                "I don't follow any specific influencers for grooming advice. I prefer educational content — like dermatologists explaining ingredients — over lifestyle influencers showing their routines.",
             ],
         }
 
-        # 4. Complete all 4 modules (M1 → M4)
-        for module_id in ["M1", "M2", "M3", "M4"]:
+        # 4. Complete all 7 modules (M1 → M7)
+        for module_id in ["M1", "M2", "M3", "M4", "M5", "M6", "M7"]:
             print(f"\n{elapsed()} Starting module {module_id}...")
 
             # Start single module
@@ -221,7 +241,7 @@ async def main():
                     f"can_generate_twin={complete_data.get('can_generate_twin')}"
                 )
                 if mod_status == "module_paused":
-                    print(f"    WARN: Module {module_id} paused (coverage too low), may affect twin eligibility")
+                    print(f"    WARN: Module {module_id} paused (coverage too low), may affect eligibility")
             elif module_done:
                 # Module was already completed server-side
                 ok(f"Module {module_id} was already completed by server")
@@ -242,184 +262,6 @@ async def main():
             f"can_generate_twin={modules_data['can_generate_twin']}"
         )
 
-        if not modules_data["can_generate_twin"]:
-            fail("Cannot generate twin despite completing all modules")
-
-        # 7. Check twin eligibility
-        print(f"\n{elapsed()} Checking twin eligibility...")
-        r = await client.get(f"{API}/interviews/user/{user_id}/twin-eligibility")
-        if r.status_code != 200:
-            fail(f"Eligibility check failed: {r.status_code}")
-
-        elig_data = r.json()
-        assert elig_data["can_generate_twin"] is True, "Not eligible!"
-        ok(
-            f"eligible=True, completed={elig_data['completed_modules']}, "
-            f"missing={elig_data['missing_modules']}"
-        )
-
-        # ==============================================================
-        # PHASE 2: Twin Generation + Chat
-        # ==============================================================
-        print(f"\n{'='*60}")
-        print("PHASE 2: Twin Generation + Chat")
-        print(f"{'='*60}")
-
-        # 8. Generate twin
-        print(f"\n{elapsed()} Generating digital twin (this may take 15-30s)...")
-        gen_start = time.time()
-
-        gen_req = {
-            "trigger": "mandatory_modules_complete",
-            "modules_to_include": ["M1", "M2", "M3", "M4"],
-        }
-        r = await client.post(
-            f"{API}/twins/generate?user_id={user_id}", json=gen_req
-        )
-        gen_time = time.time() - gen_start
-
-        if r.status_code not in (200, 201):
-            fail(f"Twin generation failed: {r.status_code} - {r.text}")
-
-        twin_data = r.json()
-        twin_id = twin_data["id"]
-        ok(
-            f"Twin created in {gen_time:.1f}s: "
-            f"id={twin_id[:8]}..., "
-            f"version={twin_data['version']}, "
-            f"status={twin_data['status']}, "
-            f"quality={twin_data['quality_label']} ({twin_data['quality_score']:.2f})"
-        )
-
-        if twin_data["status"] != "ready":
-            fail(f"Twin status is {twin_data['status']}, expected 'ready'")
-
-        # Verify structured profile exists
-        if twin_data.get("structured_profile"):
-            profile = twin_data["structured_profile"]
-            has_keys = [k for k in ["demographics", "personality", "decision_making", "preferences", "communication"] if k in profile]
-            ok(f"Structured profile has: {', '.join(has_keys)}")
-        else:
-            fail("No structured profile in twin response")
-
-        # Verify persona summary exists
-        if twin_data.get("persona_summary_text"):
-            summary_len = len(twin_data["persona_summary_text"])
-            ok(f"Persona summary: {summary_len} chars")
-        else:
-            fail("No persona summary in twin response")
-
-        # Verify coverage confidence
-        if twin_data.get("coverage_confidence"):
-            modules_covered = [cc["domain"] for cc in twin_data["coverage_confidence"]]
-            ok(f"Coverage for modules: {modules_covered}")
-        else:
-            print("  WARN: No coverage confidence data")
-
-        # 9. Get twin profile
-        print(f"\n{elapsed()} Getting twin profile by ID...")
-        r = await client.get(f"{API}/twins/{twin_id}")
-        assert r.status_code == 200, f"Get twin failed: {r.status_code}"
-        ok(f"Retrieved twin {twin_id[:8]}...")
-
-        # 10. Get user's latest twin
-        print(f"\n{elapsed()} Getting user's latest twin...")
-        r = await client.get(f"{API}/twins/user/{user_id}")
-        assert r.status_code == 200, f"Get user twin failed: {r.status_code}"
-        user_twin = r.json()
-        assert user_twin["id"] == twin_id, "User twin ID mismatch"
-        ok(f"Latest twin matches: v{user_twin['version']}")
-
-        # 11. Get version history
-        print(f"\n{elapsed()} Getting version history...")
-        r = await client.get(f"{API}/twins/{twin_id}/versions")
-        assert r.status_code == 200
-        versions = r.json()
-        ok(f"{len(versions)} version(s)")
-
-        # 12. Chat with twin — first message
-        print(f"\n{elapsed()} Chatting with twin (message 1)...")
-        chat_start = time.time()
-        chat_req = {
-            "message": "Would you prefer a subscription-based or one-time purchase for a productivity app?"
-        }
-        r = await client.post(
-            f"{API}/twins/{twin_id}/chat?user_id={user_id}", json=chat_req
-        )
-        chat_time = time.time() - chat_start
-
-        if r.status_code != 200:
-            fail(f"Chat failed: {r.status_code} - {r.text}")
-
-        chat_data = r.json()
-        chat_session_id = chat_data["session_id"]
-        ok(
-            f"Response in {chat_time:.1f}s: "
-            f"confidence={chat_data['confidence_label']} ({chat_data['confidence_score']:.2f}), "
-            f"evidence={len(chat_data['evidence_used'])} snippets"
-        )
-        print(f"    Twin says: \"{chat_data['response_text'][:150]}...\"")
-
-        if chat_data.get("suggested_module"):
-            print(f"    Suggested module: {chat_data['suggested_module']}")
-        if chat_data.get("coverage_gaps"):
-            print(f"    Coverage gaps: {chat_data['coverage_gaps']}")
-
-        # 13. Chat — follow-up message (same session)
-        print(f"\n{elapsed()} Chatting with twin (message 2, follow-up)...")
-        chat_req2 = {
-            "message": "What about for a meal delivery service — subscription or pay per order?",
-            "session_id": chat_session_id,
-        }
-        r = await client.post(
-            f"{API}/twins/{twin_id}/chat?user_id={user_id}", json=chat_req2
-        )
-        assert r.status_code == 200, f"Follow-up chat failed: {r.status_code}"
-        chat_data2 = r.json()
-        assert chat_data2["session_id"] == chat_session_id, "Session changed unexpectedly"
-        ok(
-            f"confidence={chat_data2['confidence_label']} ({chat_data2['confidence_score']:.2f}), "
-            f"evidence={len(chat_data2['evidence_used'])} snippets"
-        )
-        print(f"    Twin says: \"{chat_data2['response_text'][:150]}...\"")
-
-        # 14. Chat — question about uncovered domain
-        print(f"\n{elapsed()} Chatting with twin (message 3, testing coverage gaps)...")
-        chat_req3 = {
-            "message": "How do you handle your health and fitness routine? What supplements do you take?",
-            "session_id": chat_session_id,
-        }
-        r = await client.post(
-            f"{API}/twins/{twin_id}/chat?user_id={user_id}", json=chat_req3
-        )
-        assert r.status_code == 200
-        chat_data3 = r.json()
-        ok(
-            f"confidence={chat_data3['confidence_label']} ({chat_data3['confidence_score']:.2f})"
-        )
-        print(f"    Twin says: \"{chat_data3['response_text'][:150]}...\"")
-        if chat_data3.get("suggested_module"):
-            ok(f"Correctly suggests module: {chat_data3['suggested_module']}")
-
-        # 15. Get chat history
-        print(f"\n{elapsed()} Getting chat history...")
-        r = await client.get(
-            f"{API}/twins/{twin_id}/chat/{chat_session_id}/history"
-        )
-        assert r.status_code == 200
-        history = r.json()
-        msg_count = len(history["messages"])
-        user_msgs = sum(1 for m in history["messages"] if m["role"] == "user")
-        twin_msgs = sum(1 for m in history["messages"] if m["role"] == "twin")
-        ok(f"{msg_count} messages (user={user_msgs}, twin={twin_msgs})")
-
-        # 16. List chat sessions
-        print(f"\n{elapsed()} Listing chat sessions...")
-        r = await client.get(f"{API}/twins/{twin_id}/chat/sessions")
-        assert r.status_code == 200
-        sessions = r.json()
-        ok(f"{len(sessions)} session(s)")
-
         # ==============================================================
         # SUMMARY
         # ==============================================================
@@ -429,13 +271,8 @@ async def main():
         print(f"{'='*60}")
         print(f"  Total time: {total_time:.1f}s")
         print(f"  User ID: {user_id}")
-        print(f"  Twin ID: {twin_id}")
-        print(f"  Twin quality: {twin_data['quality_label']} ({twin_data['quality_score']:.2f})")
-        print(f"  Twin generation: {gen_time:.1f}s")
-        print(f"  Chat messages: {msg_count}")
         print(f"  Phase 0: PASS (health, root, docs)")
-        print(f"  Phase 1: PASS (4 modules completed)")
-        print(f"  Phase 2: PASS (twin generated + 3 chat messages)")
+        print(f"  Phase 1: PASS (7 modules completed)")
         print(f"\n  ALL PHASES PASSED")
         print(f"{'='*60}\n")
 

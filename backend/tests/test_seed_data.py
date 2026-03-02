@@ -7,31 +7,30 @@ from pathlib import Path
 
 SEED_DATA_PATH = Path(__file__).parent.parent / "seed_data" / "question_banks"
 
-REQUIRED_MODULES = ["M1", "M2", "M3", "M4"]
+REQUIRED_MODULES = ["M1", "M2", "M3", "M4", "M5", "M6", "M7", "M8"]
+
+MODULE_FILES = {
+    "M1": "M1_core_identity_context.json",
+    "M2": "M2_preferences_values.json",
+    "M3": "M3_purchase_decision_logic.json",
+    "M4": "M4_lifestyle_grooming.json",
+    "M5": "M5_sensory_aesthetic.json",
+    "M6": "M6_bodywash_deep_dive.json",
+    "M7": "M7_media_influence.json",
+    "M8": "M8_concept_test.json",
+}
 
 
 def load_question_bank(module_id: str) -> dict:
     """Load a question bank JSON file."""
-    filename = {
-        "M1": "M1_core_identity.json",
-        "M2": "M2_decision_logic.json",
-        "M3": "M3_preferences_values.json",
-        "M4": "M4_communication_social.json",
-    }[module_id]
-
-    with open(SEED_DATA_PATH / filename) as f:
+    with open(SEED_DATA_PATH / MODULE_FILES[module_id]) as f:
         return json.load(f)
 
 
 def test_question_bank_files_exist():
     """Test that all required question bank files exist."""
     for module_id in REQUIRED_MODULES:
-        filename = {
-            "M1": "M1_core_identity.json",
-            "M2": "M2_decision_logic.json",
-            "M3": "M3_preferences_values.json",
-            "M4": "M4_communication_social.json",
-        }[module_id]
+        filename = MODULE_FILES[module_id]
         assert (SEED_DATA_PATH / filename).exists(), f"Missing {filename}"
 
 
@@ -73,7 +72,11 @@ def test_question_format(module_id: str):
         assert "estimated_seconds" in q
 
         # Validate question type
-        valid_types = ["open_text", "forced_choice", "scenario", "trade_off", "likert"]
+        valid_types = [
+            "open_text", "numeric", "single_select", "multi_select",
+            "scale", "scale_open", "rank_order", "matrix_scale", "matrix_premium",
+            "forced_choice", "scenario", "trade_off", "likert",
+        ]
         assert q["question_type"] in valid_types, f"Invalid type: {q['question_type']}"
 
 

@@ -15,25 +15,25 @@ SEED_DATA_DIR = Path(__file__).parent.parent.parent / "seed_data" / "question_ba
 # Module metadata
 MODULE_METADATA = {
     "M1": {"name": "Core Identity & Context", "order": 1, "type": "mandatory"},
-    "M2": {"name": "Decision Logic & Risk", "order": 2, "type": "mandatory"},
-    "M3": {"name": "Preferences & Values", "order": 3, "type": "mandatory"},
-    "M4": {"name": "Communication & Social", "order": 4, "type": "mandatory"},
-    "A1": {"name": "Lifestyle & Routines", "order": 5, "type": "addon"},
-    "A2": {"name": "Spending & Financial Behavior", "order": 6, "type": "addon"},
-    "A3": {"name": "Career & Growth Aspirations", "order": 7, "type": "addon"},
-    "A4": {"name": "Work & Learning Style", "order": 8, "type": "addon"},
+    "M2": {"name": "Preferences & Values", "order": 2, "type": "mandatory"},
+    "M3": {"name": "Purchase Decision Logic", "order": 3, "type": "mandatory"},
+    "M4": {"name": "Lifestyle & Grooming", "order": 4, "type": "mandatory"},
+    "M5": {"name": "Sensory & Aesthetic Preferences", "order": 5, "type": "mandatory"},
+    "M6": {"name": "Body Wash Deep-Dive", "order": 6, "type": "mandatory"},
+    "M7": {"name": "Media & Influence", "order": 7, "type": "mandatory"},
+    "M8": {"name": "Concept Test", "order": 8, "type": "mandatory"},
 }
 
 # Mapping from module_id to filename
 MODULE_FILES = {
-    "M1": "M1_core_identity.json",
-    "M2": "M2_decision_logic.json",
-    "M3": "M3_preferences_values.json",
-    "M4": "M4_communication_social.json",
-    "A1": "A1_lifestyle_routines.json",
-    "A2": "A2_spending_financial.json",
-    "A3": "A3_career_growth.json",
-    "A4": "A4_work_learning.json",
+    "M1": "M1_core_identity_context.json",
+    "M2": "M2_preferences_values.json",
+    "M3": "M3_purchase_decision_logic.json",
+    "M4": "M4_lifestyle_grooming.json",
+    "M5": "M5_sensory_aesthetic.json",
+    "M6": "M6_bodywash_deep_dive.json",
+    "M7": "M7_media_influence.json",
+    "M8": "M8_concept_test.json",
 }
 
 
@@ -46,12 +46,35 @@ class CompletionCriteria(BaseModel):
     min_behavioral_rules: int = Field(default=0, ge=0)
 
 
+class OptionItem(BaseModel):
+    """Option for select/rank/matrix questions."""
+
+    label: str
+    value: str
+
+
+class ConceptCard(BaseModel):
+    """Structured concept card for concept test modules."""
+
+    name: str
+    consumer_insight: str
+    key_benefit: str
+    how_it_works: str
+    packaging: str
+    price: str
+
+
 class Question(BaseModel):
     """Question from question bank."""
 
     question_id: str
     question_text: str
-    question_type: Literal["open_text", "forced_choice", "scenario", "trade_off", "likert"]
+    question_type: Literal[
+        "open_text", "numeric", "single_select", "multi_select",
+        "scale", "scale_open", "rank_order", "matrix_scale", "matrix_premium",
+        # Legacy types kept for backwards compat
+        "forced_choice", "scenario", "trade_off", "likert",
+    ]
     target_signals: list[str]
     follow_up_triggers: list[str] = Field(default_factory=list)
     priority: int = Field(default=1, ge=1, le=3)
@@ -61,6 +84,17 @@ class Question(BaseModel):
     intent: Literal["EXPLORE", "DEEPEN", "CONTRAST", "CLARIFY", "RESOLVE"] = Field(
         default="EXPLORE", description="Default question intent"
     )
+    # Rich UI fields
+    options: list[OptionItem] | None = None
+    max_selections: int | None = None
+    scale_min: int | None = None
+    scale_max: int | None = None
+    scale_labels: dict[str, str] | None = None
+    matrix_items: list[str] | None = None
+    matrix_options: list[OptionItem] | None = None
+    placeholder: str | None = None
+    # Concept test fields
+    concept_ref: str | None = None
 
 
 class ModuleQuestionBank(BaseModel):
@@ -73,6 +107,7 @@ class ModuleQuestionBank(BaseModel):
     completion_criteria: CompletionCriteria
     signal_targets: list[str]
     questions: list[Question]
+    concepts: dict[str, ConceptCard] = Field(default_factory=dict)
 
 
 class ModuleInfo(BaseModel):
@@ -80,9 +115,9 @@ class ModuleInfo(BaseModel):
 
     module_id: str
     module_name: str
-    module_type: Literal["mandatory", "addon"]
+    module_type: Literal["mandatory"] = "mandatory"
     order: int
-    estimated_duration_min: int = 3
+    estimated_duration_min: int = 5
 
 
 class QuestionBankService:
@@ -128,6 +163,11 @@ class QuestionBankService:
         # Parse questions
         questions = [Question(**q) for q in data.get("questions", [])]
 
+        # Parse concepts (for concept test modules)
+        concepts: dict[str, ConceptCard] = {}
+        for concept_id, concept_data in data.get("concepts", {}).items():
+            concepts[concept_id] = ConceptCard(**concept_data)
+
         # Build question bank
         question_bank = ModuleQuestionBank(
             module_id=data["module_id"],
@@ -137,6 +177,7 @@ class QuestionBankService:
             completion_criteria=CompletionCriteria(**data["completion_criteria"]),
             signal_targets=data["signal_targets"],
             questions=questions,
+            concepts=concepts,
         )
 
         self._cache[module_id] = question_bank
@@ -153,13 +194,19 @@ class QuestionBankService:
         for module_id, meta in MODULE_METADATA.items():
             # Only include modules that have question banks
             if module_id in MODULE_FILES:
+                # Pull actual duration from question bank data
+                try:
+                    bank = self.load_question_bank(module_id)
+                    est_min = bank.estimated_duration_min
+                except (FileNotFoundError, ValueError):
+                    est_min = 5
                 modules.append(
                     ModuleInfo(
                         module_id=module_id,
                         module_name=meta["name"],
-                        module_type=meta["type"],
+                        module_type="mandatory",
                         order=meta["order"],
-                        estimated_duration_min=3 if meta["type"] == "mandatory" else 4,
+                        estimated_duration_min=est_min,
                     )
                 )
         return sorted(modules, key=lambda m: m.order)
@@ -210,10 +257,8 @@ class QuestionBankService:
         """
         bank = self.load_question_bank(module_id)
 
-        # Sort by priority, then by question_id for consistency
-        sorted_questions = sorted(bank.questions, key=lambda q: (q.priority, q.question_id))
-
-        for question in sorted_questions:
+        # Return questions in bank order (sequential)
+        for question in bank.questions:
             if question.question_id not in asked_question_ids:
                 return question
 
@@ -293,6 +338,22 @@ class QuestionBankService:
             return MODULE_METADATA[module_id]["name"]
         bank = self.load_question_bank(module_id)
         return bank.module_name
+
+    def get_concept_card(self, module_id: str, concept_ref: str) -> ConceptCard | None:
+        """Get a concept card by reference ID.
+
+        Args:
+            module_id: Module ID containing the concept.
+            concept_ref: Concept reference (e.g., "concept1").
+
+        Returns:
+            ConceptCard if found, None otherwise.
+        """
+        try:
+            bank = self.load_question_bank(module_id)
+            return bank.concepts.get(concept_ref)
+        except (FileNotFoundError, ValueError):
+            return None
 
     def get_first_question(self, module_id: str) -> Question:
         """Get the first question for a module.

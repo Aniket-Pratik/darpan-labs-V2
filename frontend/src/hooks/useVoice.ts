@@ -27,6 +27,7 @@ interface UseVoiceReturn {
   stopRecording: () => void;
   switchToText: () => void;
   disconnect: () => void;
+  clearTranscript: () => void;
 }
 
 /**
@@ -141,6 +142,7 @@ export function useVoice({
       switch (msg.type) {
         case 'final_transcript':
           setFinalTranscript(msg.text);
+          setIsProcessing(false);
           break;
 
         case 'processing':
@@ -273,6 +275,10 @@ export function useVoice({
     cleanupWebSocket();
   }, [cleanupAudio, cleanupWebSocket]);
 
+  const clearTranscript = useCallback(() => {
+    setFinalTranscript('');
+  }, []);
+
   const disconnect = useCallback(() => {
     cleanupAudio();
     cleanupWebSocket();
@@ -292,5 +298,6 @@ export function useVoice({
     stopRecording,
     switchToText,
     disconnect,
+    clearTranscript,
   };
 }

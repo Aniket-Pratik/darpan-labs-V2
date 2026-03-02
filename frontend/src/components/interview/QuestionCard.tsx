@@ -4,6 +4,18 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, SkipForward, Loader2, Mic, Square } from 'lucide-react';
 import type { Question } from '@/store/interviewStore';
+import { ConceptCard } from './ConceptCard';
+import {
+  OpenTextInput,
+  NumericInput,
+  SingleSelectInput,
+  MultiSelectInput,
+  ScaleInput,
+  ScaleOpenInput,
+  RankOrderInput,
+  MatrixScaleInput,
+  MatrixPremiumInput,
+} from './inputs';
 
 interface QuestionCardProps {
   question: Question;
@@ -102,6 +114,76 @@ export function QuestionCard({
 
   const isBusy = isSubmitting || isProcessingVoice;
 
+  // Determine if this is a text-based question type (show mic for these)
+  const structuredTypes = new Set([
+    'single_select', 'multi_select', 'scale', 'rank_order',
+    'matrix_scale', 'matrix_premium', 'numeric',
+  ]);
+  const isTextType = !structuredTypes.has(question.question_type);
+
+  const renderInput = () => {
+    const q = question;
+    switch (q.question_type) {
+      case 'numeric':
+        return <NumericInput value={answer} onChange={onAnswerChange} placeholder={q.placeholder} disabled={isBusy} />;
+      case 'single_select':
+        return <SingleSelectInput value={answer} onChange={onAnswerChange} options={q.options || []} disabled={isBusy} />;
+      case 'multi_select':
+        return <MultiSelectInput value={answer} onChange={onAnswerChange} options={q.options || []} maxSelections={q.max_selections} disabled={isBusy} />;
+      case 'scale':
+        return <ScaleInput value={answer} onChange={onAnswerChange} scaleMin={q.scale_min} scaleMax={q.scale_max} scaleLabels={q.scale_labels} disabled={isBusy} />;
+      case 'scale_open':
+        return <ScaleOpenInput value={answer} onChange={onAnswerChange} scaleMin={q.scale_min} scaleMax={q.scale_max} scaleLabels={q.scale_labels} placeholder={q.placeholder} disabled={isBusy} />;
+      case 'rank_order':
+        return <RankOrderInput value={answer} onChange={onAnswerChange} options={q.options || []} maxSelections={q.max_selections} disabled={isBusy} />;
+      case 'matrix_scale':
+        return <MatrixScaleInput value={answer} onChange={onAnswerChange} matrixItems={q.matrix_items || []} scaleMin={q.scale_min} scaleMax={q.scale_max} scaleLabels={q.scale_labels} disabled={isBusy} />;
+      case 'matrix_premium':
+        return <MatrixPremiumInput value={answer} onChange={onAnswerChange} matrixItems={q.matrix_items || []} matrixOptions={q.matrix_options || []} disabled={isBusy} />;
+      default:
+        // open_text and all legacy types
+        return (
+          <div className="relative">
+            <AnimatePresence>
+              {isRecording && (
+                <motion.div
+                  className="absolute inset-0 z-10 bg-darpan-bg/90 border border-darpan-lime/30 rounded-lg flex items-center justify-center"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <WaveformAnimation />
+                </motion.div>
+              )}
+            </AnimatePresence>
+            <OpenTextInput
+              value={answer}
+              onChange={onAnswerChange}
+              placeholder={q.placeholder || 'Type or tap the mic to speak...'}
+              disabled={isBusy || isRecording}
+            />
+            {/* Mic button */}
+            <button
+              type="button"
+              onClick={handleMicClick}
+              disabled={isBusy}
+              className={`absolute bottom-3 right-3 z-20 w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200
+                ${isBusy ? 'bg-white/5 cursor-not-allowed' : isRecording ? 'bg-red-500 hover:bg-red-600 shadow-md shadow-red-500/30' : 'bg-white/10 hover:bg-white/20'}
+              `}
+            >
+              {isBusy ? (
+                <Loader2 className="w-4 h-4 text-white/30 animate-spin" />
+              ) : isRecording ? (
+                <Square className="w-3.5 h-3.5 text-white fill-white" />
+              ) : (
+                <Mic className="w-4 h-4 text-white/60" />
+              )}
+            </button>
+          </div>
+        );
+    }
+  };
+
   return (
     <motion.div
       className="w-full max-w-2xl mx-auto"
@@ -117,6 +199,11 @@ export function QuestionCard({
             {moduleName}
           </span>
         </div>
+      )}
+
+      {/* Concept card (shown for concept test questions) */}
+      {question.concept_card && (
+        <ConceptCard concept={question.concept_card} />
       )}
 
       {/* Question card */}
@@ -147,91 +234,43 @@ export function QuestionCard({
           {question.question_text}
         </motion.h2>
 
-        {/* Unified input area */}
+        {/* Input area */}
         <form onSubmit={handleSubmit}>
-          <div className="relative">
-            {/* Recording waveform overlay */}
-            <AnimatePresence>
-              {isRecording && (
-                <motion.div
-                  className="absolute inset-0 z-10 bg-darpan-bg/90 border border-darpan-lime/30 rounded-lg
-                             flex items-center justify-center"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                >
-                  <WaveformAnimation />
-                </motion.div>
-              )}
-            </AnimatePresence>
+          {/* Render input component based on question type */}
+          {renderInput()}
 
-            {/* Textarea — always visible, user can type or see transcript */}
-            <textarea
-              value={answer}
-              onChange={(e) => onAnswerChange(e.target.value)}
-              placeholder="Type or tap the mic to speak..."
-              className="w-full h-32 px-4 py-3 pr-14 bg-darpan-bg border border-darpan-border rounded-lg
-                         text-white placeholder-white/30 resize-none
-                         focus:outline-none focus:border-darpan-lime/50 focus:ring-1 focus:ring-darpan-lime/30
-                         transition-colors duration-200"
-              disabled={isBusy || isRecording}
-              autoFocus
-            />
+          {/* Voice controls — only for text-based types */}
+          {isTextType && (
+            <>
+              {/* Voice error */}
+              <AnimatePresence>
+                {voiceError && (
+                  <motion.p
+                    className="mt-2 text-xs text-red-400"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                  >
+                    {voiceError}
+                  </motion.p>
+                )}
+              </AnimatePresence>
 
-            {/* Mic button — inside textarea, bottom-right */}
-            <button
-              type="button"
-              onClick={handleMicClick}
-              disabled={isBusy}
-              className={`
-                absolute bottom-3 right-3 z-20 w-9 h-9 rounded-full
-                flex items-center justify-center transition-all duration-200
-                ${
-                  isBusy
-                    ? 'bg-white/5 cursor-not-allowed'
-                    : isRecording
-                      ? 'bg-red-500 hover:bg-red-600 shadow-md shadow-red-500/30'
-                      : 'bg-white/10 hover:bg-white/20'
-                }
-              `}
-            >
-              {isBusy ? (
-                <Loader2 className="w-4 h-4 text-white/30 animate-spin" />
-              ) : isRecording ? (
-                <Square className="w-3.5 h-3.5 text-white fill-white" />
-              ) : (
-                <Mic className="w-4 h-4 text-white/60" />
-              )}
-            </button>
-          </div>
-
-          {/* Voice error */}
-          <AnimatePresence>
-            {voiceError && (
-              <motion.p
-                className="mt-2 text-xs text-red-400"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
-                {voiceError}
-              </motion.p>
-            )}
-          </AnimatePresence>
-
-          {/* Timeout prompt */}
-          <AnimatePresence>
-            {timeoutMessage && (
-              <motion.p
-                className="mt-2 text-sm text-darpan-lime/70 italic"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
-                {timeoutMessage}
-              </motion.p>
-            )}
-          </AnimatePresence>
+              {/* Timeout prompt */}
+              <AnimatePresence>
+                {timeoutMessage && (
+                  <motion.p
+                    className="mt-2 text-sm text-darpan-lime/70 italic"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                  >
+                    {timeoutMessage}
+                  </motion.p>
+                )}
+              </AnimatePresence>
+            </>
+          )}
 
           {/* Action buttons */}
           <div className="flex items-center justify-between mt-4">

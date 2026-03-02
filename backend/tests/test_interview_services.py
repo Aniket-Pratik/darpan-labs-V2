@@ -120,7 +120,7 @@ class TestQuestionBankService:
         service = QuestionBankService()
         modules = service.get_all_modules()
 
-        assert len(modules) == 8  # M1-M4 + A1-A4
+        assert len(modules) == 8  # M1-M8
         assert modules[0].module_id == "M1"
         assert modules[0].module_type == "mandatory"
 
@@ -129,7 +129,7 @@ class TestQuestionBankService:
         service = QuestionBankService()
         mandatory = service.get_mandatory_modules()
 
-        assert mandatory == ["M1", "M2", "M3", "M4"]
+        assert mandatory == ["M1", "M2", "M3", "M4", "M5", "M6", "M7", "M8"]
 
     def test_get_question_by_id(self):
         """Test getting a specific question."""
@@ -175,7 +175,7 @@ class TestQuestionBankService:
         signals = service.get_signal_targets("M1")
 
         assert len(signals) > 0
-        assert "occupation_lifestyle_overview" in signals or len(signals) > 3
+        assert "occupation_lifestyle" in signals or len(signals) > 3
 
     def test_get_module_completion_criteria(self):
         """Test getting completion criteria."""
@@ -184,7 +184,7 @@ class TestQuestionBankService:
 
         assert criteria.coverage_threshold == 0.70
         assert criteria.confidence_threshold == 0.65
-        assert criteria.min_questions == 4
+        assert criteria.min_questions == 8
 
     def test_get_first_question(self):
         """Test getting first question for a module."""
@@ -198,7 +198,7 @@ class TestQuestionBankService:
         """Test getting questions targeting a specific signal."""
         service = QuestionBankService()
         questions = service.get_questions_for_signal(
-            "M1", "self_described_personality"
+            "M1", "psychographic_self_perception"
         )
 
         # Should find at least one question for this signal
@@ -220,65 +220,21 @@ class TestAnswerParserService:
         assert service.llm_client is not None
         assert service.prompt_service is not None
 
-    def test_calculate_heuristic_specificity_empty(self):
-        """Test specificity for empty answer."""
+    @pytest.mark.asyncio
+    async def test_empty_answer_is_unsatisfactory(self):
+        """Test that empty answers are caught without LLM call."""
         service = AnswerParserService()
-        score = service.calculate_heuristic_specificity("")
-        assert score == 0.0
+        is_sat, reason = await service.is_answer_satisfactory("question", "")
+        assert is_sat is False
+        assert reason == "empty answer"
 
-    def test_calculate_heuristic_specificity_short(self):
-        """Test specificity for short answer."""
+    @pytest.mark.asyncio
+    async def test_whitespace_answer_is_unsatisfactory(self):
+        """Test that whitespace-only answers are caught."""
         service = AnswerParserService()
-        score = service.calculate_heuristic_specificity("Yes")
-        assert score < 0.3
-
-    def test_calculate_heuristic_specificity_detailed(self):
-        """Test specificity for detailed answer."""
-        service = AnswerParserService()
-        answer = """
-        I'm a software engineer at a tech startup in San Francisco.
-        I typically work from 9am to 6pm, spending most of my time
-        on backend development using Python and PostgreSQL.
-        On weekends, I enjoy hiking and reading.
-        """
-        score = service.calculate_heuristic_specificity(answer)
-        assert score > 0.4
-
-    def test_calculate_heuristic_specificity_with_numbers(self):
-        """Test specificity increases with numbers."""
-        service = AnswerParserService()
-        without_numbers = "I work from morning to evening"
-        with_numbers = "I work from 9am to 5pm every day"
-
-        score_without = service.calculate_heuristic_specificity(without_numbers)
-        score_with = service.calculate_heuristic_specificity(with_numbers)
-
-        assert score_with >= score_without
-
-    def test_detect_language_english(self):
-        """Test language detection for English."""
-        service = AnswerParserService()
-        lang = service.detect_language_heuristic("I am a software engineer.")
-        assert lang == "EN"
-
-    def test_detect_language_hindi(self):
-        """Test language detection for Hindi."""
-        service = AnswerParserService()
-        lang = service.detect_language_heuristic("मैं एक सॉफ्टवेयर इंजीनियर हूं।")
-        assert lang == "HI"
-
-    def test_detect_language_hinglish(self):
-        """Test language detection for Hinglish."""
-        service = AnswerParserService()
-        # Mix of English and Hindi
-        lang = service.detect_language_heuristic("Mujhe coding करना पसंद है")
-        assert lang in ["HG", "EN"]  # Could detect as either depending on ratio
-
-    def test_detect_language_empty(self):
-        """Test language detection for empty text."""
-        service = AnswerParserService()
-        lang = service.detect_language_heuristic("")
-        assert lang == "EN"  # Default
+        is_sat, reason = await service.is_answer_satisfactory("question", "   ")
+        assert is_sat is False
+        assert reason == "empty answer"
 
 
 class TestLLMResponseSchemas:

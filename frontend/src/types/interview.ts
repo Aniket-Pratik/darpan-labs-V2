@@ -5,7 +5,26 @@
 // Module types
 export type ModuleStatus = 'pending' | 'active' | 'completed' | 'skipped';
 export type InterviewStatus = 'idle' | 'loading' | 'active' | 'paused' | 'completed' | 'error';
-export type QuestionType = 'open_text' | 'forced_choice' | 'scenario' | 'trade_off' | 'likert';
+export type QuestionType =
+  | 'open_text' | 'numeric' | 'single_select' | 'multi_select'
+  | 'scale' | 'scale_open' | 'rank_order' | 'matrix_scale' | 'matrix_premium'
+  // Legacy types
+  | 'forced_choice' | 'scenario' | 'trade_off' | 'likert';
+
+export interface OptionItem {
+  label: string;
+  value: string;
+}
+
+export interface ConceptCard {
+  concept_id: string;
+  name: string;
+  consumer_insight: string;
+  key_benefit: string;
+  how_it_works: string;
+  packaging: string;
+  price: string;
+}
 export type NextQuestionStatus = 'continue' | 'module_complete' | 'all_modules_complete';
 
 // API Request types
@@ -42,6 +61,7 @@ export interface ModuleInfo {
   module_id: string;
   module_name: string;
   estimated_duration_min: number;
+  total_questions: number;
   status: ModuleStatus;
 }
 
@@ -56,6 +76,15 @@ export interface FirstQuestion {
   question_text: string;
   question_type: string;
   target_signal: string;
+  options?: OptionItem[];
+  max_selections?: number;
+  scale_min?: number;
+  scale_max?: number;
+  scale_labels?: Record<string, string>;
+  matrix_items?: string[];
+  matrix_options?: OptionItem[];
+  placeholder?: string;
+  concept_card?: ConceptCard;
 }
 
 export interface QuestionMeta {
@@ -65,12 +94,22 @@ export interface QuestionMeta {
   rationale?: string;
   is_followup: boolean;
   parent_question_id?: string;
+  options?: OptionItem[];
+  max_selections?: number;
+  scale_min?: number;
+  scale_max?: number;
+  scale_labels?: Record<string, string>;
+  matrix_items?: string[];
+  matrix_options?: OptionItem[];
+  placeholder?: string;
+  concept_card?: ConceptCard;
 }
 
 export interface ModuleProgress {
   module_id: string;
   module_name: string;
   questions_asked: number;
+  total_questions: number;
   coverage_score: number;
   confidence_score: number;
   signals_captured: string[];
@@ -106,6 +145,15 @@ export interface InterviewNextQuestionResponse {
   status: NextQuestionStatus;
   module_summary?: string;
   acknowledgment_text?: string;
+  options?: OptionItem[];
+  max_selections?: number;
+  scale_min?: number;
+  scale_max?: number;
+  scale_labels?: Record<string, string>;
+  matrix_items?: string[];
+  matrix_options?: OptionItem[];
+  placeholder?: string;
+  concept_card?: ConceptCard;
 }
 
 export interface InterviewStatusResponse {
@@ -132,19 +180,35 @@ export interface InterviewPauseResponse {
 export const MODULE_INFO: Record<string, { name: string; description: string }> = {
   M1: {
     name: 'Core Identity & Context',
-    description: 'Understanding who you are and your life context',
+    description: 'Demographics, personality, and consumer orientation',
   },
   M2: {
-    name: 'Decision Logic & Risk',
-    description: 'How you make decisions and handle uncertainty',
+    name: 'Preferences & Values',
+    description: 'Value system, trust hierarchy, and brand attitudes',
   },
   M3: {
-    name: 'Preferences & Values',
-    description: 'Your priorities and what matters to you',
+    name: 'Purchase Decision Logic',
+    description: 'How and where you buy, price sensitivity, and switching behavior',
   },
   M4: {
-    name: 'Communication & Social',
-    description: 'Your interaction style and social tendencies',
+    name: 'Lifestyle & Grooming',
+    description: 'Daily bathing context, routines, and skin concerns',
+  },
+  M5: {
+    name: 'Sensory & Aesthetic Preferences',
+    description: 'Fragrance, texture, lather, and packaging preferences',
+  },
+  M6: {
+    name: 'Body Wash Deep-Dive',
+    description: 'Current brands, satisfaction, pain points, and unmet needs',
+  },
+  M7: {
+    name: 'Media & Influence',
+    description: 'How you discover products and who you trust',
+  },
+  M8: {
+    name: 'Concept Test',
+    description: 'Evaluate 5 product concepts and help pick the best 2 to develop',
   },
 };
 
@@ -168,7 +232,6 @@ export interface UserModulesResponse {
   completed_count: number;
   total_required: number;
   can_generate_twin: boolean;
-  existing_twin_id?: string;
 }
 
 export interface StartSingleModuleRequest {
@@ -194,14 +257,6 @@ export interface ModuleCompleteResponse {
   remaining_modules: string[];
 }
 
-export interface TwinEligibilityResponse {
-  user_id: string;
-  can_generate_twin: boolean;
-  completed_modules: string[];
-  missing_modules: string[];
-  message: string;
-}
-
 // Voice WebSocket message types
 export type VoiceServerMessage =
   | { type: 'final_transcript'; text: string; language: string; confidence: number }
@@ -214,6 +269,15 @@ export type VoiceServerMessage =
       module_progress: ModuleProgress;
       status: NextQuestionStatus;
       module_summary?: string;
+      options?: OptionItem[];
+      max_selections?: number;
+      scale_min?: number;
+      scale_max?: number;
+      scale_labels?: Record<string, string>;
+      matrix_items?: string[];
+      matrix_options?: OptionItem[];
+      placeholder?: string;
+      concept_card?: ConceptCard;
     }
   | { type: 'error'; message: string }
   | { type: 'timeout_prompt'; message: string };

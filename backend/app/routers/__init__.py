@@ -1,5 +1,5 @@
 # API Routers
 
-from app.routers import interviews, cohorts, experiments
+from app.routers import admin, auth, interviews
 
-__all__ = ["interviews", "cohorts", "experiments"]
+__all__ = ["admin", "auth", "interviews"]

@@ -7,6 +7,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_session
+from app.dependencies import get_current_user
+from app.models.user import User
 from app.schemas.interview import (
     InterviewAnswerRequest,
     InterviewAnswerResponse,
@@ -18,7 +20,6 @@ from app.schemas.interview import (
     InterviewStatusResponse,
     ModuleCompleteResponse,
     StartSingleModuleRequest,
-    TwinEligibilityResponse,
     UserModulesResponse,
 )
 from app.services.interview_service import InterviewService, get_interview_service
@@ -49,9 +50,11 @@ async def start_interview(
     request: InterviewStartRequest,
     session: AsyncSession = Depends(get_session),
     service: InterviewService = Depends(get_service),
+    current_user: User = Depends(get_current_user),
 ) -> InterviewStartResponse:
     """Start a new interview session."""
     try:
+        request.user_id = current_user.id
         return await service.start_interview(session, request)
     except ValueError as e:
         logger.warning(f"Invalid interview start request: {e}")
@@ -83,6 +86,7 @@ async def submit_answer(
     request: InterviewAnswerRequest,
     session: AsyncSession = Depends(get_session),
     service: InterviewService = Depends(get_service),
+    current_user: User = Depends(get_current_user),
 ) -> InterviewAnswerResponse:
     """Submit an answer to the current question."""
     try:
@@ -123,6 +127,7 @@ async def get_next_question(
     session_id: UUID,
     session: AsyncSession = Depends(get_session),
     service: InterviewService = Depends(get_service),
+    current_user: User = Depends(get_current_user),
 ) -> InterviewNextQuestionResponse:
     """Get the next question for the interview."""
     try:
@@ -157,6 +162,7 @@ async def skip_question(
     request: InterviewSkipRequest = None,
     session: AsyncSession = Depends(get_session),
     service: InterviewService = Depends(get_service),
+    current_user: User = Depends(get_current_user),
 ) -> InterviewNextQuestionResponse:
     """Skip current question and get next."""
     if request is None:
@@ -192,6 +198,7 @@ async def pause_interview(
     session_id: UUID,
     session: AsyncSession = Depends(get_session),
     service: InterviewService = Depends(get_service),
+    current_user: User = Depends(get_current_user),
 ) -> InterviewPauseResponse:
     """Pause interview for later resumption."""
     try:
@@ -225,6 +232,7 @@ async def resume_interview(
     session_id: UUID,
     session: AsyncSession = Depends(get_session),
     service: InterviewService = Depends(get_service),
+    current_user: User = Depends(get_current_user),
 ) -> InterviewStartResponse:
     """Resume paused interview from last position."""
     try:
@@ -261,6 +269,7 @@ async def get_interview_status(
     session_id: UUID,
     session: AsyncSession = Depends(get_session),
     service: InterviewService = Depends(get_service),
+    current_user: User = Depends(get_current_user),
 ) -> InterviewStatusResponse:
     """Get full interview status with module progress."""
     try:
@@ -296,10 +305,11 @@ async def get_user_modules(
     user_id: UUID,
     session: AsyncSession = Depends(get_session),
     service: InterviewService = Depends(get_service),
+    current_user: User = Depends(get_current_user),
 ) -> UserModulesResponse:
     """Get all module completion status for a user."""
     try:
-        return await service.get_user_modules(session, user_id)
+        return await service.get_user_modules(session, current_user.id)
     except Exception as e:
         logger.error(f"Failed to get user modules: {e}")
         raise HTTPException(
@@ -324,9 +334,11 @@ async def start_single_module(
     request: StartSingleModuleRequest,
     session: AsyncSession = Depends(get_session),
     service: InterviewService = Depends(get_service),
+    current_user: User = Depends(get_current_user),
 ) -> InterviewStartResponse:
     """Start a specific module for a user."""
     try:
+        request.user_id = current_user.id
         return await service.start_single_module(session, request)
     except ValueError as e:
         logger.warning(f"Invalid module start request: {e}")
@@ -335,10 +347,10 @@ async def start_single_module(
             detail=str(e),
         )
     except Exception as e:
-        logger.error(f"Failed to start module: {e}")
+        logger.error(f"Failed to start module: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to start module",
+            detail=f"Failed to start module: {e}",
         )
 
 
@@ -357,6 +369,7 @@ async def complete_module_and_exit(
     session_id: UUID,
     session: AsyncSession = Depends(get_session),
     service: InterviewService = Depends(get_service),
+    current_user: User = Depends(get_current_user),
 ) -> ModuleCompleteResponse:
     """Complete current module and exit to module selection."""
     try:
@@ -375,27 +388,3 @@ async def complete_module_and_exit(
         )
 
 
-@router.get(
-    "/user/{user_id}/twin-eligibility",
-    response_model=TwinEligibilityResponse,
-    summary="Check twin generation eligibility",
-    description="""
-    Check if a user can generate their digital twin.
-
-    A twin can only be generated when all 4 mandatory modules are completed.
-    """,
-)
-async def check_twin_eligibility(
-    user_id: UUID,
-    session: AsyncSession = Depends(get_session),
-    service: InterviewService = Depends(get_service),
-) -> TwinEligibilityResponse:
-    """Check if user can generate twin."""
-    try:
-        return await service.check_twin_eligibility(session, user_id)
-    except Exception as e:
-        logger.error(f"Failed to check twin eligibility: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to check twin eligibility",
-        )

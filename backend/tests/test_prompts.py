@@ -9,11 +9,9 @@ PROMPTS_PATH = Path(__file__).parent.parent / "prompts"
 REQUIRED_PROMPTS = [
     "interviewer_question.txt",
     "module_completion.txt",
-    "profile_extraction.txt",
-    "twin_response.txt",
-    "experiment_response.txt",
     "transcript_correction.txt",
     "answer_parser.txt",
+    "answer_satisfaction.txt",
 ]
 
 
@@ -31,8 +29,8 @@ class TestPromptFilesExist:
         file_path = PROMPTS_PATH / prompt_file
         assert file_path.exists(), f"Missing prompt file: {prompt_file}"
 
-    def test_all_seven_prompts_exist(self):
-        """Test that all 7 required prompt files exist."""
+    def test_all_required_prompts_exist(self):
+        """Test that all required prompt files exist."""
         existing_prompts = [f.name for f in PROMPTS_PATH.glob("*.txt")]
         for prompt in REQUIRED_PROMPTS:
             assert prompt in existing_prompts, f"Missing: {prompt}"
@@ -101,110 +99,6 @@ class TestModuleCompletionPrompt:
         assert len(content) > 100, "Module completion prompt should have substantial content"
 
 
-class TestProfileExtractionPrompt:
-    """Tests for profile_extraction.txt prompt."""
-
-    def test_prompt_exists_and_readable(self):
-        """Test that profile extraction prompt is readable."""
-        file_path = PROMPTS_PATH / "profile_extraction.txt"
-        content = file_path.read_text()
-        assert len(content) > 100, "Profile extraction prompt should have substantial content"
-
-    def test_mentions_profile_or_twin(self):
-        """Test that prompt mentions profile or twin concepts."""
-        content = (PROMPTS_PATH / "profile_extraction.txt").read_text()
-        assert "profile" in content.lower() or "twin" in content.lower()
-
-    def test_has_enrichment_sections(self):
-        """Test that prompt includes enrichment extraction instructions."""
-        content = (PROMPTS_PATH / "profile_extraction.txt").read_text()
-        assert "behavioral_rules" in content
-        assert "voice_signature" in content
-        assert "tensions" in content
-        assert "narrative_memories" in content
-        assert "exemplar_quotes" in content
-        assert "PRIORITIES" in content
-
-
-class TestPersonaSummaryPrompt:
-    """Tests for persona_summary.txt prompt enrichments."""
-
-    def test_has_simulation_notes(self):
-        """Test that prompt asks for simulation_notes."""
-        content = (PROMPTS_PATH / "persona_summary.txt").read_text()
-        assert "simulation_notes" in content
-
-    def test_has_enrichment_references(self):
-        """Test that prompt references enriched profile data."""
-        content = (PROMPTS_PATH / "persona_summary.txt").read_text()
-        assert "behavioral_rules" in content or "behavioral rules" in content
-        assert "voice_signature" in content or "voice" in content.lower()
-        assert "tension" in content.lower()
-        assert "narrative_memories" in content or "narrative memories" in content.lower()
-
-
-class TestEvidenceChunkingPrompt:
-    """Tests for evidence_chunking.txt prompt enrichments."""
-
-    def test_has_new_categories(self):
-        """Test that prompt includes new evidence categories."""
-        content = (PROMPTS_PATH / "evidence_chunking.txt").read_text()
-        assert "conditional_rule" in content
-        assert "voice_exemplar" in content
-        assert "contradiction" in content
-
-    def test_has_snippet_type(self):
-        """Test that prompt includes snippet_type field."""
-        content = (PROMPTS_PATH / "evidence_chunking.txt").read_text()
-        assert "snippet_type" in content
-        assert "direct_quote" in content
-
-    def test_has_emotional_valence(self):
-        """Test that prompt includes emotional_valence field."""
-        content = (PROMPTS_PATH / "evidence_chunking.txt").read_text()
-        assert "emotional_valence" in content
-
-
-class TestTwinResponsePrompt:
-    """Tests for twin_response.txt prompt."""
-
-    def test_prompt_exists_and_readable(self):
-        """Test that twin response prompt is readable."""
-        file_path = PROMPTS_PATH / "twin_response.txt"
-        content = file_path.read_text()
-        assert len(content) > 100, "Twin response prompt should have substantial content"
-
-    def test_mentions_confidence(self):
-        """Test that prompt mentions confidence scoring."""
-        content = (PROMPTS_PATH / "twin_response.txt").read_text()
-        assert "confidence" in content.lower()
-
-    def test_has_voice_matching_rule(self):
-        """Test that prompt includes voice/style matching rule."""
-        content = (PROMPTS_PATH / "twin_response.txt").read_text()
-        assert "speaking style" in content.lower() or "characteristic phrases" in content.lower()
-
-    def test_has_tension_rule(self):
-        """Test that prompt includes tension acknowledgment rule."""
-        content = (PROMPTS_PATH / "twin_response.txt").read_text()
-        assert "contradiction" in content.lower() or "tension" in content.lower()
-
-
-class TestExperimentResponsePrompt:
-    """Tests for experiment_response.txt prompt."""
-
-    def test_prompt_exists_and_readable(self):
-        """Test that experiment response prompt is readable."""
-        file_path = PROMPTS_PATH / "experiment_response.txt"
-        content = file_path.read_text()
-        assert len(content) > 100, "Experiment response prompt should have substantial content"
-
-    def test_has_voice_matching_rule(self):
-        """Test that prompt includes voice/style matching rule."""
-        content = (PROMPTS_PATH / "experiment_response.txt").read_text()
-        assert "speaking style" in content.lower() or "tone" in content.lower()
-
-
 class TestTranscriptCorrectionPrompt:
     """Tests for transcript_correction.txt prompt."""
 
@@ -266,4 +160,4 @@ class TestPromptConsistency:
             if "{" in content:
                 placeholder_count += 1
         # At least some prompts should use placeholders
-        assert placeholder_count >= 3, "Expected more prompts to use placeholders"
+        assert placeholder_count >= 2, "Expected more prompts to use placeholders"

@@ -1,0 +1,155 @@
+{
+  "module_id": "M1",
+  "module_name": "Core Identity & Context",
+  "module_goal": "Establish demographics, psychographics, personality, and general consumer orientation. Foundation layer for the digital twin.",
+  "estimated_duration_min": 4,
+  "completion_criteria": {
+    "coverage_threshold": 0.70,
+    "confidence_threshold": 0.65,
+    "min_questions": 6
+  },
+  "signal_targets": [
+    "geography_climate",
+    "occupation_lifestyle",
+    "income_bracket",
+    "household_composition",
+    "content_language",
+    "psychographic_self_perception",
+    "innovation_adoption",
+    "scent_social_awareness",
+    "skin_attention_level",
+    "ideal_grooming_vision"
+  ],
+  "questions": [
+    {
+      "question_id": "M1_q01",
+      "question_text": "Where do you currently live? (City and state)",
+      "question_type": "open_text",
+      "target_signals": ["geography_climate"],
+      "priority": 1,
+      "estimated_seconds": 20,
+      "placeholder": "City, State"
+    },
+    {
+      "question_id": "M1_q03",
+      "question_text": "What is your current occupation or primary activity?",
+      "question_type": "single_select",
+      "target_signals": ["occupation_lifestyle"],
+      "priority": 1,
+      "estimated_seconds": 15,
+      "options": [
+        {"label": "Student", "value": "student"},
+        {"label": "Working professional (office-based)", "value": "professional_office"},
+        {"label": "Working professional (field/travel)", "value": "professional_field"},
+        {"label": "Homemaker", "value": "homemaker"},
+        {"label": "Self-employed/Freelancer", "value": "self_employed"},
+        {"label": "Retired", "value": "retired"},
+        {"label": "Currently between jobs", "value": "between_jobs"}
+      ]
+    },
+    {
+      "question_id": "M1_q04",
+      "question_text": "What is your approximate monthly household income range?",
+      "question_type": "single_select",
+      "target_signals": ["income_bracket"],
+      "priority": 1,
+      "estimated_seconds": 10,
+      "options": [
+        {"label": "Below \u20b925,000", "value": "below_25k"},
+        {"label": "\u20b925,000\u201350,000", "value": "25k_50k"},
+        {"label": "\u20b950,000\u20131 lakh", "value": "50k_1l"},
+        {"label": "\u20b91\u20132 lakh", "value": "1l_2l"},
+        {"label": "Above \u20b92 lakh", "value": "above_2l"},
+        {"label": "Prefer not to say", "value": "prefer_not_to_say"}
+      ]
+    },
+    {
+      "question_id": "M1_q05",
+      "question_text": "What is your household composition?",
+      "question_type": "single_select",
+      "target_signals": ["household_composition"],
+      "priority": 1,
+      "estimated_seconds": 15,
+      "options": [
+        {"label": "Living alone", "value": "alone"},
+        {"label": "With partner/spouse", "value": "partner"},
+        {"label": "Nuclear family with kids", "value": "nuclear_kids"},
+        {"label": "Joint family (parents, siblings, extended)", "value": "joint_family"},
+        {"label": "Shared housing with roommates/friends", "value": "shared_housing"}
+      ]
+    },
+    {
+      "question_id": "M1_q08",
+      "question_text": "What languages do you primarily consume content in? And for product ads and personal care content, do you prefer the same language or a different one?",
+      "question_type": "multi_select",
+      "target_signals": ["content_language"],
+      "priority": 2,
+      "estimated_seconds": 20,
+      "options": [
+        {"label": "English", "value": "english"},
+        {"label": "Hindi", "value": "hindi"},
+        {"label": "Tamil", "value": "tamil"},
+        {"label": "Telugu", "value": "telugu"},
+        {"label": "Kannada", "value": "kannada"},
+        {"label": "Marathi", "value": "marathi"},
+        {"label": "Bengali", "value": "bengali"},
+        {"label": "Gujarati", "value": "gujarati"},
+        {"label": "Malayalam", "value": "malayalam"},
+        {"label": "Other regional language", "value": "other_regional"}
+      ]
+    },
+    {
+      "question_id": "M1_q09",
+      "question_text": "How would you describe your personality in 3-5 words?",
+      "question_type": "open_text",
+      "target_signals": ["psychographic_self_perception"],
+      "priority": 1,
+      "estimated_seconds": 30,
+      "placeholder": "There's no right answer \u2014 just the first words that come to mind"
+    },
+    {
+      "question_id": "M1_q11",
+      "question_text": "How comfortable are you trying new brands or products you haven't used before?",
+      "question_type": "scale",
+      "target_signals": ["innovation_adoption"],
+      "priority": 1,
+      "estimated_seconds": 15,
+      "scale_min": 1,
+      "scale_max": 5,
+      "scale_labels": {
+        "1": "Very hesitant, I stick to what I know",
+        "5": "Very eager, I love trying new things"
+      }
+    },
+    {
+      "question_id": "M1_q13",
+      "question_text": "How much do you care about how you smell to others throughout the day? Is grooming more about feeling good yourself, or about how others perceive you, or both?",
+      "question_type": "open_text",
+      "target_signals": ["scent_social_awareness"],
+      "priority": 1,
+      "estimated_seconds": 40
+    },
+    {
+      "question_id": "M1_q14",
+      "question_text": "How much attention do you pay to how your skin looks and feels on a daily basis?",
+      "question_type": "single_select",
+      "target_signals": ["skin_attention_level"],
+      "priority": 1,
+      "estimated_seconds": 15,
+      "options": [
+        {"label": "Not at all \u2014 I don't think about it", "value": "not_at_all"},
+        {"label": "I notice when there's a problem", "value": "notice_problems"},
+        {"label": "I regularly check and care about it", "value": "regularly_care"}
+      ]
+    },
+    {
+      "question_id": "M1_q15",
+      "question_text": "When you imagine your ideal grooming routine \u2014 not what you do now, but what you'd love \u2014 what does it look like?",
+      "question_type": "open_text",
+      "target_signals": ["ideal_grooming_vision"],
+      "priority": 1,
+      "estimated_seconds": 45,
+      "placeholder": "Dream big \u2014 describe your perfect routine if time, money, and products were no constraint"
+    }
+  ]
+}

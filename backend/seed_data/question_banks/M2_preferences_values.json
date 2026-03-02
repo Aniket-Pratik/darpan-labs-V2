@@ -1,0 +1,156 @@
+{
+  "module_id": "M2",
+  "module_name": "Preferences & Values",
+  "module_goal": "Value system, trust hierarchy, brand attitudes, willingness-to-pay, and the science-vs-tradition framing preference.",
+  "estimated_duration_min": 4,
+  "completion_criteria": {
+    "coverage_threshold": 0.70,
+    "confidence_threshold": 0.65,
+    "min_questions": 5
+  },
+  "signal_targets": [
+    "purchase_driver_hierarchy",
+    "clean_beauty_attitude",
+    "certification_sensitivity",
+    "brand_origin_perception",
+    "value_willingness_to_pay",
+    "brand_loyalty",
+    "trust_hierarchy",
+    "science_vs_tradition"
+  ],
+  "questions": [
+    {
+      "question_id": "M2_q01",
+      "question_text": "When buying any personal care product, rank these factors from most to least important:",
+      "question_type": "rank_order",
+      "target_signals": ["purchase_driver_hierarchy"],
+      "priority": 1,
+      "estimated_seconds": 40,
+      "options": [
+        {"label": "Price", "value": "price"},
+        {"label": "Brand name & reputation", "value": "brand"},
+        {"label": "Ingredients & what's in it", "value": "ingredients"},
+        {"label": "How it smells", "value": "fragrance"},
+        {"label": "How the packaging looks", "value": "packaging"},
+        {"label": "Friend or family recommendation", "value": "recommendation"},
+        {"label": "Online reviews & ratings", "value": "reviews"},
+        {"label": "Doctor or expert recommendation", "value": "expert"}
+      ]
+    },
+    {
+      "question_id": "M2_q02",
+      "question_text": "How important is it to you that a product is 'natural' or 'chemical-free'? And what does 'natural' mean to you in your own words?",
+      "question_type": "scale_open",
+      "target_signals": ["clean_beauty_attitude"],
+      "priority": 1,
+      "estimated_seconds": 40,
+      "scale_min": 1,
+      "scale_max": 5,
+      "scale_labels": {
+        "1": "Not important at all",
+        "5": "Extremely important"
+      },
+      "placeholder": "Describe what 'natural' means to you personally"
+    },
+    {
+      "question_id": "M2_q04",
+      "question_text": "Which certifications or labels influence your purchase? Select all that apply.",
+      "question_type": "multi_select",
+      "target_signals": ["certification_sensitivity"],
+      "priority": 1,
+      "estimated_seconds": 25,
+      "options": [
+        {"label": "Dermatologist-tested (tested by skin doctors)", "value": "dermatologist_tested"},
+        {"label": "Cruelty-free (not tested on animals)", "value": "cruelty_free"},
+        {"label": "Organic (made from organically grown ingredients)", "value": "organic"},
+        {"label": "Ayurvedic (based on traditional Indian medicine)", "value": "ayurvedic"},
+        {"label": "pH-balanced (gentle, maintains skin's natural balance)", "value": "ph_balanced"},
+        {"label": "Paraben-free (free from a specific preservative)", "value": "paraben_free"},
+        {"label": "Sulfate-free (free from strong foaming agents)", "value": "sulfate_free"},
+        {"label": "None of these matter to me", "value": "none"}
+      ]
+    },
+    {
+      "question_id": "M2_q05",
+      "question_text": "How do you feel about Indian personal care brands vs. international brands? Do you have a preference or bias?",
+      "question_type": "open_text",
+      "target_signals": ["brand_origin_perception"],
+      "priority": 1,
+      "estimated_seconds": 40,
+      "placeholder": "Share your honest feelings \u2014 there's no right answer"
+    },
+    {
+      "question_id": "M2_q06",
+      "question_text": "What is the maximum premium (%) you would pay for a product that aligns with your values? Rate each separately:",
+      "question_type": "matrix_premium",
+      "target_signals": ["value_willingness_to_pay"],
+      "priority": 1,
+      "estimated_seconds": 45,
+      "matrix_items": [
+        "Sustainable/eco-friendly packaging",
+        "Ayurvedic or traditional ingredients",
+        "Clinical-grade, lab-tested formulation",
+        "Cruelty-free, not tested on animals",
+        "Made in India"
+      ],
+      "matrix_options": [
+        {"label": "0% extra", "value": "0"},
+        {"label": "10-20% extra", "value": "10_20"},
+        {"label": "20-40% extra", "value": "20_40"},
+        {"label": "40-60% extra", "value": "40_60"},
+        {"label": "Price doesn't matter", "value": "unlimited"}
+      ]
+    },
+    {
+      "question_id": "M2_q07",
+      "question_text": "How loyal are you to personal care brands?",
+      "question_type": "single_select",
+      "target_signals": ["brand_loyalty"],
+      "priority": 1,
+      "estimated_seconds": 15,
+      "options": [
+        {"label": "I stick to the same brands for years", "value": "very_loyal"},
+        {"label": "I have 2-3 favorites I rotate between", "value": "moderate_loyalty"},
+        {"label": "I'm always trying new things, no strong loyalty", "value": "low_loyalty"},
+        {"label": "I buy whatever is on offer or cheapest", "value": "price_driven"}
+      ]
+    },
+    {
+      "question_id": "M2_q09",
+      "question_text": "How much do you trust the following sources for personal care product information? Rate each 1-5:",
+      "question_type": "matrix_scale",
+      "target_signals": ["trust_hierarchy"],
+      "priority": 1,
+      "estimated_seconds": 40,
+      "matrix_items": [
+        "TV advertisements",
+        "Instagram or YouTube influencers",
+        "Dermatologists or skin doctors",
+        "Friends and family",
+        "Online reviews (Amazon, Nykaa)",
+        "Claims written on the product packaging"
+      ],
+      "scale_min": 1,
+      "scale_max": 5,
+      "scale_labels": {
+        "1": "Don't trust at all",
+        "5": "Trust completely"
+      }
+    },
+    {
+      "question_id": "M2_q11",
+      "question_text": "Would you prefer a product that is 'clinically proven' or one that is 'inspired by traditional/Ayurvedic wisdom'? Why?",
+      "question_type": "single_select",
+      "target_signals": ["science_vs_tradition"],
+      "priority": 1,
+      "estimated_seconds": 25,
+      "options": [
+        {"label": "Strongly prefer clinical", "value": "strong_clinical"},
+        {"label": "Slightly prefer clinical", "value": "slight_clinical"},
+        {"label": "No preference", "value": "no_preference"},
+        {"label": "Slightly prefer Ayurvedic", "value": "slight_ayurvedic"},
+        {"label": "Strongly prefer Ayurvedic", "value": "strong_ayurvedic"}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,140 @@
+{
+  "module_id": "M3",
+  "module_name": "Purchase Decision Logic",
+  "module_goal": "How they buy, where they buy, how they switch, price sensitivity, and channel behavior.",
+  "estimated_duration_min": 4,
+  "completion_criteria": {
+    "coverage_threshold": 0.70,
+    "confidence_threshold": 0.65,
+    "min_questions": 5
+  },
+  "signal_targets": [
+    "replenishment_behavior",
+    "channel_preference",
+    "price_band",
+    "switching_triggers",
+    "switching_story",
+    "online_decision_funnel",
+    "quick_commerce_impact",
+    "price_elasticity"
+  ],
+  "questions": [
+    {
+      "question_id": "M3_q01",
+      "question_text": "When your current body wash/soap runs out, what is your typical next step?",
+      "question_type": "single_select",
+      "target_signals": ["replenishment_behavior"],
+      "priority": 1,
+      "estimated_seconds": 15,
+      "options": [
+        {"label": "Repurchase the exact same product", "value": "repurchase_same"},
+        {"label": "Browse online for options before buying", "value": "browse_online"},
+        {"label": "Visit a store and decide there", "value": "store_decide"},
+        {"label": "Ask family or friends what they use", "value": "ask_others"},
+        {"label": "Wait for a deal or discount before buying", "value": "wait_deal"}
+      ]
+    },
+    {
+      "question_id": "M3_q02",
+      "question_text": "Where do you most often buy personal care products? Pick your top 3:",
+      "question_type": "rank_order",
+      "target_signals": ["channel_preference"],
+      "priority": 1,
+      "estimated_seconds": 30,
+      "max_selections": 3,
+      "options": [
+        {"label": "Amazon", "value": "amazon"},
+        {"label": "Flipkart", "value": "flipkart"},
+        {"label": "Nykaa (beauty-focused online store)", "value": "nykaa"},
+        {"label": "BigBasket, Blinkit, Zepto, or Swiggy Instamart", "value": "quick_commerce"},
+        {"label": "Supermarket (DMart, Reliance Fresh, Big Bazaar)", "value": "supermarket"},
+        {"label": "Pharmacy or medical store", "value": "pharmacy"},
+        {"label": "Local kirana or general store", "value": "kirana"},
+        {"label": "Brand's own website", "value": "brand_website"},
+        {"label": "Instagram or WhatsApp shop", "value": "social_commerce"}
+      ]
+    },
+    {
+      "question_id": "M3_q03",
+      "question_text": "How much do you typically spend on a single body wash purchase?",
+      "question_type": "single_select",
+      "target_signals": ["price_band"],
+      "priority": 1,
+      "estimated_seconds": 10,
+      "options": [
+        {"label": "Under \u20b9100", "value": "under_100"},
+        {"label": "\u20b9100\u2013200", "value": "100_200"},
+        {"label": "\u20b9200\u2013350", "value": "200_350"},
+        {"label": "\u20b9350\u2013500", "value": "350_500"},
+        {"label": "Above \u20b9500", "value": "above_500"}
+      ]
+    },
+    {
+      "question_id": "M3_q06",
+      "question_text": "What would make you switch away from your current body wash? Pick your top 3:",
+      "question_type": "rank_order",
+      "target_signals": ["switching_triggers"],
+      "priority": 1,
+      "estimated_seconds": 30,
+      "max_selections": 3,
+      "options": [
+        {"label": "Found something cheaper", "value": "cheaper"},
+        {"label": "Found something that smells better", "value": "better_smell"},
+        {"label": "Developed a skin problem", "value": "skin_problem"},
+        {"label": "Doctor or dermatologist recommended something else", "value": "doctor_rec"},
+        {"label": "An influencer I trust reviewed something new", "value": "influencer"},
+        {"label": "Got a free sample of another product", "value": "free_sample"},
+        {"label": "A friend or family member recommended something", "value": "friend_rec"},
+        {"label": "Saw an ad that really resonated with me", "value": "ad_resonance"}
+      ]
+    },
+    {
+      "question_id": "M3_q11",
+      "question_text": "Describe the last time you tried a completely new body wash brand. What triggered the switch? Were you satisfied?",
+      "question_type": "open_text",
+      "target_signals": ["switching_story"],
+      "priority": 1,
+      "estimated_seconds": 45,
+      "placeholder": "Tell us the full story \u2014 what made you try it and what happened"
+    },
+    {
+      "question_id": "M3_q12",
+      "question_text": "When shopping online for personal care, what do you look at first? Pick your top 3:",
+      "question_type": "rank_order",
+      "target_signals": ["online_decision_funnel"],
+      "priority": 2,
+      "estimated_seconds": 25,
+      "max_selections": 3,
+      "options": [
+        {"label": "Product images", "value": "images"},
+        {"label": "Star rating", "value": "star_rating"},
+        {"label": "Number of reviews", "value": "review_count"},
+        {"label": "Price", "value": "price"},
+        {"label": "Ingredient list", "value": "ingredients"},
+        {"label": "Brand name", "value": "brand_name"}
+      ]
+    },
+    {
+      "question_id": "M3_q14",
+      "question_text": "Do you use quick commerce (Blinkit, Zepto, Swiggy Instamart) for personal care? If yes, does the limited selection change what you buy?",
+      "question_type": "open_text",
+      "target_signals": ["quick_commerce_impact"],
+      "priority": 2,
+      "estimated_seconds": 30
+    },
+    {
+      "question_id": "M3_q15",
+      "question_text": "If a brand you liked raised its price by 30%, what would you do?",
+      "question_type": "single_select",
+      "target_signals": ["price_elasticity"],
+      "priority": 1,
+      "estimated_seconds": 15,
+      "options": [
+        {"label": "Keep buying \u2014 I'm loyal to this brand", "value": "keep_buying"},
+        {"label": "Look for alternatives \u2014 I'd compare other options", "value": "look_alternatives"},
+        {"label": "Wait for offers \u2014 I'd hold out for a sale", "value": "wait_offers"},
+        {"label": "Switch permanently \u2014 I'd find something else at the old price", "value": "switch"}
+      ]
+    }
+  ]
+}

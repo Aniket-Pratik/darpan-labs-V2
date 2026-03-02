@@ -61,10 +61,11 @@ class Settings(BaseSettings):
     langfuse_secret_key: Optional[str] = None
     langfuse_host: str = "https://cloud.langfuse.com"
 
-    # Auth (placeholder for Supabase/Clerk)
+    # Auth
     auth_secret_key: str = "your-secret-key-change-in-production"
     auth_algorithm: str = "HS256"
-    auth_access_token_expire_minutes: int = 30
+    auth_access_token_expire_minutes: int = 1440  # 24 hours
+    google_client_id: str = ""
 
     # Storage
     s3_bucket: Optional[str] = None
