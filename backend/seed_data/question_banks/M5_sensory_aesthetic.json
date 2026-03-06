@@ -1,0 +1,132 @@
+{
+  "module_id": "M5",
+  "module_name": "Sensory & Aesthetic Preferences",
+  "module_goal": "Fragrance, texture, lather, post-wash feel, and packaging. The #1 driver in body wash choice.",
+  "estimated_duration_min": 3,
+  "completion_criteria": {
+    "coverage_threshold": 0.70,
+    "confidence_threshold": 0.65,
+    "min_questions": 5
+  },
+  "signal_targets": [
+    "fragrance_preference",
+    "scent_anchor",
+    "fragrance_longevity",
+    "lather_expectation",
+    "texture_preference",
+    "post_wash_feel",
+    "packaging_archetype",
+    "unarticulated_ideal_product"
+  ],
+  "questions": [
+    {
+      "question_id": "M5_q01",
+      "question_text": "What fragrance families do you naturally gravitate toward? Pick your top 2:",
+      "question_type": "multi_select",
+      "target_signals": ["fragrance_preference"],
+      "priority": 1,
+      "estimated_seconds": 25,
+      "max_selections": 2,
+      "options": [
+        {"label": "Fresh/Citrus \u2014 lemon, orange, grapefruit", "value": "fresh_citrus"},
+        {"label": "Floral \u2014 rose, jasmine, lavender, mogra", "value": "floral"},
+        {"label": "Woody/Musky \u2014 sandalwood, cedarwood, warm temple smell", "value": "woody_musky"},
+        {"label": "Herbal/Earthy \u2014 neem, tulsi, aloe vera, wet earth after rain", "value": "herbal_earthy"},
+        {"label": "Sweet/Gourmand \u2014 vanilla, chocolate, caramel, coffee", "value": "sweet_gourmand"},
+        {"label": "Ocean/Aquatic \u2014 sea breeze, fresh rain", "value": "ocean_aquatic"},
+        {"label": "Spicy/Warm \u2014 cinnamon, clove, black pepper", "value": "spicy_warm"},
+        {"label": "Fragrance-free \u2014 I prefer no noticeable scent", "value": "fragrance_free"}
+      ]
+    },
+    {
+      "question_id": "M5_q02",
+      "question_text": "Name a specific product whose fragrance you loved. Did you repurchase it because of the scent? What made that fragrance special to you?",
+      "question_type": "open_text",
+      "target_signals": ["scent_anchor"],
+      "priority": 1,
+      "estimated_seconds": 40,
+      "placeholder": "This can be any product \u2014 body wash, perfume, shampoo, candle, anything"
+    },
+    {
+      "question_id": "M5_q03",
+      "question_text": "How long should a body wash fragrance last on your skin?",
+      "question_type": "single_select",
+      "target_signals": ["fragrance_longevity"],
+      "priority": 1,
+      "estimated_seconds": 15,
+      "options": [
+        {"label": "I don't want it to linger \u2014 fresh during shower is enough", "value": "shower_only"},
+        {"label": "1-2 hours \u2014 a light scent that fades naturally", "value": "1_2hours"},
+        {"label": "Half the day \u2014 noticeable till afternoon", "value": "half_day"},
+        {"label": "All day \u2014 I want people to notice it", "value": "all_day"}
+      ]
+    },
+    {
+      "question_id": "M5_q04",
+      "question_text": "How important is lather/foam to your body wash experience?",
+      "question_type": "single_select",
+      "target_signals": ["lather_expectation"],
+      "priority": 1,
+      "estimated_seconds": 15,
+      "options": [
+        {"label": "Essential \u2014 more foam = feels cleaner", "value": "essential"},
+        {"label": "Nice to have \u2014 I like some foam but not a dealbreaker", "value": "nice_to_have"},
+        {"label": "Don't care \u2014 I don't notice lather", "value": "dont_care"},
+        {"label": "Prefer low-lather \u2014 I like a creamy, lotion-like feel", "value": "prefer_low"}
+      ]
+    },
+    {
+      "question_id": "M5_q05",
+      "question_text": "What texture do you prefer in a body wash?",
+      "question_type": "single_select",
+      "target_signals": ["texture_preference"],
+      "priority": 1,
+      "estimated_seconds": 20,
+      "options": [
+        {"label": "Thick creamy gel \u2014 like a rich lotion (e.g., Dove)", "value": "thick_cream"},
+        {"label": "Lightweight liquid \u2014 thin, watery, spreads easily (e.g., Dettol)", "value": "lightweight"},
+        {"label": "Mousse or foam \u2014 fluffy foam from a pump", "value": "mousse"},
+        {"label": "Oil-to-foam \u2014 starts as oil, turns foamy with water", "value": "oil_to_foam"},
+        {"label": "Exfoliating with beads or scrub particles", "value": "exfoliating"}
+      ]
+    },
+    {
+      "question_id": "M5_q06",
+      "question_text": "What is your ideal post-wash skin feeling?",
+      "question_type": "single_select",
+      "target_signals": ["post_wash_feel"],
+      "priority": 1,
+      "estimated_seconds": 15,
+      "options": [
+        {"label": "Squeaky clean \u2014 tight, all oil removed", "value": "squeaky_clean"},
+        {"label": "Moisturized and soft \u2014 smooth, hydrated", "value": "moisturized"},
+        {"label": "Fresh and tingling \u2014 cool/minty sensation", "value": "fresh_tingling"},
+        {"label": "Neutral \u2014 no residue, just clean", "value": "neutral"},
+        {"label": "Silky smooth \u2014 velvety soft, almost slippery", "value": "silky_smooth"}
+      ]
+    },
+    {
+      "question_id": "M5_q09",
+      "question_text": "Do you prefer packaging that looks:",
+      "question_type": "single_select",
+      "target_signals": ["packaging_archetype"],
+      "priority": 1,
+      "estimated_seconds": 20,
+      "options": [
+        {"label": "Clinical/medical \u2014 white, clean (think Cetaphil, Minimalist)", "value": "clinical"},
+        {"label": "Luxurious/premium \u2014 metallic accents, elegant (think Bath & Body Works)", "value": "luxurious"},
+        {"label": "Natural/earthy \u2014 brown, green, recycled look (think Forest Essentials)", "value": "natural"},
+        {"label": "Playful/colorful \u2014 bright, fun (think Fiama, mCaffeine)", "value": "playful"},
+        {"label": "Minimalist/clean \u2014 simple, modern (think Muji, Plum)", "value": "minimalist"}
+      ]
+    },
+    {
+      "question_id": "M5_q12",
+      "question_text": "If you could combine the fragrance of one product with the texture of another, what would your ideal combination be?",
+      "question_type": "open_text",
+      "target_signals": ["unarticulated_ideal_product"],
+      "priority": 2,
+      "estimated_seconds": 35
+    }
+  ]
+}

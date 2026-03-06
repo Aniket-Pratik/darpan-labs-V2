@@ -44,16 +44,10 @@ class TestDatabaseBase:
         from app.models.user import User
         from app.models.consent import ConsentEvent
         from app.models.interview import InterviewSession, InterviewModule, InterviewTurn
-        from app.models.twin import TwinProfile, EvidenceSnippet
-        from app.models.chat import TwinChatSession, TwinChatMessage
-        from app.models.experiment import Cohort, Experiment, ExperimentResult
 
         models = [
             User, ConsentEvent,
             InterviewSession, InterviewModule, InterviewTurn,
-            TwinProfile, EvidenceSnippet,
-            TwinChatSession, TwinChatMessage,
-            Cohort, Experiment, ExperimentResult,
         ]
 
         for model in models:

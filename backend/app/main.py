@@ -49,7 +49,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title=settings.app_name,
     version=settings.app_version,
-    description="AI-powered digital twin platform for consumer research",
+    description="AI-powered interview platform for consumer research",
     lifespan=lifespan,
     docs_url="/docs" if settings.debug else None,
     redoc_url="/redoc" if settings.debug else None,
@@ -115,15 +115,12 @@ async def root():
 
 
 # API prefix for versioned endpoints
-from app.routers import interviews, twins, chat, voice, cohorts, experiments
+from app.routers import auth, interviews, voice, admin
 
-# Register routers (chat before twins so /twins/brand-sessions matches before /{twin_id})
+app.include_router(auth.router, prefix=settings.api_prefix)
 app.include_router(interviews.router, prefix=settings.api_prefix)
-app.include_router(chat.router, prefix=settings.api_prefix)
-app.include_router(twins.router, prefix=settings.api_prefix)
 app.include_router(voice.router, prefix=settings.api_prefix)
-app.include_router(cohorts.router, prefix=settings.api_prefix)
-app.include_router(experiments.router, prefix=settings.api_prefix)
+app.include_router(admin.router, prefix=settings.api_prefix)
 
 
 if __name__ == "__main__":

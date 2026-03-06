@@ -157,6 +157,7 @@ class PromptService:
         recent_turns: list[dict],
         cross_module_summary: str,
         sensitivity_settings: dict,
+        conversation_state: dict | None = None,
     ) -> str:
         """Format the interviewer_question.txt prompt.
 
@@ -174,6 +175,7 @@ class PromptService:
             recent_turns: Recent Q&A turns for context.
             cross_module_summary: Summary from completed modules.
             sensitivity_settings: User's sensitivity preferences.
+            conversation_state: Cumulative session memory (open loops, style markers, etc.).
 
         Returns:
             Formatted prompt ready for LLM.
@@ -183,6 +185,7 @@ class PromptService:
         captured_str = json.dumps(captured_signals)
         missing_str = json.dumps(missing_signals)
         sensitivity_str = json.dumps(sensitivity_settings)
+        conversation_state_str = json.dumps(conversation_state or {}, indent=2)
 
         return self.format_prompt(
             "interviewer_question",
@@ -199,6 +202,76 @@ class PromptService:
             recent_turns=recent_turns_str,
             cross_module_summary=cross_module_summary,
             sensitivity_settings=sensitivity_str,
+            conversation_state=conversation_state_str,
+        )
+
+    def get_followup_probe_prompt(
+        self,
+        question_text: str,
+        target_signal: str,
+        answer_text: str,
+        followup_attempt: int,
+        followup_reason: str,
+        previous_context: str = "",
+        module_goal: str = "",
+    ) -> str:
+        """Format the followup_probe.txt prompt.
+
+        Args:
+            question_text: The question that was asked.
+            target_signal: The signal we're targeting.
+            answer_text: The user's vague answer.
+            followup_attempt: Which attempt this is (1 or 2).
+            followup_reason: Why we're following up.
+            previous_context: Brief context from earlier conversation.
+            module_goal: Goal of the current module for context.
+
+        Returns:
+            Formatted prompt ready for LLM.
+        """
+        return self.format_prompt(
+            "followup_probe",
+            question_text=question_text,
+            target_signal=target_signal,
+            answer_text=answer_text,
+            followup_attempt=followup_attempt,
+            followup_reason=followup_reason,
+            previous_context=previous_context,
+            module_goal=module_goal,
+        )
+
+    def get_answer_satisfaction_prompt(
+        self,
+        question_text: str,
+        answer_text: str,
+        target_signal: str = "",
+    ) -> str:
+        """Format the answer_satisfaction.txt prompt."""
+        return self.format_prompt(
+            "answer_satisfaction",
+            question_text=question_text,
+            answer_text=answer_text,
+            target_signal=target_signal,
+        )
+
+    def get_acknowledgment_prompt(
+        self,
+        answer_text: str,
+        question_text: str,
+    ) -> str:
+        """Format the acknowledgment.txt prompt.
+
+        Args:
+            answer_text: The user's answer to acknowledge.
+            question_text: The question that was asked.
+
+        Returns:
+            Formatted prompt ready for LLM.
+        """
+        return self.format_prompt(
+            "acknowledgment",
+            answer_text=answer_text,
+            question_text=question_text,
         )
 
     def _format_previous_answers(self, previous_answers: list[dict]) -> str:

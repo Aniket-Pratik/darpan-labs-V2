@@ -19,13 +19,6 @@ from app.models import (
     InterviewSession,
     InterviewModule,
     InterviewTurn,
-    TwinProfile,
-    EvidenceSnippet,
-    TwinChatSession,
-    TwinChatMessage,
-    Cohort,
-    Experiment,
-    ExperimentResult,
 )
 
 # Alembic Config object

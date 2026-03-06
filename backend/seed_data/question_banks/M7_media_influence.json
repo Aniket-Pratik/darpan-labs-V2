@@ -1,0 +1,106 @@
+{
+  "module_id": "M7",
+  "module_name": "Media & Influence",
+  "module_goal": "How they discover products, who they trust, content preferences, and social media behavior.",
+  "estimated_duration_min": 3,
+  "completion_criteria": {
+    "coverage_threshold": 0.70,
+    "confidence_threshold": 0.65,
+    "min_questions": 4
+  },
+  "signal_targets": [
+    "discovery_channel_hierarchy",
+    "influencer_trust_signals",
+    "social_commerce_conversion",
+    "content_format_conversion",
+    "review_platform_mapping",
+    "word_of_mouth_strength"
+  ],
+  "questions": [
+    {
+      "question_id": "M7_q01",
+      "question_text": "Where do you typically discover new personal care products? Pick your top 3:",
+      "question_type": "rank_order",
+      "target_signals": ["discovery_channel_hierarchy"],
+      "priority": 1,
+      "estimated_seconds": 30,
+      "max_selections": 3,
+      "options": [
+        {"label": "Instagram (reels, stories, ads)", "value": "instagram"},
+        {"label": "YouTube (reviews, tutorials)", "value": "youtube"},
+        {"label": "TV advertisements", "value": "tv"},
+        {"label": "Friends or family told me", "value": "friends_family"},
+        {"label": "Browsing in a store (saw it on shelf)", "value": "in_store"},
+        {"label": "Amazon or Flipkart recommendations", "value": "ecommerce_reco"},
+        {"label": "Influencer or creator reviews", "value": "influencer"},
+        {"label": "Magazine or blog article", "value": "magazine_blog"},
+        {"label": "Salon, parlour, or dermatologist", "value": "salon_derm"},
+        {"label": "Quick commerce app (Blinkit, Zepto)", "value": "quick_commerce"}
+      ]
+    },
+    {
+      "question_id": "M7_q03",
+      "question_text": "Who do you follow or trust in the personal care space on social media? Name specific ones and what makes you trust them.",
+      "question_type": "open_text",
+      "target_signals": ["influencer_trust_signals"],
+      "priority": 1,
+      "estimated_seconds": 40
+    },
+    {
+      "question_id": "M7_q04",
+      "question_text": "Have you ever bought a personal care product because you saw it on social media? Describe what happened.",
+      "question_type": "open_text",
+      "target_signals": ["social_commerce_conversion"],
+      "priority": 1,
+      "estimated_seconds": 35
+    },
+    {
+      "question_id": "M7_q05",
+      "question_text": "What type of content makes you most likely to try a new product? Pick top 2:",
+      "question_type": "multi_select",
+      "target_signals": ["content_format_conversion"],
+      "priority": 1,
+      "estimated_seconds": 20,
+      "max_selections": 2,
+      "options": [
+        {"label": "Before/after results", "value": "before_after"},
+        {"label": "Expert or dermatologist review", "value": "expert_review"},
+        {"label": "Unboxing or first-impression video", "value": "unboxing"},
+        {"label": "Ingredient breakdown", "value": "ingredient_breakdown"},
+        {"label": "Aesthetic brand content (beautiful visuals)", "value": "aesthetic"},
+        {"label": "Discount code or special offer", "value": "discount"},
+        {"label": "Celebrity endorsement", "value": "celebrity"}
+      ]
+    },
+    {
+      "question_id": "M7_q07",
+      "question_text": "Do you read online reviews before buying personal care products? Where?",
+      "question_type": "multi_select",
+      "target_signals": ["review_platform_mapping"],
+      "priority": 2,
+      "estimated_seconds": 15,
+      "options": [
+        {"label": "Amazon reviews", "value": "amazon"},
+        {"label": "Nykaa reviews", "value": "nykaa"},
+        {"label": "YouTube video reviews", "value": "youtube"},
+        {"label": "Reddit or online forums", "value": "reddit"},
+        {"label": "Google search for '[product] review'", "value": "google"},
+        {"label": "I don't read reviews before buying", "value": "none"}
+      ]
+    },
+    {
+      "question_id": "M7_q11",
+      "question_text": "If a friend recommends a body wash to you, how likely are you to try it vs. researching it yourself first?",
+      "question_type": "scale",
+      "target_signals": ["word_of_mouth_strength"],
+      "priority": 1,
+      "estimated_seconds": 15,
+      "scale_min": 1,
+      "scale_max": 5,
+      "scale_labels": {
+        "1": "I'd still do my own research before buying",
+        "5": "I'd try it right away, no questions asked"
+      }
+    }
+  ]
+}

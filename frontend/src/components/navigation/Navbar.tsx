@@ -1,28 +1,21 @@
 'use client';
 
 import Link from 'next/link';
-import { LayoutDashboard, Brain, MessageSquare, FlaskConical, Plus } from 'lucide-react';
+import { useRouter, usePathname } from 'next/navigation';
+import { Brain, LogOut, Shield } from 'lucide-react';
 import { NavItem } from './NavItem';
-import { SideSwitcher } from './SideSwitcher';
+import { useAuthStore } from '@/store/authStore';
 
-const CREATE_NAV_ITEMS = [
-  { label: 'Dashboard', href: '/create/dashboard', icon: LayoutDashboard },
-  { label: 'Modules', href: '/create/modules', icon: Brain },
-  { label: 'My Twin', href: '/create/twin/chat', icon: MessageSquare },
-];
+export function Navbar() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const { user, logout } = useAuthStore();
+  const isAdminSection = pathname.startsWith('/admin');
 
-const BRAND_NAV_ITEMS = [
-  { label: 'Experiments', href: '/brand/experiments', icon: FlaskConical },
-  { label: 'Chat', href: '/brand/chat', icon: MessageSquare },
-  { label: 'New Experiment', href: '/brand/experiments/new', icon: Plus },
-];
-
-interface NavbarProps {
-  side: 'create' | 'brand';
-}
-
-export function Navbar({ side }: NavbarProps) {
-  const navItems = side === 'create' ? CREATE_NAV_ITEMS : BRAND_NAV_ITEMS;
+  const handleLogout = () => {
+    logout();
+    router.push('/login');
+  };
 
   return (
     <header className="border-b border-darpan-border bg-darpan-bg/80 backdrop-blur-sm sticky top-0 z-50">
@@ -34,13 +27,30 @@ export function Navbar({ side }: NavbarProps) {
 
         {/* Nav items */}
         <nav className="flex items-center gap-1">
-          {navItems.map((item) => (
-            <NavItem key={item.href} {...item} />
-          ))}
+          {!isAdminSection && (
+            <NavItem label="Modules" href="/create/modules" icon={Brain} />
+          )}
+          {user?.is_admin && (
+            <NavItem label="Admin" href="/admin" icon={Shield} />
+          )}
         </nav>
 
-        {/* Side switcher */}
-        <SideSwitcher side={side} />
+        {/* User section */}
+        {user && (
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-white/60 hidden sm:inline">
+              {user.display_name}
+            </span>
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-white/50
+                         hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+              <span className="hidden sm:inline">Logout</span>
+            </button>
+          </div>
+        )}
       </div>
     </header>
   );

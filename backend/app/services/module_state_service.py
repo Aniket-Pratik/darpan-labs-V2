@@ -1,4 +1,4 @@
-"""Module state tracking and scoring service."""
+"""Module state tracking service (simplified)."""
 
 import logging
 from datetime import datetime, timezone
@@ -7,14 +7,8 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.llm import LLMClient, get_llm_client
 from app.models.interview import InterviewModule, InterviewSession, InterviewTurn
-from app.schemas.llm_responses import (
-    ModuleCompletionResponse,
-    ModuleCompletionResult,
-    ParsedAnswer,
-)
-from app.services.prompt_service import PromptService, get_prompt_service
+from app.schemas.llm_responses import ModuleCompletionResult
 from app.services.question_bank_service import (
     QuestionBankService,
     get_question_bank_service,
@@ -29,19 +23,13 @@ class ModuleStateService:
     def __init__(
         self,
         question_bank: QuestionBankService | None = None,
-        llm_client: LLMClient | None = None,
-        prompt_service: PromptService | None = None,
     ):
         """Initialize module state service.
 
         Args:
             question_bank: Service for loading question banks.
-            llm_client: LLM client for completion evaluation.
-            prompt_service: Service for loading prompts.
         """
         self.question_bank = question_bank or get_question_bank_service()
-        self.llm_client = llm_client or get_llm_client()
-        self.prompt_service = prompt_service or get_prompt_service()
 
     async def initialize_modules(
         self,
@@ -154,63 +142,22 @@ class ModuleStateService:
         self,
         session: AsyncSession,
         module: InterviewModule,
-        parsed_answer: ParsedAnswer,
     ) -> InterviewModule:
-        """Update module scores after receiving an answer.
+        """Update module state after receiving an answer.
 
-        Updates coverage and confidence scores based on the parsed answer.
-        Uses heuristics for Sprint 1a, LLM evaluation for Sprint 1b.
+        Simply increments the question count.
 
         Args:
             session: Database session.
             module: Module to update.
-            parsed_answer: Parsed answer data.
 
         Returns:
             Updated InterviewModule.
         """
-        # Increment question count
         module.question_count += 1
-
-        # Get target signals for this module
-        target_signals = self.question_bank.get_signal_targets(module.module_id)
-        total_signals = len(target_signals)
-
-        # Update captured signals
-        current_signals = list(module.signals_captured or [])
-        target_signal_set = set(target_signals)
-        for signal in parsed_answer.signals_extracted:
-            if signal.signal not in current_signals:
-                current_signals.append(signal.signal)
-        module.signals_captured = current_signals
-
-        # Calculate coverage (only count signals that match targets)
-        if total_signals > 0:
-            matched = len([s for s in current_signals if s in target_signal_set])
-            module.coverage_score = min(matched / total_signals, 1.0)
-        else:
-            module.coverage_score = 0.0
-
-        # Update confidence based on answer specificity
-        # Weighted average with existing confidence
-        if module.question_count == 1:
-            module.confidence_score = parsed_answer.specificity_score
-        else:
-            # Rolling average weighted toward recent answers
-            weight = 0.7  # Weight for new answer
-            module.confidence_score = (
-                weight * parsed_answer.specificity_score
-                + (1 - weight) * module.confidence_score
-            )
-
         await session.flush()
         logger.info(
-            f"Updated module {module.module_id}: "
-            f"coverage={module.coverage_score:.2f}, "
-            f"confidence={module.confidence_score:.2f}, "
-            f"signals_captured={current_signals}, "
-            f"target_signals={target_signals}, "
-            f"matched={len([s for s in current_signals if s in target_signal_set])}/{total_signals}"
+            f"Updated module {module.module_id}: question_count={module.question_count}"
         )
         return module
 
@@ -220,7 +167,9 @@ class ModuleStateService:
         interview_session_id: UUID,
         module_id: str,
     ) -> ModuleCompletionResult:
-        """Evaluate if a module meets completion criteria using LLM.
+        """Evaluate if a module is complete.
+
+        Complete = all bank questions have been asked (question_count >= total).
 
         Args:
             session: Database session.
@@ -228,124 +177,25 @@ class ModuleStateService:
             module_id: Module to evaluate.
 
         Returns:
-            ModuleCompletionResult with completion status and scores.
+            ModuleCompletionResult with completion status.
         """
-        # Get module state
         module = await self.get_module_state(session, interview_session_id, module_id)
         if not module:
             raise ValueError(f"Module {module_id} not found for session")
 
-        # Get completion criteria
-        criteria = self.question_bank.get_module_completion_criteria(module_id)
-
-        # Quick check: if below thresholds, don't bother with LLM
-        if (
-            module.coverage_score < criteria.coverage_threshold * 0.8
-            or module.question_count < criteria.min_questions
-        ):
-            return ModuleCompletionResult(
-                is_complete=False,
-                coverage_score=module.coverage_score,
-                confidence_score=module.confidence_score,
-                signals_captured=list(module.signals_captured or []),
-                signals_missing=self._get_missing_signals(module),
-                recommendation="ASK_MORE",
-            )
-
-        # Get all turns for this module
-        turns = await self._get_module_turns(session, interview_session_id, module_id)
-
-        # Format turns for prompt
-        turns_data = [
-            {
-                "question": t.question_text,
-                "answer": t.answer_text,
-                "target_signal": (t.question_meta or {}).get("target_signal", ""),
-            }
-            for t in turns
-            if t.role == "user" and t.answer_text
-        ]
-
-        # Call LLM for evaluation
-        try:
-            prompt = self.prompt_service.get_module_completion_prompt(
-                module_id=module_id,
-                module_name=self.question_bank.get_module_name(module_id),
-                signal_targets=self.question_bank.get_signal_targets(module_id),
-                coverage_threshold=criteria.coverage_threshold,
-                confidence_threshold=criteria.confidence_threshold,
-                module_turns=turns_data,
-            )
-
-            response = await self.llm_client.generate(
-                prompt=prompt,
-                response_format=ModuleCompletionResponse,
-                temperature=0.2,
-                metadata={"prompt_name": "module_completion", "module_id": module_id},
-            )
-
-            result = ModuleCompletionResult.from_llm_response(response)
-
-            # Update module with LLM scores (cap coverage at 1.0)
-            module.coverage_score = min(result.coverage_score, 1.0)
-            module.confidence_score = min(result.confidence_score, 1.0)
-            module.signals_captured = result.signals_captured
-            module.completion_eval = {
-                "recommendation": result.recommendation,
-                "signals_missing": result.signals_missing,
-                "module_summary": result.module_summary,
-            }
-            await session.flush()
-
-            return result
-
-        except Exception as e:
-            logger.warning(f"LLM completion evaluation failed: {e}")
-            # Fallback to heuristic evaluation
-            return self._evaluate_heuristic(module, criteria)
-
-    def _evaluate_heuristic(
-        self,
-        module: InterviewModule,
-        criteria,
-    ) -> ModuleCompletionResult:
-        """Heuristic completion evaluation when LLM fails.
-
-        Args:
-            module: Module to evaluate.
-            criteria: Completion criteria.
-
-        Returns:
-            ModuleCompletionResult based on heuristics.
-        """
-        is_complete = (
-            module.coverage_score >= criteria.coverage_threshold
-            and module.confidence_score >= criteria.confidence_threshold
-            and module.question_count >= criteria.min_questions
-        )
+        bank = self.question_bank.load_question_bank(module_id)
+        total_questions = len(bank.questions)
+        is_complete = module.question_count >= total_questions
 
         return ModuleCompletionResult(
             is_complete=is_complete,
-            coverage_score=module.coverage_score,
-            confidence_score=module.confidence_score,
-            signals_captured=list(module.signals_captured or []),
-            signals_missing=self._get_missing_signals(module),
+            coverage_score=1.0 if is_complete else module.question_count / max(total_questions, 1),
+            confidence_score=1.0 if is_complete else 0.0,
+            signals_captured=[],
+            signals_missing=[],
             recommendation="COMPLETE" if is_complete else "ASK_MORE",
             module_summary=None,
         )
-
-    def _get_missing_signals(self, module: InterviewModule) -> list[str]:
-        """Get signals not yet captured for a module.
-
-        Args:
-            module: Module to check.
-
-        Returns:
-            List of missing signal names.
-        """
-        target_signals = set(self.question_bank.get_signal_targets(module.module_id))
-        captured = set(module.signals_captured or [])
-        return list(target_signals - captured)
 
     async def transition_to_next_module(
         self,

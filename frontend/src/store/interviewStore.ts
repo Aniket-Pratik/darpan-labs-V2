@@ -11,6 +11,8 @@ import type {
   QuestionMeta,
   NextQuestionStatus,
   VoiceServerMessage,
+  OptionItem,
+  ConceptCard,
 } from '@/types/interview';
 import {
   startInterview as apiStartInterview,
@@ -29,6 +31,15 @@ export interface Question {
   question_type: string;
   target_signal?: string;
   meta?: QuestionMeta;
+  options?: OptionItem[];
+  max_selections?: number;
+  scale_min?: number;
+  scale_max?: number;
+  scale_labels?: Record<string, string>;
+  matrix_items?: string[];
+  matrix_options?: OptionItem[];
+  placeholder?: string;
+  concept_card?: ConceptCard;
 }
 
 export type InputMode = 'text' | 'voice';
@@ -123,7 +134,7 @@ export const useInterviewStore = create<InterviewState>((set, get) => ({
       const response = await apiStartInterview({
         user_id: userId,
         input_mode: 'text',
-        modules_to_complete: modules || ['M1', 'M2', 'M3', 'M4'],
+        modules_to_complete: modules || ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7'],
         consent: {
           accepted: true,
           consent_version: 'v2.0',
@@ -141,6 +152,7 @@ export const useInterviewStore = create<InterviewState>((set, get) => ({
           module_id: response.first_module.module_id,
           module_name: response.first_module.module_name,
           questions_asked: 0,
+          total_questions: response.first_module.total_questions,
           coverage_score: 0,
           confidence_score: 0,
           signals_captured: [],
@@ -151,6 +163,14 @@ export const useInterviewStore = create<InterviewState>((set, get) => ({
           question_text: response.first_question.question_text,
           question_type: response.first_question.question_type,
           target_signal: response.first_question.target_signal,
+          options: response.first_question.options,
+          max_selections: response.first_question.max_selections,
+          scale_min: response.first_question.scale_min,
+          scale_max: response.first_question.scale_max,
+          scale_labels: response.first_question.scale_labels,
+          matrix_items: response.first_question.matrix_items,
+          matrix_options: response.first_question.matrix_options,
+          placeholder: response.first_question.placeholder,
         },
         currentAnswer: '',
       });
@@ -265,6 +285,7 @@ export const useInterviewStore = create<InterviewState>((set, get) => ({
           module_id: response.first_module.module_id,
           module_name: response.first_module.module_name,
           questions_asked: 0,
+          total_questions: response.first_module.total_questions,
           coverage_score: 0,
           confidence_score: 0,
           signals_captured: [],
@@ -275,6 +296,14 @@ export const useInterviewStore = create<InterviewState>((set, get) => ({
           question_text: response.first_question.question_text,
           question_type: response.first_question.question_type,
           target_signal: response.first_question.target_signal,
+          options: response.first_question.options,
+          max_selections: response.first_question.max_selections,
+          scale_min: response.first_question.scale_min,
+          scale_max: response.first_question.scale_max,
+          scale_labels: response.first_question.scale_labels,
+          matrix_items: response.first_question.matrix_items,
+          matrix_options: response.first_question.matrix_options,
+          placeholder: response.first_question.placeholder,
         },
         currentAnswer: '',
       });
@@ -375,6 +404,30 @@ export const useInterviewStore = create<InterviewState>((set, get) => ({
   },
 }));
 
+// Helper to extract rich fields from response or meta
+function extractRichFields(response: {
+  options?: OptionItem[];
+  max_selections?: number;
+  scale_min?: number;
+  scale_max?: number;
+  scale_labels?: Record<string, string>;
+  matrix_items?: string[];
+  matrix_options?: OptionItem[];
+  placeholder?: string;
+  question_meta?: QuestionMeta;
+}) {
+  return {
+    options: response.options || response.question_meta?.options,
+    max_selections: response.max_selections ?? response.question_meta?.max_selections,
+    scale_min: response.scale_min ?? response.question_meta?.scale_min,
+    scale_max: response.scale_max ?? response.question_meta?.scale_max,
+    scale_labels: response.scale_labels || response.question_meta?.scale_labels,
+    matrix_items: response.matrix_items || response.question_meta?.matrix_items,
+    matrix_options: response.matrix_options || response.question_meta?.matrix_options,
+    placeholder: response.placeholder || response.question_meta?.placeholder,
+  };
+}
+
 // Helper function to handle next question response
 function handleNextQuestionResponse(
   set: (state: Partial<InterviewState>) => void,
@@ -388,6 +441,14 @@ function handleNextQuestionResponse(
     question_type?: string;
     question_meta?: QuestionMeta;
     module_id: string;
+    options?: OptionItem[];
+    max_selections?: number;
+    scale_min?: number;
+    scale_max?: number;
+    scale_labels?: Record<string, string>;
+    matrix_items?: string[];
+    matrix_options?: OptionItem[];
+    placeholder?: string;
   }
 ) {
   const { currentModule, modulePlan } = get();
@@ -406,6 +467,8 @@ function handleNextQuestionResponse(
     });
     return;
   }
+
+  const rich = extractRichFields(response);
 
   if (response.status === 'module_complete') {
     // Module completed, show transition
@@ -431,6 +494,7 @@ function handleNextQuestionResponse(
             question_type: response.question_type || 'open_text',
             target_signal: response.question_meta?.target_signal,
             meta: response.question_meta,
+            ...rich,
           }
         : null,
       currentAnswer: '',
@@ -448,6 +512,7 @@ function handleNextQuestionResponse(
       question_type: response.question_type || 'open_text',
       target_signal: response.question_meta?.target_signal,
       meta: response.question_meta,
+      ...rich,
     },
     currentAnswer: '',
   });

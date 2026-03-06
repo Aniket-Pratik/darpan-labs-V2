@@ -1,0 +1,154 @@
+{
+  "module_id": "M6",
+  "module_name": "Body Wash Deep-Dive",
+  "module_goal": "Current brands, satisfaction/pain points, brand-benefit associations, unmet needs, price bands, claims, and format curiosity. The most critical module for concept testing.",
+  "estimated_duration_min": 5,
+  "completion_criteria": {
+    "coverage_threshold": 0.70,
+    "confidence_threshold": 0.65,
+    "min_questions": 7
+  },
+  "signal_targets": [
+    "current_brand_usage",
+    "satisfaction_drivers",
+    "pain_points",
+    "unaided_brand_recall",
+    "consumer_mental_model",
+    "d2c_brand_perception",
+    "dream_product",
+    "claim_resonance",
+    "premium_ceiling",
+    "india_specific_positioning",
+    "value_escalation"
+  ],
+  "questions": [
+    {
+      "question_id": "M6_q01",
+      "question_text": "What body wash brand(s) do you currently use? List all.",
+      "question_type": "open_text",
+      "target_signals": ["current_brand_usage"],
+      "priority": 1,
+      "estimated_seconds": 25,
+      "placeholder": "List all brands you've used in the last 3 months"
+    },
+    {
+      "question_id": "M6_q03",
+      "question_text": "What do you like MOST about your current body wash? (Top 1-2 things)",
+      "question_type": "open_text",
+      "target_signals": ["satisfaction_drivers"],
+      "priority": 1,
+      "estimated_seconds": 30
+    },
+    {
+      "question_id": "M6_q04",
+      "question_text": "What, if anything, frustrates you or feels 'just okay' about your current body wash?",
+      "question_type": "open_text",
+      "target_signals": ["pain_points"],
+      "priority": 1,
+      "estimated_seconds": 30
+    },
+    {
+      "question_id": "M6_q05",
+      "question_text": "What body wash brands can you name off the top of your head? List as many as you can.",
+      "question_type": "open_text",
+      "target_signals": ["unaided_brand_recall"],
+      "priority": 1,
+      "estimated_seconds": 30,
+      "placeholder": "Don't think too hard \u2014 write every body wash brand that comes to mind. The order matters \u2014 first ones first."
+    },
+    {
+      "question_id": "M6_q06",
+      "question_text": "How would you categorize body washes in your mind? What makes one different from another?",
+      "question_type": "open_text",
+      "target_signals": ["consumer_mental_model"],
+      "priority": 1,
+      "estimated_seconds": 35
+    },
+    {
+      "question_id": "M6_q07",
+      "question_text": "Have you tried any of these newer/D2C body wash brands? Rate your experience for any you've used:",
+      "question_type": "matrix_scale",
+      "target_signals": ["d2c_brand_perception"],
+      "priority": 2,
+      "estimated_seconds": 45,
+      "matrix_items": [
+        "mCaffeine (coffee-based)",
+        "Plum (green, fruity, vegan)",
+        "Beardo (men's grooming)",
+        "Bombay Shaving Company (men's, premium)",
+        "Mamaearth (natural, toxin-free)",
+        "WOW Skin Science (natural)",
+        "The Man Company (men's grooming)",
+        "Minimalist (clinical, transparent bottles)",
+        "Dot & Key (colorful, K-beauty style)",
+        "St. Botanica (Ayurvedic-modern mix)"
+      ],
+      "scale_min": 1,
+      "scale_max": 5,
+      "scale_labels": {
+        "1": "Poor experience",
+        "5": "Excellent experience"
+      }
+    },
+    {
+      "question_id": "M6_q09",
+      "question_text": "If you could design your PERFECT body wash from scratch, describe it. Think about fragrance, texture, benefit, packaging, price \u2014 anything.",
+      "question_type": "open_text",
+      "target_signals": ["dream_product"],
+      "priority": 1,
+      "estimated_seconds": 50
+    },
+    {
+      "question_id": "M6_q10",
+      "question_text": "What claims or product descriptions on a body wash would make you stop and read more? Pick top 3:",
+      "question_type": "rank_order",
+      "target_signals": ["claim_resonance"],
+      "priority": 1,
+      "estimated_seconds": 30,
+      "max_selections": 3,
+      "options": [
+        {"label": "72-hour freshness", "value": "72hr_freshness"},
+        {"label": "pH balanced", "value": "ph_balanced"},
+        {"label": "With shea butter & vitamin E", "value": "shea_vitamin_e"},
+        {"label": "Dermatologist recommended", "value": "derm_recommended"},
+        {"label": "100% natural ingredients", "value": "natural"},
+        {"label": "Intense moisturization", "value": "intense_moisture"},
+        {"label": "Charcoal detox", "value": "charcoal_detox"},
+        {"label": "Made for Indian skin & water", "value": "india_specific"},
+        {"label": "Backed by clinical studies", "value": "clinical_studies"},
+        {"label": "Ayurvedic formula", "value": "ayurvedic"}
+      ]
+    },
+    {
+      "question_id": "M6_q12",
+      "question_text": "What is the most you have ever paid for a body wash? What was it and was it worth it?",
+      "question_type": "open_text",
+      "target_signals": ["premium_ceiling"],
+      "priority": 1,
+      "estimated_seconds": 35
+    },
+    {
+      "question_id": "M6_q16",
+      "question_text": "Would you be interested in a body wash specifically formulated for Indian skin types and hard water conditions?",
+      "question_type": "scale_open",
+      "target_signals": ["india_specific_positioning"],
+      "priority": 1,
+      "estimated_seconds": 30,
+      "scale_min": 1,
+      "scale_max": 5,
+      "scale_labels": {
+        "1": "Not at all, doesn't matter",
+        "5": "Very interested, I'd want to try it"
+      },
+      "placeholder": "What would 'Indian-specific' mean to you?"
+    },
+    {
+      "question_id": "M6_q18",
+      "question_text": "What would a body wash need to offer for you to pay 2x your current price?",
+      "question_type": "open_text",
+      "target_signals": ["value_escalation"],
+      "priority": 1,
+      "estimated_seconds": 35
+    }
+  ]
+}

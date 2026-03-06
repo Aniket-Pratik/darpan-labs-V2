@@ -1,0 +1,111 @@
+{
+  "module_id": "M4",
+  "module_name": "Lifestyle & Grooming Routines",
+  "module_goal": "Daily bathing context, product usage, skin concerns, household dynamics, and water quality factors.",
+  "estimated_duration_min": 4,
+  "completion_criteria": {
+    "coverage_threshold": 0.70,
+    "confidence_threshold": 0.65,
+    "min_questions": 5
+  },
+  "signal_targets": [
+    "usage_frequency",
+    "full_routine_mapping",
+    "format_preference",
+    "category_involvement",
+    "specific_skin_needs",
+    "household_purchase_dynamics",
+    "water_quality_factor",
+    "routine_evolution"
+  ],
+  "questions": [
+    {
+      "question_id": "M4_q01",
+      "question_text": "How many times a day do you typically shower/bathe?",
+      "question_type": "single_select",
+      "target_signals": ["usage_frequency"],
+      "priority": 1,
+      "estimated_seconds": 10,
+      "options": [
+        {"label": "Once", "value": "once"},
+        {"label": "Twice", "value": "twice"},
+        {"label": "Three or more times", "value": "three_plus"},
+        {"label": "Less than once a day (not daily)", "value": "less_than_daily"}
+      ]
+    },
+    {
+      "question_id": "M4_q05",
+      "question_text": "Walk me through your typical bathing routine step by step. What products do you use and in what order?",
+      "question_type": "open_text",
+      "target_signals": ["full_routine_mapping"],
+      "priority": 1,
+      "estimated_seconds": 50,
+      "placeholder": "Describe everything you do, step by step \u2014 include all products"
+    },
+    {
+      "question_id": "M4_q06",
+      "question_text": "Do you currently use body wash, bar soap, or both? What drives that choice?",
+      "question_type": "open_text",
+      "target_signals": ["format_preference"],
+      "priority": 1,
+      "estimated_seconds": 35
+    },
+    {
+      "question_id": "M4_q08",
+      "question_text": "How would you describe your relationship with bathing/grooming?",
+      "question_type": "single_select",
+      "target_signals": ["category_involvement"],
+      "priority": 1,
+      "estimated_seconds": 15,
+      "options": [
+        {"label": "Purely functional \u2014 just get clean and get out", "value": "functional"},
+        {"label": "A small daily pleasure \u2014 I enjoy it but don't overthink it", "value": "small_pleasure"},
+        {"label": "A proper self-care ritual \u2014 I take time, use multiple products", "value": "self_care_ritual"},
+        {"label": "Depends on my mood \u2014 sometimes quick, sometimes indulgent", "value": "mood_dependent"}
+      ]
+    },
+    {
+      "question_id": "M4_q11",
+      "question_text": "What specific skin concerns, if any, do you have? Select all that apply.",
+      "question_type": "multi_select",
+      "target_signals": ["specific_skin_needs"],
+      "priority": 1,
+      "estimated_seconds": 20,
+      "options": [
+        {"label": "Dryness (skin feels tight, flaky, or rough)", "value": "dryness"},
+        {"label": "Oiliness (skin gets greasy quickly)", "value": "oiliness"},
+        {"label": "Acne or body acne (pimples on back, chest)", "value": "acne"},
+        {"label": "Sensitivity (skin gets red, itchy, or irritated)", "value": "sensitivity"},
+        {"label": "Uneven skin tone (dark patches, pigmentation)", "value": "uneven_tone"},
+        {"label": "Rough or bumpy texture", "value": "rough_texture"},
+        {"label": "Body odor concerns", "value": "body_odor"},
+        {"label": "None \u2014 my skin is generally fine", "value": "none"}
+      ]
+    },
+    {
+      "question_id": "M4_q12",
+      "question_text": "Do other household members use the same body wash as you? Who decides what to buy?",
+      "question_type": "open_text",
+      "target_signals": ["household_purchase_dynamics"],
+      "priority": 2,
+      "estimated_seconds": 30
+    },
+    {
+      "question_id": "M4_q13",
+      "question_text": "How does your water quality affect your product choices, if at all?",
+      "question_type": "open_text",
+      "target_signals": ["water_quality_factor"],
+      "priority": 2,
+      "estimated_seconds": 30
+    },
+    {
+      "question_id": "M4_q14",
+      "question_text": "Has your bathing routine changed in the last 2 years? If so, how and why?",
+      "question_type": "open_text",
+      "target_signals": ["routine_evolution"],
+      "priority": 2,
+      "estimated_seconds": 35,
+      "placeholder": "Describe what changed and why, or if nothing changed"
+    }
+  ]
+}

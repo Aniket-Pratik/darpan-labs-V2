@@ -1,4 +1,6 @@
 import { Navbar } from '@/components/navigation';
+import { AuthGuard } from '@/components/auth/AuthGuard';
+import { ProfileGuard } from '@/components/auth/ProfileGuard';
 
 export default function CreateLayout({
   children,
@@ -6,9 +8,13 @@ export default function CreateLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar side="create" />
-      <main className="flex-1">{children}</main>
-    </div>
+    <AuthGuard>
+      <ProfileGuard>
+        <div className="min-h-screen flex flex-col">
+          <Navbar />
+          <main className="flex-1">{children}</main>
+        </div>
+      </ProfileGuard>
+    </AuthGuard>
   );
 }

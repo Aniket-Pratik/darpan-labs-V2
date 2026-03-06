@@ -25,6 +25,25 @@ class ConsentData(BaseModel):
     allow_data_retention_days: int = 30
 
 
+class OptionItemSchema(BaseModel):
+    """Option for select/rank/matrix questions."""
+
+    label: str
+    value: str
+
+
+class ConceptCardSchema(BaseModel):
+    """Structured concept card for concept test display."""
+
+    concept_id: str
+    name: str
+    consumer_insight: str
+    key_benefit: str
+    how_it_works: str
+    packaging: str
+    price: str
+
+
 class InterviewStartRequest(BaseModel):
     """Request to start an interview session."""
 
@@ -32,7 +51,7 @@ class InterviewStartRequest(BaseModel):
     input_mode: Literal["voice", "text"] = "text"
     language_preference: Literal["auto", "en", "hi"] = "auto"
     modules_to_complete: list[str] = Field(
-        default=["M1", "M2", "M3", "M4"],
+        default=["M1", "M2", "M3", "M4", "M5", "M6", "M7"],
         description="Module IDs to complete in this session",
     )
     sensitivity_settings: SensitivitySettings = Field(
@@ -45,13 +64,21 @@ class QuestionMeta(BaseModel):
     """Metadata for a question."""
 
     question_id: str
-    question_type: Literal[
-        "open_text", "forced_choice", "scenario", "trade_off", "likert"
-    ]
+    question_type: str
     target_signal: str
     rationale: str | None = None
     is_followup: bool = False
     parent_question_id: str | None = None
+    # Rich UI fields
+    options: list[OptionItemSchema] | None = None
+    max_selections: int | None = None
+    scale_min: int | None = None
+    scale_max: int | None = None
+    scale_labels: dict[str, str] | None = None
+    matrix_items: list[str] | None = None
+    matrix_options: list[OptionItemSchema] | None = None
+    placeholder: str | None = None
+    concept_card: ConceptCardSchema | None = None
 
 
 class ModuleInfo(BaseModel):
@@ -60,6 +87,7 @@ class ModuleInfo(BaseModel):
     module_id: str
     module_name: str
     estimated_duration_min: int
+    total_questions: int = 0
     status: Literal["pending", "active", "completed", "skipped"] = "pending"
 
 
@@ -70,6 +98,16 @@ class FirstQuestion(BaseModel):
     question_text: str
     question_type: str
     target_signal: str
+    # Rich UI fields
+    options: list[OptionItemSchema] | None = None
+    max_selections: int | None = None
+    scale_min: int | None = None
+    scale_max: int | None = None
+    scale_labels: dict[str, str] | None = None
+    matrix_items: list[str] | None = None
+    matrix_options: list[OptionItemSchema] | None = None
+    placeholder: str | None = None
+    concept_card: ConceptCardSchema | None = None
 
 
 class ModulePlanItem(BaseModel):
@@ -128,6 +166,7 @@ class ModuleProgress(BaseModel):
     module_id: str
     module_name: str
     questions_asked: int
+    total_questions: int
     coverage_score: float
     confidence_score: float
     signals_captured: list[str]
@@ -146,6 +185,16 @@ class InterviewNextQuestionResponse(BaseSchema):
     status: Literal["continue", "module_complete", "all_modules_complete"]
     module_summary: str | None = None
     acknowledgment_text: str | None = None
+    # Rich UI fields (top-level for convenience)
+    options: list[OptionItemSchema] | None = None
+    max_selections: int | None = None
+    scale_min: int | None = None
+    scale_max: int | None = None
+    scale_labels: dict[str, str] | None = None
+    matrix_items: list[str] | None = None
+    matrix_options: list[OptionItemSchema] | None = None
+    placeholder: str | None = None
+    concept_card: ConceptCardSchema | None = None
 
 
 class InterviewStatusResponse(BaseSchema):
@@ -197,9 +246,8 @@ class UserModulesResponse(BaseSchema):
     user_id: UUID
     modules: list[UserModuleStatus]
     completed_count: int
-    total_required: int = 4
+    total_required: int = 7
     can_generate_twin: bool
-    existing_twin_id: UUID | None = None
 
 
 class StartSingleModuleRequest(BaseModel):
@@ -226,11 +274,3 @@ class ModuleCompleteResponse(BaseSchema):
     remaining_modules: list[str]
 
 
-class TwinEligibilityResponse(BaseSchema):
-    """Response for twin generation eligibility check."""
-
-    user_id: UUID
-    can_generate_twin: bool
-    completed_modules: list[str]
-    missing_modules: list[str]
-    message: str

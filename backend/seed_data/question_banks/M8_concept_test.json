@@ -1,0 +1,1845 @@
+{
+  "module_id": "M8",
+  "module_name": "Concept Test",
+  "module_goal": "Evaluate 5 body wash product concepts through sequential monadic exposure. Capture initial reactions, purchase intent, appeal, uniqueness, believability, brand fit, routine fit, concerns, and comparative preference to identify which 2 concepts to develop.",
+  "estimated_duration_min": 13,
+  "completion_criteria": {
+    "coverage_threshold": 0.65,
+    "confidence_threshold": 0.6,
+    "min_questions": 30
+  },
+  "signal_targets": [
+    "category_usage_frequency",
+    "current_brand_set",
+    "category_satisfaction",
+    "unmet_needs",
+    "concept1_interest",
+    "concept1_positive_reactions",
+    "concept1_improvements",
+    "concept1_routine_fit",
+    "concept1_time_saving",
+    "concept1_purchase_intent",
+    "concept1_uniqueness",
+    "concept1_relevance",
+    "concept1_believability",
+    "concept1_brand_fit",
+    "concept1_concerns",
+    "concept2_interest",
+    "concept2_positive_reactions",
+    "concept2_improvements",
+    "concept2_routine_fit",
+    "concept2_time_saving",
+    "concept2_purchase_intent",
+    "concept2_uniqueness",
+    "concept2_relevance",
+    "concept2_believability",
+    "concept2_brand_fit",
+    "concept2_concerns",
+    "concept3_interest",
+    "concept3_positive_reactions",
+    "concept3_improvements",
+    "concept3_routine_fit",
+    "concept3_purchase_intent",
+    "concept3_uniqueness",
+    "concept3_relevance",
+    "concept3_believability",
+    "concept3_brand_fit",
+    "concept3_concerns",
+    "concept4_interest",
+    "concept4_positive_reactions",
+    "concept4_improvements",
+    "concept4_purchase_intent",
+    "concept4_uniqueness",
+    "concept4_relevance",
+    "concept4_believability",
+    "concept4_brand_fit",
+    "concept4_concerns",
+    "concept5_interest",
+    "concept5_positive_reactions",
+    "concept5_improvements",
+    "concept5_routine_fit",
+    "concept5_purchase_intent",
+    "concept5_uniqueness",
+    "concept5_relevance",
+    "concept5_believability",
+    "concept5_brand_fit",
+    "concept5_concerns",
+    "concept1_semantic_profile",
+    "concept2_semantic_profile",
+    "concept3_semantic_profile",
+    "concept4_semantic_profile",
+    "concept5_semantic_profile",
+    "concept_ranking",
+    "price_acceptance",
+    "price_expectation",
+    "attribute_importance"
+  ],
+  "questions": [
+    {
+      "question_id": "M8_q01",
+      "question_text": "How often do you personally use body wash or shower gel?",
+      "question_type": "single_select",
+      "target_signals": [
+        "category_usage_frequency"
+      ],
+      "priority": 1,
+      "estimated_seconds": 10,
+      "options": [
+        {
+          "label": "Daily",
+          "value": "daily"
+        },
+        {
+          "label": "Several times a week",
+          "value": "several_weekly"
+        },
+        {
+          "label": "About once a week",
+          "value": "once_weekly"
+        },
+        {
+          "label": "A few times a month",
+          "value": "few_monthly"
+        },
+        {
+          "label": "Rarely or never",
+          "value": "rarely_never"
+        }
+      ]
+    },
+    {
+      "question_id": "M8_q02",
+      "question_text": "Which body wash or shower gel brands have you used in the past 3 months? Select all that apply.",
+      "question_type": "multi_select",
+      "target_signals": [
+        "current_brand_set"
+      ],
+      "priority": 1,
+      "estimated_seconds": 20,
+      "options": [
+        {
+          "label": "Dove",
+          "value": "dove"
+        },
+        {
+          "label": "Olay",
+          "value": "olay"
+        },
+        {
+          "label": "Nivea",
+          "value": "nivea"
+        },
+        {
+          "label": "Johnson's",
+          "value": "johnsons"
+        },
+        {
+          "label": "Lux",
+          "value": "lux"
+        },
+        {
+          "label": "Pears",
+          "value": "pears"
+        },
+        {
+          "label": "Fiama",
+          "value": "fiama"
+        },
+        {
+          "label": "The Body Shop",
+          "value": "body_shop"
+        },
+        {
+          "label": "Other brand",
+          "value": "other"
+        },
+        {
+          "label": "Don't remember",
+          "value": "dont_remember"
+        }
+      ]
+    },
+    {
+      "question_id": "M8_q03",
+      "question_text": "Overall, how satisfied are you with the body wash or shower gel you currently use most often?",
+      "question_type": "single_select",
+      "target_signals": [
+        "category_satisfaction"
+      ],
+      "priority": 1,
+      "estimated_seconds": 10,
+      "options": [
+        {
+          "label": "Very satisfied",
+          "value": "very_satisfied"
+        },
+        {
+          "label": "Somewhat satisfied",
+          "value": "somewhat_satisfied"
+        },
+        {
+          "label": "Neither satisfied nor dissatisfied",
+          "value": "neutral"
+        },
+        {
+          "label": "Somewhat dissatisfied",
+          "value": "somewhat_dissatisfied"
+        },
+        {
+          "label": "Very dissatisfied",
+          "value": "very_dissatisfied"
+        }
+      ]
+    },
+    {
+      "question_id": "M8_q04",
+      "question_text": "What, if anything, would you most like to see improved in body wash or shower gel products?",
+      "question_type": "open_text",
+      "target_signals": [
+        "unmet_needs"
+      ],
+      "priority": 1,
+      "estimated_seconds": 30,
+      "placeholder": "e.g., longer-lasting fragrance, better moisturization, more natural ingredients, lower price..."
+    },
+    {
+      "question_id": "M8_q05",
+      "question_text": "Overall, how interested are you in this product concept?",
+      "question_type": "scale",
+      "target_signals": [
+        "concept1_interest"
+      ],
+      "priority": 1,
+      "estimated_seconds": 60,
+      "scale_min": 1,
+      "scale_max": 5,
+      "scale_labels": {
+        "1": "Not at all interested",
+        "3": "Moderately interested",
+        "5": "Extremely interested"
+      },
+      "concept_ref": "concept1"
+    },
+    {
+      "question_id": "M8_q06",
+      "question_text": "What, if anything, did you find most appealing about the Dove 60-Second Body Spray concept?",
+      "question_type": "open_text",
+      "target_signals": [
+        "concept1_positive_reactions"
+      ],
+      "priority": 1,
+      "estimated_seconds": 30,
+      "placeholder": "Share what caught your attention or excited you about this product idea",
+      "concept_ref": "concept1"
+    },
+    {
+      "question_id": "M8_q07",
+      "question_text": "What, if anything, would you change or improve about the Dove 60-Second Body Spray concept?",
+      "question_type": "open_text",
+      "target_signals": [
+        "concept1_improvements"
+      ],
+      "priority": 1,
+      "estimated_seconds": 30,
+      "placeholder": "Any concerns, suggestions, or things that didn't resonate with you",
+      "concept_ref": "concept1"
+    },
+    {
+      "question_id": "M8_q08",
+      "question_text": "How well does the Dove 60-Second Body Spray concept fit with your current routine?",
+      "question_type": "scale",
+      "target_signals": [
+        "concept1_routine_fit"
+      ],
+      "priority": 1,
+      "estimated_seconds": 10,
+      "scale_min": 1,
+      "scale_max": 5,
+      "scale_labels": {
+        "1": "Not at all well",
+        "3": "Somewhat well",
+        "5": "Extremely well"
+      },
+      "concept_ref": "concept1"
+    },
+    {
+      "question_id": "M8_q09",
+      "question_text": "How likely would the Dove 60-Second Body Spray be to save you time in your routine?",
+      "question_type": "scale",
+      "target_signals": [
+        "concept1_time_saving"
+      ],
+      "priority": 2,
+      "estimated_seconds": 10,
+      "scale_min": 1,
+      "scale_max": 5,
+      "scale_labels": {
+        "1": "Not at all likely",
+        "3": "Moderately likely",
+        "5": "Extremely likely"
+      },
+      "concept_ref": "concept1"
+    },
+    {
+      "question_id": "M8_q10",
+      "question_text": "Based on what you've seen, how likely would you be to buy the Dove 60-Second Body Spray?",
+      "question_type": "single_select",
+      "target_signals": [
+        "concept1_purchase_intent"
+      ],
+      "priority": 1,
+      "estimated_seconds": 10,
+      "options": [
+        {
+          "label": "Definitely would buy",
+          "value": "definitely_buy"
+        },
+        {
+          "label": "Probably would buy",
+          "value": "probably_buy"
+        },
+        {
+          "label": "Might or might not buy",
+          "value": "might_buy"
+        },
+        {
+          "label": "Probably would not buy",
+          "value": "probably_not"
+        },
+        {
+          "label": "Definitely would not buy",
+          "value": "definitely_not"
+        }
+      ],
+      "concept_ref": "concept1"
+    },
+    {
+      "question_id": "M8_q12",
+      "question_text": "How unique or different is the Dove 60-Second Body Spray compared to other body wash products available today?",
+      "question_type": "single_select",
+      "target_signals": [
+        "concept1_uniqueness"
+      ],
+      "priority": 1,
+      "estimated_seconds": 10,
+      "options": [
+        {
+          "label": "Extremely unique",
+          "value": "extremely"
+        },
+        {
+          "label": "Very unique",
+          "value": "very"
+        },
+        {
+          "label": "Somewhat unique",
+          "value": "somewhat"
+        },
+        {
+          "label": "Not very unique",
+          "value": "not_very"
+        },
+        {
+          "label": "Not at all unique",
+          "value": "not_at_all"
+        }
+      ],
+      "concept_ref": "concept1"
+    },
+    {
+      "question_id": "M8_q13",
+      "question_text": "How relevant is the Dove 60-Second Body Spray to your personal needs?",
+      "question_type": "single_select",
+      "target_signals": [
+        "concept1_relevance"
+      ],
+      "priority": 2,
+      "estimated_seconds": 10,
+      "options": [
+        {
+          "label": "Extremely relevant",
+          "value": "extremely"
+        },
+        {
+          "label": "Very relevant",
+          "value": "very"
+        },
+        {
+          "label": "Somewhat relevant",
+          "value": "somewhat"
+        },
+        {
+          "label": "Not very relevant",
+          "value": "not_very"
+        },
+        {
+          "label": "Not at all relevant",
+          "value": "not_at_all"
+        }
+      ],
+      "concept_ref": "concept1"
+    },
+    {
+      "question_id": "M8_q14",
+      "question_text": "How believable are the claims made about the Dove 60-Second Body Spray?",
+      "question_type": "single_select",
+      "target_signals": [
+        "concept1_believability"
+      ],
+      "priority": 1,
+      "estimated_seconds": 10,
+      "options": [
+        {
+          "label": "Completely believable",
+          "value": "completely"
+        },
+        {
+          "label": "Very believable",
+          "value": "very"
+        },
+        {
+          "label": "Somewhat believable",
+          "value": "somewhat"
+        },
+        {
+          "label": "Not very believable",
+          "value": "not_very"
+        },
+        {
+          "label": "Not at all believable",
+          "value": "not_at_all"
+        }
+      ],
+      "concept_ref": "concept1"
+    },
+    {
+      "question_id": "M8_q15",
+      "question_text": "How well does the Dove 60-Second Body Spray idea fit with what you expect from the Dove brand?",
+      "question_type": "single_select",
+      "target_signals": [
+        "concept1_brand_fit"
+      ],
+      "priority": 2,
+      "estimated_seconds": 10,
+      "options": [
+        {
+          "label": "Fits extremely well",
+          "value": "extremely"
+        },
+        {
+          "label": "Fits very well",
+          "value": "very"
+        },
+        {
+          "label": "Fits somewhat well",
+          "value": "somewhat"
+        },
+        {
+          "label": "Doesn't fit very well",
+          "value": "not_very"
+        },
+        {
+          "label": "Doesn't fit at all",
+          "value": "not_at_all"
+        }
+      ],
+      "concept_ref": "concept1"
+    },
+    {
+      "question_id": "M8_q16",
+      "question_text": "How would you describe the Dove 60-Second Body Spray? Rate each pair of characteristics.",
+      "question_type": "matrix_scale",
+      "target_signals": [
+        "concept1_semantic_profile"
+      ],
+      "priority": 2,
+      "estimated_seconds": 30,
+      "matrix_items": [
+        "Basic — Premium",
+        "Boring — Exciting",
+        "Not for me — Made for me",
+        "Old-fashioned — Innovative",
+        "Forgettable — Memorable"
+      ],
+      "scale_min": 1,
+      "scale_max": 5,
+      "scale_labels": {
+        "1": "Strongly left word",
+        "3": "Neutral",
+        "5": "Strongly right word"
+      },
+      "concept_ref": "concept1"
+    },
+    {
+      "question_id": "M8_q17",
+      "question_text": "How important are each of these factors when choosing a body wash?",
+      "question_type": "matrix_scale",
+      "target_signals": [
+        "attribute_importance"
+      ],
+      "priority": 2,
+      "estimated_seconds": 35,
+      "matrix_items": [
+        "Cleansing effectiveness",
+        "Moisturization / skin hydration",
+        "Fragrance / scent quality",
+        "Gentleness on skin",
+        "Value for money",
+        "Innovation / uniqueness",
+        "Brand trust and reputation",
+        "Convenience / ease of use"
+      ],
+      "scale_min": 1,
+      "scale_max": 5,
+      "scale_labels": {
+        "1": "Not at all important",
+        "3": "Moderately important",
+        "5": "Extremely important"
+      },
+      "concept_ref": null
+    },
+    {
+      "question_id": "M8_q19",
+      "question_text": "What concerns, if any, would you have about trying the Dove 60-Second Body Spray? Select all that apply.",
+      "question_type": "multi_select",
+      "target_signals": [
+        "concept1_concerns"
+      ],
+      "priority": 1,
+      "estimated_seconds": 15,
+      "options": [
+        {
+          "label": "Price might be too high",
+          "value": "price_high"
+        },
+        {
+          "label": "Might not work as claimed",
+          "value": "skeptical_claims"
+        },
+        {
+          "label": "Could irritate my skin",
+          "value": "skin_irritation"
+        },
+        {
+          "label": "Might not be available where I shop",
+          "value": "availability"
+        },
+        {
+          "label": "Don't trust new products",
+          "value": "distrust_new"
+        },
+        {
+          "label": "Happy with current product",
+          "value": "happy_current"
+        },
+        {
+          "label": "Other concern",
+          "value": "other"
+        },
+        {
+          "label": "No concerns",
+          "value": "no_concerns"
+        }
+      ],
+      "concept_ref": "concept1"
+    },
+    {
+      "question_id": "M8_q20",
+      "question_text": "Overall, how interested are you in this product concept?",
+      "question_type": "scale",
+      "target_signals": [
+        "concept2_interest"
+      ],
+      "priority": 1,
+      "estimated_seconds": 60,
+      "scale_min": 1,
+      "scale_max": 5,
+      "scale_labels": {
+        "1": "Not at all interested",
+        "3": "Moderately interested",
+        "5": "Extremely interested"
+      },
+      "concept_ref": "concept2"
+    },
+    {
+      "question_id": "M8_q21",
+      "question_text": "What, if anything, did you find most appealing about the Dove Skip concept?",
+      "question_type": "open_text",
+      "target_signals": [
+        "concept2_positive_reactions"
+      ],
+      "priority": 1,
+      "estimated_seconds": 30,
+      "placeholder": "Share what caught your attention or excited you about this product idea",
+      "concept_ref": "concept2"
+    },
+    {
+      "question_id": "M8_q22",
+      "question_text": "What, if anything, would you change or improve about the Dove Skip concept?",
+      "question_type": "open_text",
+      "target_signals": [
+        "concept2_improvements"
+      ],
+      "priority": 1,
+      "estimated_seconds": 30,
+      "placeholder": "Any concerns, suggestions, or things that didn't resonate with you",
+      "concept_ref": "concept2"
+    },
+    {
+      "question_id": "M8_q23",
+      "question_text": "How well does the Dove Skip concept fit with your current routine?",
+      "question_type": "scale",
+      "target_signals": [
+        "concept2_routine_fit"
+      ],
+      "priority": 1,
+      "estimated_seconds": 10,
+      "scale_min": 1,
+      "scale_max": 5,
+      "scale_labels": {
+        "1": "Not at all well",
+        "3": "Somewhat well",
+        "5": "Extremely well"
+      },
+      "concept_ref": "concept2"
+    },
+    {
+      "question_id": "M8_q24",
+      "question_text": "How likely would Dove Skip be to save you time in your routine?",
+      "question_type": "scale",
+      "target_signals": [
+        "concept2_time_saving"
+      ],
+      "priority": 2,
+      "estimated_seconds": 10,
+      "scale_min": 1,
+      "scale_max": 5,
+      "scale_labels": {
+        "1": "Not at all likely",
+        "3": "Moderately likely",
+        "5": "Extremely likely"
+      },
+      "concept_ref": "concept2"
+    },
+    {
+      "question_id": "M8_q25",
+      "question_text": "Based on what you've seen, how likely would you be to buy Dove Skip?",
+      "question_type": "single_select",
+      "target_signals": [
+        "concept2_purchase_intent"
+      ],
+      "priority": 1,
+      "estimated_seconds": 10,
+      "options": [
+        {
+          "label": "Definitely would buy",
+          "value": "definitely_buy"
+        },
+        {
+          "label": "Probably would buy",
+          "value": "probably_buy"
+        },
+        {
+          "label": "Might or might not buy",
+          "value": "might_buy"
+        },
+        {
+          "label": "Probably would not buy",
+          "value": "probably_not"
+        },
+        {
+          "label": "Definitely would not buy",
+          "value": "definitely_not"
+        }
+      ],
+      "concept_ref": "concept2"
+    },
+    {
+      "question_id": "M8_q27",
+      "question_text": "How unique or different is Dove Skip compared to other body wash products available today?",
+      "question_type": "single_select",
+      "target_signals": [
+        "concept2_uniqueness"
+      ],
+      "priority": 1,
+      "estimated_seconds": 10,
+      "options": [
+        {
+          "label": "Extremely unique",
+          "value": "extremely"
+        },
+        {
+          "label": "Very unique",
+          "value": "very"
+        },
+        {
+          "label": "Somewhat unique",
+          "value": "somewhat"
+        },
+        {
+          "label": "Not very unique",
+          "value": "not_very"
+        },
+        {
+          "label": "Not at all unique",
+          "value": "not_at_all"
+        }
+      ],
+      "concept_ref": "concept2"
+    },
+    {
+      "question_id": "M8_q28",
+      "question_text": "How relevant is Dove Skip to your personal needs?",
+      "question_type": "single_select",
+      "target_signals": [
+        "concept2_relevance"
+      ],
+      "priority": 2,
+      "estimated_seconds": 10,
+      "options": [
+        {
+          "label": "Extremely relevant",
+          "value": "extremely"
+        },
+        {
+          "label": "Very relevant",
+          "value": "very"
+        },
+        {
+          "label": "Somewhat relevant",
+          "value": "somewhat"
+        },
+        {
+          "label": "Not very relevant",
+          "value": "not_very"
+        },
+        {
+          "label": "Not at all relevant",
+          "value": "not_at_all"
+        }
+      ],
+      "concept_ref": "concept2"
+    },
+    {
+      "question_id": "M8_q29",
+      "question_text": "How believable are the claims made about Dove Skip?",
+      "question_type": "single_select",
+      "target_signals": [
+        "concept2_believability"
+      ],
+      "priority": 1,
+      "estimated_seconds": 10,
+      "options": [
+        {
+          "label": "Completely believable",
+          "value": "completely"
+        },
+        {
+          "label": "Very believable",
+          "value": "very"
+        },
+        {
+          "label": "Somewhat believable",
+          "value": "somewhat"
+        },
+        {
+          "label": "Not very believable",
+          "value": "not_very"
+        },
+        {
+          "label": "Not at all believable",
+          "value": "not_at_all"
+        }
+      ],
+      "concept_ref": "concept2"
+    },
+    {
+      "question_id": "M8_q30",
+      "question_text": "How well does Dove Skip fit with what you expect from the Dove brand?",
+      "question_type": "single_select",
+      "target_signals": [
+        "concept2_brand_fit"
+      ],
+      "priority": 2,
+      "estimated_seconds": 10,
+      "options": [
+        {
+          "label": "Fits extremely well",
+          "value": "extremely"
+        },
+        {
+          "label": "Fits very well",
+          "value": "very"
+        },
+        {
+          "label": "Fits somewhat well",
+          "value": "somewhat"
+        },
+        {
+          "label": "Doesn't fit very well",
+          "value": "not_very"
+        },
+        {
+          "label": "Doesn't fit at all",
+          "value": "not_at_all"
+        }
+      ],
+      "concept_ref": "concept2"
+    },
+    {
+      "question_id": "M8_q31",
+      "question_text": "How would you describe Dove Skip? Rate each pair of characteristics.",
+      "question_type": "matrix_scale",
+      "target_signals": [
+        "concept2_semantic_profile"
+      ],
+      "priority": 2,
+      "estimated_seconds": 30,
+      "matrix_items": [
+        "Basic — Premium",
+        "Boring — Exciting",
+        "Not for me — Made for me",
+        "Old-fashioned — Innovative",
+        "Forgettable — Memorable"
+      ],
+      "scale_min": 1,
+      "scale_max": 5,
+      "scale_labels": {
+        "1": "Strongly left word",
+        "3": "Neutral",
+        "5": "Strongly right word"
+      },
+      "concept_ref": "concept2"
+    },
+    {
+      "question_id": "M8_q34",
+      "question_text": "What concerns, if any, would you have about trying Dove Skip? Select all that apply.",
+      "question_type": "multi_select",
+      "target_signals": [
+        "concept2_concerns"
+      ],
+      "priority": 1,
+      "estimated_seconds": 15,
+      "options": [
+        {
+          "label": "Price might be too high",
+          "value": "price_high"
+        },
+        {
+          "label": "Might not work as claimed",
+          "value": "skeptical_claims"
+        },
+        {
+          "label": "Could irritate my skin",
+          "value": "skin_irritation"
+        },
+        {
+          "label": "Might not be available where I shop",
+          "value": "availability"
+        },
+        {
+          "label": "Don't trust new products",
+          "value": "distrust_new"
+        },
+        {
+          "label": "Happy with current product",
+          "value": "happy_current"
+        },
+        {
+          "label": "Other concern",
+          "value": "other"
+        },
+        {
+          "label": "No concerns",
+          "value": "no_concerns"
+        }
+      ],
+      "concept_ref": "concept2"
+    },
+    {
+      "question_id": "M8_q35",
+      "question_text": "Overall, how interested are you in this product concept?",
+      "question_type": "scale",
+      "target_signals": [
+        "concept3_interest"
+      ],
+      "priority": 1,
+      "estimated_seconds": 60,
+      "scale_min": 1,
+      "scale_max": 5,
+      "scale_labels": {
+        "1": "Not at all interested",
+        "3": "Moderately interested",
+        "5": "Extremely interested"
+      },
+      "concept_ref": "concept3"
+    },
+    {
+      "question_id": "M8_q36",
+      "question_text": "What, if anything, did you find most appealing about the Dove Night Wash concept?",
+      "question_type": "open_text",
+      "target_signals": [
+        "concept3_positive_reactions"
+      ],
+      "priority": 1,
+      "estimated_seconds": 30,
+      "placeholder": "Share what caught your attention or excited you about this product idea",
+      "concept_ref": "concept3"
+    },
+    {
+      "question_id": "M8_q37",
+      "question_text": "What, if anything, would you change or improve about the Dove Night Wash concept?",
+      "question_type": "open_text",
+      "target_signals": [
+        "concept3_improvements"
+      ],
+      "priority": 1,
+      "estimated_seconds": 30,
+      "placeholder": "Any concerns, suggestions, or things that didn't resonate with you",
+      "concept_ref": "concept3"
+    },
+    {
+      "question_id": "M8_q38",
+      "question_text": "How well does the Dove Night Wash concept fit with your current routine?",
+      "question_type": "scale",
+      "target_signals": [
+        "concept3_routine_fit"
+      ],
+      "priority": 1,
+      "estimated_seconds": 10,
+      "scale_min": 1,
+      "scale_max": 5,
+      "scale_labels": {
+        "1": "Not at all well",
+        "3": "Somewhat well",
+        "5": "Extremely well"
+      },
+      "concept_ref": "concept3"
+    },
+    {
+      "question_id": "M8_q40",
+      "question_text": "Based on what you've seen, how likely would you be to buy Dove Night Wash?",
+      "question_type": "single_select",
+      "target_signals": [
+        "concept3_purchase_intent"
+      ],
+      "priority": 1,
+      "estimated_seconds": 10,
+      "options": [
+        {
+          "label": "Definitely would buy",
+          "value": "definitely_buy"
+        },
+        {
+          "label": "Probably would buy",
+          "value": "probably_buy"
+        },
+        {
+          "label": "Might or might not buy",
+          "value": "might_buy"
+        },
+        {
+          "label": "Probably would not buy",
+          "value": "probably_not"
+        },
+        {
+          "label": "Definitely would not buy",
+          "value": "definitely_not"
+        }
+      ],
+      "concept_ref": "concept3"
+    },
+    {
+      "question_id": "M8_q42",
+      "question_text": "How unique or different is Dove Night Wash compared to other body wash products available today?",
+      "question_type": "single_select",
+      "target_signals": [
+        "concept3_uniqueness"
+      ],
+      "priority": 1,
+      "estimated_seconds": 10,
+      "options": [
+        {
+          "label": "Extremely unique",
+          "value": "extremely"
+        },
+        {
+          "label": "Very unique",
+          "value": "very"
+        },
+        {
+          "label": "Somewhat unique",
+          "value": "somewhat"
+        },
+        {
+          "label": "Not very unique",
+          "value": "not_very"
+        },
+        {
+          "label": "Not at all unique",
+          "value": "not_at_all"
+        }
+      ],
+      "concept_ref": "concept3"
+    },
+    {
+      "question_id": "M8_q43",
+      "question_text": "How relevant is Dove Night Wash to your personal needs?",
+      "question_type": "single_select",
+      "target_signals": [
+        "concept3_relevance"
+      ],
+      "priority": 2,
+      "estimated_seconds": 10,
+      "options": [
+        {
+          "label": "Extremely relevant",
+          "value": "extremely"
+        },
+        {
+          "label": "Very relevant",
+          "value": "very"
+        },
+        {
+          "label": "Somewhat relevant",
+          "value": "somewhat"
+        },
+        {
+          "label": "Not very relevant",
+          "value": "not_very"
+        },
+        {
+          "label": "Not at all relevant",
+          "value": "not_at_all"
+        }
+      ],
+      "concept_ref": "concept3"
+    },
+    {
+      "question_id": "M8_q44",
+      "question_text": "How believable are the claims made about Dove Night Wash?",
+      "question_type": "single_select",
+      "target_signals": [
+        "concept3_believability"
+      ],
+      "priority": 1,
+      "estimated_seconds": 10,
+      "options": [
+        {
+          "label": "Completely believable",
+          "value": "completely"
+        },
+        {
+          "label": "Very believable",
+          "value": "very"
+        },
+        {
+          "label": "Somewhat believable",
+          "value": "somewhat"
+        },
+        {
+          "label": "Not very believable",
+          "value": "not_very"
+        },
+        {
+          "label": "Not at all believable",
+          "value": "not_at_all"
+        }
+      ],
+      "concept_ref": "concept3"
+    },
+    {
+      "question_id": "M8_q45",
+      "question_text": "How well does Dove Night Wash fit with what you expect from the Dove brand?",
+      "question_type": "single_select",
+      "target_signals": [
+        "concept3_brand_fit"
+      ],
+      "priority": 2,
+      "estimated_seconds": 10,
+      "options": [
+        {
+          "label": "Fits extremely well",
+          "value": "extremely"
+        },
+        {
+          "label": "Fits very well",
+          "value": "very"
+        },
+        {
+          "label": "Fits somewhat well",
+          "value": "somewhat"
+        },
+        {
+          "label": "Doesn't fit very well",
+          "value": "not_very"
+        },
+        {
+          "label": "Doesn't fit at all",
+          "value": "not_at_all"
+        }
+      ],
+      "concept_ref": "concept3"
+    },
+    {
+      "question_id": "M8_q46",
+      "question_text": "How would you describe Dove Night Wash? Rate each pair of characteristics.",
+      "question_type": "matrix_scale",
+      "target_signals": [
+        "concept3_semantic_profile"
+      ],
+      "priority": 2,
+      "estimated_seconds": 30,
+      "matrix_items": [
+        "Basic — Premium",
+        "Boring — Exciting",
+        "Not for me — Made for me",
+        "Old-fashioned — Innovative",
+        "Forgettable — Memorable"
+      ],
+      "scale_min": 1,
+      "scale_max": 5,
+      "scale_labels": {
+        "1": "Strongly left word",
+        "3": "Neutral",
+        "5": "Strongly right word"
+      },
+      "concept_ref": "concept3"
+    },
+    {
+      "question_id": "M8_q49",
+      "question_text": "What concerns, if any, would you have about trying Dove Night Wash? Select all that apply.",
+      "question_type": "multi_select",
+      "target_signals": [
+        "concept3_concerns"
+      ],
+      "priority": 1,
+      "estimated_seconds": 15,
+      "options": [
+        {
+          "label": "Price might be too high",
+          "value": "price_high"
+        },
+        {
+          "label": "Might not work as claimed",
+          "value": "skeptical_claims"
+        },
+        {
+          "label": "Could irritate my skin",
+          "value": "skin_irritation"
+        },
+        {
+          "label": "Might not be available where I shop",
+          "value": "availability"
+        },
+        {
+          "label": "Don't trust new products",
+          "value": "distrust_new"
+        },
+        {
+          "label": "Happy with current product",
+          "value": "happy_current"
+        },
+        {
+          "label": "Other concern",
+          "value": "other"
+        },
+        {
+          "label": "No concerns",
+          "value": "no_concerns"
+        }
+      ],
+      "concept_ref": "concept3"
+    },
+    {
+      "question_id": "M8_q50",
+      "question_text": "Overall, how interested are you in this product concept?",
+      "question_type": "scale",
+      "target_signals": [
+        "concept4_interest"
+      ],
+      "priority": 1,
+      "estimated_seconds": 60,
+      "scale_min": 1,
+      "scale_max": 5,
+      "scale_labels": {
+        "1": "Not at all interested",
+        "3": "Moderately interested",
+        "5": "Extremely interested"
+      },
+      "concept_ref": "concept4"
+    },
+    {
+      "question_id": "M8_q51",
+      "question_text": "What, if anything, did you find most appealing about the Dove Yours & Mine concept?",
+      "question_type": "open_text",
+      "target_signals": [
+        "concept4_positive_reactions"
+      ],
+      "priority": 1,
+      "estimated_seconds": 30,
+      "placeholder": "Share what caught your attention or excited you about this product idea",
+      "concept_ref": "concept4"
+    },
+    {
+      "question_id": "M8_q52",
+      "question_text": "What, if anything, would you change or improve about the Dove Yours & Mine concept?",
+      "question_type": "open_text",
+      "target_signals": [
+        "concept4_improvements"
+      ],
+      "priority": 1,
+      "estimated_seconds": 30,
+      "placeholder": "Any concerns, suggestions, or things that didn't resonate with you",
+      "concept_ref": "concept4"
+    },
+    {
+      "question_id": "M8_q55",
+      "question_text": "Based on what you've seen, how likely would you be to buy Dove Yours & Mine?",
+      "question_type": "single_select",
+      "target_signals": [
+        "concept4_purchase_intent"
+      ],
+      "priority": 1,
+      "estimated_seconds": 10,
+      "options": [
+        {
+          "label": "Definitely would buy",
+          "value": "definitely_buy"
+        },
+        {
+          "label": "Probably would buy",
+          "value": "probably_buy"
+        },
+        {
+          "label": "Might or might not buy",
+          "value": "might_buy"
+        },
+        {
+          "label": "Probably would not buy",
+          "value": "probably_not"
+        },
+        {
+          "label": "Definitely would not buy",
+          "value": "definitely_not"
+        }
+      ],
+      "concept_ref": "concept4"
+    },
+    {
+      "question_id": "M8_q57",
+      "question_text": "How unique or different is Dove Yours & Mine compared to other body wash products available today?",
+      "question_type": "single_select",
+      "target_signals": [
+        "concept4_uniqueness"
+      ],
+      "priority": 1,
+      "estimated_seconds": 10,
+      "options": [
+        {
+          "label": "Extremely unique",
+          "value": "extremely"
+        },
+        {
+          "label": "Very unique",
+          "value": "very"
+        },
+        {
+          "label": "Somewhat unique",
+          "value": "somewhat"
+        },
+        {
+          "label": "Not very unique",
+          "value": "not_very"
+        },
+        {
+          "label": "Not at all unique",
+          "value": "not_at_all"
+        }
+      ],
+      "concept_ref": "concept4"
+    },
+    {
+      "question_id": "M8_q58",
+      "question_text": "How relevant is Dove Yours & Mine to your personal needs?",
+      "question_type": "single_select",
+      "target_signals": [
+        "concept4_relevance"
+      ],
+      "priority": 2,
+      "estimated_seconds": 10,
+      "options": [
+        {
+          "label": "Extremely relevant",
+          "value": "extremely"
+        },
+        {
+          "label": "Very relevant",
+          "value": "very"
+        },
+        {
+          "label": "Somewhat relevant",
+          "value": "somewhat"
+        },
+        {
+          "label": "Not very relevant",
+          "value": "not_very"
+        },
+        {
+          "label": "Not at all relevant",
+          "value": "not_at_all"
+        }
+      ],
+      "concept_ref": "concept4"
+    },
+    {
+      "question_id": "M8_q59",
+      "question_text": "How believable are the claims made about Dove Yours & Mine?",
+      "question_type": "single_select",
+      "target_signals": [
+        "concept4_believability"
+      ],
+      "priority": 1,
+      "estimated_seconds": 10,
+      "options": [
+        {
+          "label": "Completely believable",
+          "value": "completely"
+        },
+        {
+          "label": "Very believable",
+          "value": "very"
+        },
+        {
+          "label": "Somewhat believable",
+          "value": "somewhat"
+        },
+        {
+          "label": "Not very believable",
+          "value": "not_very"
+        },
+        {
+          "label": "Not at all believable",
+          "value": "not_at_all"
+        }
+      ],
+      "concept_ref": "concept4"
+    },
+    {
+      "question_id": "M8_q60",
+      "question_text": "How well does Dove Yours & Mine fit with what you expect from the Dove brand?",
+      "question_type": "single_select",
+      "target_signals": [
+        "concept4_brand_fit"
+      ],
+      "priority": 2,
+      "estimated_seconds": 10,
+      "options": [
+        {
+          "label": "Fits extremely well",
+          "value": "extremely"
+        },
+        {
+          "label": "Fits very well",
+          "value": "very"
+        },
+        {
+          "label": "Fits somewhat well",
+          "value": "somewhat"
+        },
+        {
+          "label": "Doesn't fit very well",
+          "value": "not_very"
+        },
+        {
+          "label": "Doesn't fit at all",
+          "value": "not_at_all"
+        }
+      ],
+      "concept_ref": "concept4"
+    },
+    {
+      "question_id": "M8_q61",
+      "question_text": "How would you describe Dove Yours & Mine? Rate each pair of characteristics.",
+      "question_type": "matrix_scale",
+      "target_signals": [
+        "concept4_semantic_profile"
+      ],
+      "priority": 2,
+      "estimated_seconds": 30,
+      "matrix_items": [
+        "Basic — Premium",
+        "Boring — Exciting",
+        "Not for me — Made for me",
+        "Old-fashioned — Innovative",
+        "Forgettable — Memorable"
+      ],
+      "scale_min": 1,
+      "scale_max": 5,
+      "scale_labels": {
+        "1": "Strongly left word",
+        "3": "Neutral",
+        "5": "Strongly right word"
+      },
+      "concept_ref": "concept4"
+    },
+    {
+      "question_id": "M8_q64",
+      "question_text": "What concerns, if any, would you have about trying Dove Yours & Mine? Select all that apply.",
+      "question_type": "multi_select",
+      "target_signals": [
+        "concept4_concerns"
+      ],
+      "priority": 1,
+      "estimated_seconds": 15,
+      "options": [
+        {
+          "label": "Price might be too high",
+          "value": "price_high"
+        },
+        {
+          "label": "Might not work as claimed",
+          "value": "skeptical_claims"
+        },
+        {
+          "label": "Could irritate my skin",
+          "value": "skin_irritation"
+        },
+        {
+          "label": "Might not be available where I shop",
+          "value": "availability"
+        },
+        {
+          "label": "Don't trust new products",
+          "value": "distrust_new"
+        },
+        {
+          "label": "Happy with current product",
+          "value": "happy_current"
+        },
+        {
+          "label": "Other concern",
+          "value": "other"
+        },
+        {
+          "label": "No concerns",
+          "value": "no_concerns"
+        }
+      ],
+      "concept_ref": "concept4"
+    },
+    {
+      "question_id": "M8_q65",
+      "question_text": "Overall, how interested are you in this product concept?",
+      "question_type": "scale",
+      "target_signals": [
+        "concept5_interest"
+      ],
+      "priority": 1,
+      "estimated_seconds": 60,
+      "scale_min": 1,
+      "scale_max": 5,
+      "scale_labels": {
+        "1": "Not at all interested",
+        "3": "Moderately interested",
+        "5": "Extremely interested"
+      },
+      "concept_ref": "concept5"
+    },
+    {
+      "question_id": "M8_q66",
+      "question_text": "What, if anything, did you find most appealing about the Dove Skin ID concept?",
+      "question_type": "open_text",
+      "target_signals": [
+        "concept5_positive_reactions"
+      ],
+      "priority": 1,
+      "estimated_seconds": 30,
+      "placeholder": "Share what caught your attention or excited you about this product idea",
+      "concept_ref": "concept5"
+    },
+    {
+      "question_id": "M8_q67",
+      "question_text": "What, if anything, would you change or improve about the Dove Skin ID concept?",
+      "question_type": "open_text",
+      "target_signals": [
+        "concept5_improvements"
+      ],
+      "priority": 1,
+      "estimated_seconds": 30,
+      "placeholder": "Any concerns, suggestions, or things that didn't resonate with you",
+      "concept_ref": "concept5"
+    },
+    {
+      "question_id": "M8_q68",
+      "question_text": "How well does the Dove Skin ID concept fit with your current routine?",
+      "question_type": "scale",
+      "target_signals": [
+        "concept5_routine_fit"
+      ],
+      "priority": 1,
+      "estimated_seconds": 10,
+      "scale_min": 1,
+      "scale_max": 5,
+      "scale_labels": {
+        "1": "Not at all well",
+        "3": "Somewhat well",
+        "5": "Extremely well"
+      },
+      "concept_ref": "concept5"
+    },
+    {
+      "question_id": "M8_q70",
+      "question_text": "Based on what you've seen, how likely would you be to buy Dove Skin ID?",
+      "question_type": "single_select",
+      "target_signals": [
+        "concept5_purchase_intent"
+      ],
+      "priority": 1,
+      "estimated_seconds": 10,
+      "options": [
+        {
+          "label": "Definitely would buy",
+          "value": "definitely_buy"
+        },
+        {
+          "label": "Probably would buy",
+          "value": "probably_buy"
+        },
+        {
+          "label": "Might or might not buy",
+          "value": "might_buy"
+        },
+        {
+          "label": "Probably would not buy",
+          "value": "probably_not"
+        },
+        {
+          "label": "Definitely would not buy",
+          "value": "definitely_not"
+        }
+      ],
+      "concept_ref": "concept5"
+    },
+    {
+      "question_id": "M8_q72",
+      "question_text": "How unique or different is Dove Skin ID compared to other body wash products available today?",
+      "question_type": "single_select",
+      "target_signals": [
+        "concept5_uniqueness"
+      ],
+      "priority": 1,
+      "estimated_seconds": 10,
+      "options": [
+        {
+          "label": "Extremely unique",
+          "value": "extremely"
+        },
+        {
+          "label": "Very unique",
+          "value": "very"
+        },
+        {
+          "label": "Somewhat unique",
+          "value": "somewhat"
+        },
+        {
+          "label": "Not very unique",
+          "value": "not_very"
+        },
+        {
+          "label": "Not at all unique",
+          "value": "not_at_all"
+        }
+      ],
+      "concept_ref": "concept5"
+    },
+    {
+      "question_id": "M8_q73",
+      "question_text": "How relevant is Dove Skin ID to your personal needs?",
+      "question_type": "single_select",
+      "target_signals": [
+        "concept5_relevance"
+      ],
+      "priority": 2,
+      "estimated_seconds": 10,
+      "options": [
+        {
+          "label": "Extremely relevant",
+          "value": "extremely"
+        },
+        {
+          "label": "Very relevant",
+          "value": "very"
+        },
+        {
+          "label": "Somewhat relevant",
+          "value": "somewhat"
+        },
+        {
+          "label": "Not very relevant",
+          "value": "not_very"
+        },
+        {
+          "label": "Not at all relevant",
+          "value": "not_at_all"
+        }
+      ],
+      "concept_ref": "concept5"
+    },
+    {
+      "question_id": "M8_q74",
+      "question_text": "How believable are the claims made about Dove Skin ID?",
+      "question_type": "single_select",
+      "target_signals": [
+        "concept5_believability"
+      ],
+      "priority": 1,
+      "estimated_seconds": 10,
+      "options": [
+        {
+          "label": "Completely believable",
+          "value": "completely"
+        },
+        {
+          "label": "Very believable",
+          "value": "very"
+        },
+        {
+          "label": "Somewhat believable",
+          "value": "somewhat"
+        },
+        {
+          "label": "Not very believable",
+          "value": "not_very"
+        },
+        {
+          "label": "Not at all believable",
+          "value": "not_at_all"
+        }
+      ],
+      "concept_ref": "concept5"
+    },
+    {
+      "question_id": "M8_q75",
+      "question_text": "How well does Dove Skin ID fit with what you expect from the Dove brand?",
+      "question_type": "single_select",
+      "target_signals": [
+        "concept5_brand_fit"
+      ],
+      "priority": 2,
+      "estimated_seconds": 10,
+      "options": [
+        {
+          "label": "Fits extremely well",
+          "value": "extremely"
+        },
+        {
+          "label": "Fits very well",
+          "value": "very"
+        },
+        {
+          "label": "Fits somewhat well",
+          "value": "somewhat"
+        },
+        {
+          "label": "Doesn't fit very well",
+          "value": "not_very"
+        },
+        {
+          "label": "Doesn't fit at all",
+          "value": "not_at_all"
+        }
+      ],
+      "concept_ref": "concept5"
+    },
+    {
+      "question_id": "M8_q76",
+      "question_text": "How would you describe Dove Skin ID? Rate each pair of characteristics.",
+      "question_type": "matrix_scale",
+      "target_signals": [
+        "concept5_semantic_profile"
+      ],
+      "priority": 2,
+      "estimated_seconds": 30,
+      "matrix_items": [
+        "Basic — Premium",
+        "Boring — Exciting",
+        "Not for me — Made for me",
+        "Old-fashioned — Innovative",
+        "Forgettable — Memorable"
+      ],
+      "scale_min": 1,
+      "scale_max": 5,
+      "scale_labels": {
+        "1": "Strongly left word",
+        "3": "Neutral",
+        "5": "Strongly right word"
+      },
+      "concept_ref": "concept5"
+    },
+    {
+      "question_id": "M8_q79",
+      "question_text": "What concerns, if any, would you have about trying Dove Skin ID? Select all that apply.",
+      "question_type": "multi_select",
+      "target_signals": [
+        "concept5_concerns"
+      ],
+      "priority": 1,
+      "estimated_seconds": 15,
+      "options": [
+        {
+          "label": "Price might be too high",
+          "value": "price_high"
+        },
+        {
+          "label": "Might not work as claimed",
+          "value": "skeptical_claims"
+        },
+        {
+          "label": "Could irritate my skin",
+          "value": "skin_irritation"
+        },
+        {
+          "label": "Might not be available where I shop",
+          "value": "availability"
+        },
+        {
+          "label": "Don't trust new products",
+          "value": "distrust_new"
+        },
+        {
+          "label": "Happy with current product",
+          "value": "happy_current"
+        },
+        {
+          "label": "Other concern",
+          "value": "other"
+        },
+        {
+          "label": "No concerns",
+          "value": "no_concerns"
+        }
+      ],
+      "concept_ref": "concept5"
+    },
+    {
+      "question_id": "M8_q80",
+      "question_text": "Now that you've seen all 5 concepts, please rank them from most to least appealing. Pick your top 3:\n\n1. Dove 60-Second Body Spray — Clean in 60 seconds, no scrubbing\n2. Dove Skip — 12-hour moisture, no lotion needed\n3. Dove Night Wash — Calming evening shower ritual\n4. Dove Yours & Mine — Couples' personalized scent exchange\n5. Dove Skin ID — AI-customized body wash for your skin",
+      "question_type": "rank_order",
+      "target_signals": [
+        "concept_ranking"
+      ],
+      "priority": 1,
+      "estimated_seconds": 30,
+      "max_selections": 3,
+      "options": [
+        {
+          "label": "Dove 60-Second Body Spray",
+          "value": "concept1_60second"
+        },
+        {
+          "label": "Dove Skip",
+          "value": "concept2_skip"
+        },
+        {
+          "label": "Dove Night Wash",
+          "value": "concept3_nightwash"
+        },
+        {
+          "label": "Dove Yours & Mine",
+          "value": "concept4_yoursmine"
+        },
+        {
+          "label": "Dove Skin ID",
+          "value": "concept5_skinid"
+        }
+      ]
+    },
+    {
+      "question_id": "M8_q81",
+      "question_text": "Thinking about the concept you found most appealing — at the price shown, how likely would you be to buy it?",
+      "question_type": "single_select",
+      "target_signals": [
+        "price_acceptance"
+      ],
+      "priority": 1,
+      "estimated_seconds": 10,
+      "options": [
+        {
+          "label": "Definitely would buy",
+          "value": "definitely_buy"
+        },
+        {
+          "label": "Probably would buy",
+          "value": "probably_buy"
+        },
+        {
+          "label": "Might or might not buy",
+          "value": "might_buy"
+        },
+        {
+          "label": "Probably would not buy",
+          "value": "probably_not"
+        },
+        {
+          "label": "Definitely would not buy",
+          "value": "definitely_not"
+        }
+      ]
+    },
+    {
+      "question_id": "M8_q82",
+      "question_text": "What would you expect to pay for your most preferred concept? (Enter amount in rupees)",
+      "question_type": "numeric",
+      "target_signals": [
+        "price_expectation"
+      ],
+      "priority": 1,
+      "estimated_seconds": 15,
+      "placeholder": "Enter price in ₹ e.g. 350"
+    }
+  ],
+  "concepts": {
+    "concept1": {
+      "name": "Dove 60-Second Body Spray",
+      "consumer_insight": "I wish I could get properly clean when I'm rushing between activities. When I'm squeezing a shower between the gym and a meeting, I need to get clean fast but current body washes take forever to lather, scrub, and rinse off completely.",
+      "key_benefit": "Get completely clean in just 60 seconds — no scrubbing, minimal rinsing, maximum speed for your busiest days.",
+      "how_it_works": "Proven micellar cleansing technology from Dove's face care range dissolves dirt and oil on contact. 60-second active formula breaks down sweat and grime while you wait, rinses away easily. Aerosol spray format covers your body evenly in seconds — no time wasted building lather.",
+      "packaging": "Slim aluminum aerosol can with matte silver finish and single blue stripe. Large '60' prominently displayed.",
+      "price": "₹199 for 100ml trial size, ₹399 for 200ml regular size"
+    },
+    "concept2": {
+      "name": "Dove Skip",
+      "consumer_insight": "I want to moisturize my skin after every shower, but I always forget or skip it because it's such a hassle. I wish there was a way to get soft, hydrated skin without having to add another step to my routine.",
+      "key_benefit": "Get 12-hour moisturized skin straight from the shower — no body lotion needed.",
+      "how_it_works": "Advanced lipid-lock technology deposits a moisture barrier on your skin while you wash, so hydration stays sealed in even after toweling off. Contains 3x more moisturizing cream than regular body wash. Proven effective even in harsh conditions like air conditioning and dry winter weather.",
+      "packaging": "Dove's familiar bottle shape but 20% wider. Cream-colored base with subtle gold accents and pump dispenser. 'SKIP' prominently displayed. Small icon showing crossed-out lotion bottle with 'Replaces Body Lotion' text.",
+      "price": "₹349 for 300ml, ₹599 for 600ml"
+    },
+    "concept3": {
+      "name": "Dove Night Wash",
+      "consumer_insight": "I wish my night shower could feel truly different from my rushed morning routine. My evening shower is the only time that's completely mine, but I'm using the same energizing body wash that's meant to wake me up.",
+      "key_benefit": "Transform your night shower into a calming ritual that helps you unwind and prepare for sleep.",
+      "how_it_works": "Contains chamomile and slow-release lavender oils clinically shown to reduce stress hormones when absorbed through skin. Creates a richer, slower lather that encourages you to take your time. Warm, muted fragrance designed specifically for evening use — not the sharp, energizing scents of morning washes.",
+      "packaging": "Deep matte navy bottle with soft-touch finish. Shorter, wider shape. Muted gold 'NIGHT WASH' text with subtle crescent moon detail. No white elements on front panel.",
+      "price": "₹299 for 250ml, ₹499 for 500ml"
+    },
+    "concept4": {
+      "name": "Dove Yours & Mine",
+      "consumer_insight": "I love wearing my partner's clothes or using their products because their scent makes me feel close to them throughout the day. But there's no way for us to actually carry each other's essence with us in our daily routines.",
+      "key_benefit": "Carry a subtle trace of each other's personalized scent throughout your day, keeping you connected even when apart.",
+      "how_it_works": "Personalized fragrance quiz analyzes your scent preferences and creates custom formulas from Dove's library of 200+ fragrance compounds. Each partner receives a body wash inspired by the other's scent profile, so you literally carry each other's essence after every shower. Dove's 65+ years of fragrance expertise ensures long-lasting, skin-safe scents.",
+      "packaging": "Two 200ml bottles — one soft blush pink, one warm beige. When placed together, the bottle shapes create a subtle heart silhouette. 'YOURS & MINE' in elegant script. Comes in premium matte white gift box with gold accents.",
+      "price": "₹799 for couples kit (2×200ml), ₹999 for premium gift edition"
+    },
+    "concept5": {
+      "name": "Dove Skin ID",
+      "consumer_insight": "I wish I could find a body wash that actually works for my specific skin needs. My skin is different on different parts of my body — oily in some areas, dry in others, with dark patches on my elbows. But every body wash I try treats my whole body the same way.",
+      "key_benefit": "Get a body wash that's custom-made for your unique skin needs across your entire body.",
+      "how_it_works": "AI skin analysis technology examines your uploaded photo and personal responses to identify your specific skin needs across different body areas. Custom-blended with targeted active ingredients like niacinamide for uneven tone, salicylic acid for body acne, or ceramides for dryness. Your personalized formula is freshly made and arrives with your name on the label.",
+      "packaging": "Clean, frosted bottle with your name printed on the label like a prescription. Product color varies by formula (amber, pale green, or soft pink visible through bottle). Arrives in a white box addressed to you with a booklet explaining your personalized formula.",
+      "price": "₹699 for first order (includes skin analysis), ₹549 for refills, ₹499 with quarterly subscription"
+    }
+  }
+}

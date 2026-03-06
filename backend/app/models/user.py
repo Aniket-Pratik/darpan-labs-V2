@@ -3,7 +3,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import DateTime, String, func
+from sqlalchemy import Boolean, DateTime, Integer, String, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -34,6 +34,26 @@ class User(Base):
         String(255),
         nullable=True,
     )
+    sex: Mapped[str | None] = mapped_column(
+        String(20),
+        nullable=True,
+    )
+    age: Mapped[int | None] = mapped_column(
+        Integer,
+        nullable=True,
+    )
+    profile_completed: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        default=False,
+        server_default="false",
+    )
+    is_admin: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        default=False,
+        server_default="false",
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
@@ -57,26 +77,5 @@ class User(Base):
         back_populates="user",
         cascade="all, delete-orphan",
     )
-    twin_profiles: Mapped[list["TwinProfile"]] = relationship(
-        "TwinProfile",
-        back_populates="user",
-        cascade="all, delete-orphan",
-    )
-    evidence_snippets: Mapped[list["EvidenceSnippet"]] = relationship(
-        "EvidenceSnippet",
-        back_populates="user",
-        cascade="all, delete-orphan",
-    )
-    cohorts: Mapped[list["Cohort"]] = relationship(
-        "Cohort",
-        back_populates="created_by_user",
-        cascade="all, delete-orphan",
-    )
-    experiments: Mapped[list["Experiment"]] = relationship(
-        "Experiment",
-        back_populates="created_by_user",
-        cascade="all, delete-orphan",
-    )
-
     def __repr__(self) -> str:
         return f"<User(id={self.id}, email={self.email})>"

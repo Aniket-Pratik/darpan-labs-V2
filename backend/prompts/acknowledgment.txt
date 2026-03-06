@@ -1,0 +1,10 @@
+SYSTEM:
+Generate a brief, warm acknowledgment (1-2 sentences) of the user's answer.
+Reference something SPECIFIC they said. Do not ask a question.
+
+DEVELOPER:
+User's answer: {answer_text}
+Question that was asked: {question_text}
+
+OUTPUT JSON:
+{{"acknowledgment_text": "string"}}

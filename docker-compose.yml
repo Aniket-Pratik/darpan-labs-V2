@@ -55,24 +55,6 @@ services:
         condition: service_healthy
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
-  # Celery Worker
-  celery:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: darpan-celery
-    environment:
-      - DATABASE_URL=postgresql+asyncpg://postgres:darpan@db:5432/darpan
-      - REDIS_URL=redis://redis:6379/0
-    volumes:
-      - ./backend:/app
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    command: celery -A app.workers worker --loglevel=info
-
   # Frontend
   frontend:
     build:

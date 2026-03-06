@@ -7,35 +7,31 @@ import {
   User,
   Brain,
   Heart,
-  MessageCircle,
+  ShoppingCart,
+  Sparkles,
+  Palette,
+  Droplets,
+  Radio,
+  FlaskConical,
   Check,
   Play,
   Clock,
-  Sparkles,
   Loader2,
-  ArrowRight,
-  Coffee,
-  Wallet,
-  TrendingUp,
-  BookOpen,
 } from 'lucide-react';
 
-import {
-  getUserModules,
-  getUserIdFromStorage,
-  saveUserIdToStorage,
-} from '@/lib/interviewApi';
+import { getUserModules } from '@/lib/interviewApi';
+import { useAuthStore } from '@/store/authStore';
 import type { UserModulesResponse, UserModuleStatus } from '@/types/interview';
 
 const moduleIcons: Record<string, React.ReactNode> = {
   M1: <User className="w-6 h-6" />,
-  M2: <Brain className="w-6 h-6" />,
-  M3: <Heart className="w-6 h-6" />,
-  M4: <MessageCircle className="w-6 h-6" />,
-  A1: <Coffee className="w-6 h-6" />,
-  A2: <Wallet className="w-6 h-6" />,
-  A3: <TrendingUp className="w-6 h-6" />,
-  A4: <BookOpen className="w-6 h-6" />,
+  M2: <Heart className="w-6 h-6" />,
+  M3: <ShoppingCart className="w-6 h-6" />,
+  M4: <Sparkles className="w-6 h-6" />,
+  M5: <Palette className="w-6 h-6" />,
+  M6: <Droplets className="w-6 h-6" />,
+  M7: <Radio className="w-6 h-6" />,
+  M8: <FlaskConical className="w-6 h-6" />,
 };
 
 const moduleColors: Record<string, string> = {
@@ -43,10 +39,10 @@ const moduleColors: Record<string, string> = {
   M2: 'from-purple-500/20 to-purple-600/10 border-purple-500/30',
   M3: 'from-pink-500/20 to-pink-600/10 border-pink-500/30',
   M4: 'from-green-500/20 to-green-600/10 border-green-500/30',
-  A1: 'from-amber-500/20 to-amber-600/10 border-amber-500/30',
-  A2: 'from-emerald-500/20 to-emerald-600/10 border-emerald-500/30',
-  A3: 'from-sky-500/20 to-sky-600/10 border-sky-500/30',
-  A4: 'from-indigo-500/20 to-indigo-600/10 border-indigo-500/30',
+  M5: 'from-amber-500/20 to-amber-600/10 border-amber-500/30',
+  M6: 'from-cyan-500/20 to-cyan-600/10 border-cyan-500/30',
+  M7: 'from-indigo-500/20 to-indigo-600/10 border-indigo-500/30',
+  M8: 'from-rose-500/20 to-rose-600/10 border-rose-500/30',
 };
 
 const moduleIconColors: Record<string, string> = {
@@ -54,66 +50,56 @@ const moduleIconColors: Record<string, string> = {
   M2: 'text-purple-400',
   M3: 'text-pink-400',
   M4: 'text-green-400',
-  A1: 'text-amber-400',
-  A2: 'text-emerald-400',
-  A3: 'text-sky-400',
-  A4: 'text-indigo-400',
+  M5: 'text-amber-400',
+  M6: 'text-cyan-400',
+  M7: 'text-indigo-400',
+  M8: 'text-rose-400',
 };
 
 const DEFAULT_MODULES: UserModuleStatus[] = [
-  { module_id: 'M1', module_name: 'Core Identity & Context', description: 'Understanding who you are and your life context', status: 'not_started', estimated_duration_min: 3 },
-  { module_id: 'M2', module_name: 'Decision Logic & Risk', description: 'How you make decisions and handle uncertainty', status: 'not_started', estimated_duration_min: 3 },
-  { module_id: 'M3', module_name: 'Preferences & Values', description: 'Your priorities and what matters to you', status: 'not_started', estimated_duration_min: 3 },
-  { module_id: 'M4', module_name: 'Communication & Social', description: 'Your interaction style and social tendencies', status: 'not_started', estimated_duration_min: 3 },
-  { module_id: 'A1', module_name: 'Lifestyle & Routines', description: 'Your daily habits, routines, and lifestyle choices', status: 'not_started', estimated_duration_min: 3 },
-  { module_id: 'A2', module_name: 'Spending & Financial Behavior', description: 'How you manage money and make purchase decisions', status: 'not_started', estimated_duration_min: 3 },
-  { module_id: 'A3', module_name: 'Career & Growth Aspirations', description: 'Your career goals and personal growth mindset', status: 'not_started', estimated_duration_min: 3 },
-  { module_id: 'A4', module_name: 'Work & Learning Style', description: 'How you work, learn, and solve problems', status: 'not_started', estimated_duration_min: 3 },
+  { module_id: 'M1', module_name: 'Core Identity & Context', description: 'Location, lifestyle, personality, and consumer orientation', status: 'not_started', estimated_duration_min: 5 },
+  { module_id: 'M2', module_name: 'Preferences & Values', description: 'Value system, trust hierarchy, and brand attitudes', status: 'not_started', estimated_duration_min: 5 },
+  { module_id: 'M3', module_name: 'Purchase Decision Logic', description: 'How and where you buy, price sensitivity, and switching behavior', status: 'not_started', estimated_duration_min: 5 },
+  { module_id: 'M4', module_name: 'Lifestyle & Grooming', description: 'Daily bathing context, routines, and skin concerns', status: 'not_started', estimated_duration_min: 5 },
+  { module_id: 'M5', module_name: 'Sensory & Aesthetic Preferences', description: 'Fragrance, texture, lather, and packaging preferences', status: 'not_started', estimated_duration_min: 4 },
+  { module_id: 'M6', module_name: 'Body Wash Deep-Dive', description: 'Current brands, satisfaction, pain points, and unmet needs', status: 'not_started', estimated_duration_min: 6 },
+  { module_id: 'M7', module_name: 'Media & Influence', description: 'How you discover products and who you trust', status: 'not_started', estimated_duration_min: 4 },
+  { module_id: 'M8', module_name: 'Concept Test', description: 'Evaluate 5 product concepts and help pick the best 2 to develop', status: 'not_started', estimated_duration_min: 13 },
 ];
 
 export default function ModulesPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
-  const [userId, setUserId] = useState<string>('');
   const [modulesData, setModulesData] = useState<UserModulesResponse | null>(null);
   const hasFetched = useRef(false);
+  const authUser = useAuthStore((s) => s.user);
+  const userId = authUser?.user_id || '';
 
   useEffect(() => {
-    if (hasFetched.current) return;
+    if (hasFetched.current || !userId) return;
     hasFetched.current = true;
 
-    let uid = getUserIdFromStorage();
-    if (!uid) {
-      uid = crypto.randomUUID();
-      saveUserIdToStorage(uid);
-    }
-    setUserId(uid);
-
-    getUserModules(uid)
+    getUserModules(userId)
       .then((data) => {
         setModulesData(data);
       })
       .catch((err) => {
         console.error('Failed to fetch modules:', err);
         setModulesData({
-          user_id: uid,
+          user_id: userId,
           modules: DEFAULT_MODULES,
           completed_count: 0,
-          total_required: 4,
+          total_required: 8,
           can_generate_twin: false,
         });
       })
       .finally(() => {
         setIsLoading(false);
       });
-  }, []);
+  }, [userId]);
 
   const handleStartModule = (moduleId: string) => {
     router.push(`/create/modules/${moduleId}/start?userId=${userId}`);
-  };
-
-  const handleGenerateTwin = () => {
-    router.push(`/create/twin/generate?userId=${userId}`);
   };
 
   if (isLoading) {
@@ -129,11 +115,7 @@ export default function ModulesPage() {
 
   const modules = modulesData?.modules ?? DEFAULT_MODULES;
   const completedCount = modulesData?.completed_count ?? 0;
-  const totalRequired = modulesData?.total_required ?? 4;
-  const canGenerateTwin = modulesData?.can_generate_twin ?? false;
-
-  const mandatoryModules = modules.filter((m) => m.module_id.startsWith('M'));
-  const addonModules = modules.filter((m) => m.module_id.startsWith('A'));
+  const totalRequired = modulesData?.total_required ?? 8;
 
   return (
     <div>
@@ -146,16 +128,16 @@ export default function ModulesPage() {
           animate={{ opacity: 1, y: 0 }}
         >
           <h2 className="text-3xl font-bold text-white mb-4">
-            Build Your Digital Twin
+            Complete Your Profile
           </h2>
           <p className="text-white/60 mb-6">
-            Complete all 4 core modules to create your AI twin. Add-on modules enhance your twin further.
+            Complete all 8 modules to build your consumer profile.
           </p>
 
           {/* Progress bar */}
           <div className="max-w-md mx-auto">
             <div className="flex items-center justify-between text-sm text-white/50 mb-2">
-              <span>Core Progress</span>
+              <span>Progress</span>
               <span>{completedCount} of {totalRequired} modules</span>
             </div>
             <div className="h-2 bg-darpan-surface rounded-full overflow-hidden">
@@ -169,13 +151,9 @@ export default function ModulesPage() {
           </div>
         </motion.div>
 
-        {/* Core modules section */}
-        <div className="mb-8">
-          <h3 className="text-lg font-semibold text-white mb-1">Core Modules</h3>
-          <p className="text-sm text-white/40 mb-4">Required to generate your digital twin</p>
-        </div>
+        {/* Modules grid */}
         <div className="grid md:grid-cols-2 gap-6 mb-12">
-          {mandatoryModules.map((module, index) => (
+          {modules.map((module, index) => (
             <ModuleCard
               key={module.module_id}
               module={module}
@@ -184,61 +162,13 @@ export default function ModulesPage() {
             />
           ))}
         </div>
-
-        {/* Add-on modules section */}
-        {addonModules.length > 0 && (
-          <>
-            <div className="mb-8">
-              <h3 className="text-lg font-semibold text-white mb-1">Add-on Modules</h3>
-              <p className="text-sm text-white/40 mb-4">Optional — enhance your twin with deeper insights</p>
-            </div>
-            <div className="grid md:grid-cols-2 gap-6 mb-12">
-              {addonModules.map((module, index) => (
-                <ModuleCard
-                  key={module.module_id}
-                  module={module}
-                  index={index + mandatoryModules.length}
-                  onStart={() => handleStartModule(module.module_id)}
-                />
-              ))}
-            </div>
-          </>
-        )}
-
-        {/* Generate Twin button */}
-        <motion.div
-          className="text-center"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-        >
-          {canGenerateTwin ? (
-            <button
-              onClick={handleGenerateTwin}
-              className="flex items-center gap-3 px-8 py-4 mx-auto bg-gradient-to-r from-darpan-lime to-darpan-cyan
-                       text-black font-bold text-lg rounded-xl hover:opacity-90
-                       transition-opacity shadow-glow-lime"
-            >
-              <Sparkles className="w-6 h-6" />
-              Generate Your Digital Twin
-              <ArrowRight className="w-5 h-5" />
-            </button>
-          ) : (
-            <div className="bg-darpan-surface border border-darpan-border rounded-xl p-6 max-w-md mx-auto">
-              <Sparkles className="w-8 h-8 text-white/30 mx-auto mb-3" />
-              <p className="text-white/50 text-sm">
-                Complete all {totalRequired} modules to unlock your digital twin
-              </p>
-            </div>
-          )}
-        </motion.div>
       </main>
 
       {/* Footer */}
       <footer className="border-t border-darpan-border mt-16">
         <div className="max-w-4xl mx-auto px-4 py-6 text-center">
           <p className="text-xs text-white/30">
-            Your responses are private and used only to create your digital twin.
+            Your responses are private and used only to build your profile.
           </p>
         </div>
       </footer>
@@ -301,21 +231,10 @@ function ModuleCard({
         <p className="text-sm text-white/50">{module.description}</p>
       </div>
 
-      {/* Completion scores */}
-      {isCompleted && module.coverage_score != null && (
-        <div className="flex gap-4 mb-4 text-xs">
-          <div>
-            <span className="text-white/40">Coverage:</span>
-            <span className="ml-1 text-darpan-lime font-medium">
-              {Math.round(module.coverage_score * 100)}%
-            </span>
-          </div>
-          <div>
-            <span className="text-white/40">Confidence:</span>
-            <span className="ml-1 text-darpan-cyan font-medium">
-              {Math.round((module.confidence_score ?? 0) * 100)}%
-            </span>
-          </div>
+      {/* Completion indicator */}
+      {isCompleted && (
+        <div className="mb-4 text-xs">
+          <span className="text-darpan-lime font-medium">Completed</span>
         </div>
       )}
 

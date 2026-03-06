@@ -37,6 +37,23 @@ interface Question {
   question_text: string;
   question_type: string;
   target_signal?: string;
+  options?: { label: string; value: string }[];
+  max_selections?: number;
+  scale_min?: number;
+  scale_max?: number;
+  scale_labels?: Record<string, string>;
+  matrix_items?: string[];
+  matrix_options?: { label: string; value: string }[];
+  placeholder?: string;
+  concept_card?: {
+    concept_id: string;
+    name: string;
+    consumer_insight: string;
+    key_benefit: string;
+    how_it_works: string;
+    packaging: string;
+    price: string;
+  };
 }
 
 interface ModuleInterviewContainerProps {
@@ -96,6 +113,15 @@ export function ModuleInterviewContainer({
             question_id: data.question_id || '',
             question_text: data.question_text,
             question_type: data.question_type || 'open_text',
+            options: (data as any).options,
+            max_selections: (data as any).max_selections,
+            scale_min: (data as any).scale_min,
+            scale_max: (data as any).scale_max,
+            scale_labels: (data as any).scale_labels,
+            matrix_items: (data as any).matrix_items,
+            matrix_options: (data as any).matrix_options,
+            placeholder: (data as any).placeholder,
+            concept_card: (data as any).concept_card,
           });
           setCurrentAnswer('');
         }
@@ -132,6 +158,7 @@ export function ModuleInterviewContainer({
         module_id: response.first_module.module_id,
         module_name: response.first_module.module_name,
         questions_asked: 0,
+        total_questions: response.first_module.total_questions,
         coverage_score: 0,
         confidence_score: 0,
         signals_captured: [],
@@ -142,6 +169,15 @@ export function ModuleInterviewContainer({
         question_text: response.first_question.question_text,
         question_type: response.first_question.question_type,
         target_signal: response.first_question.target_signal,
+        options: response.first_question.options,
+        max_selections: response.first_question.max_selections,
+        scale_min: response.first_question.scale_min,
+        scale_max: response.first_question.scale_max,
+        scale_labels: response.first_question.scale_labels,
+        matrix_items: response.first_question.matrix_items,
+        matrix_options: response.first_question.matrix_options,
+        placeholder: response.first_question.placeholder,
+        concept_card: response.first_question.concept_card,
       });
       setStatus('active');
     } catch (err) {
@@ -199,6 +235,7 @@ export function ModuleInterviewContainer({
   // Handle next question response
   const handleNextQuestionResponse = (response: InterviewNextQuestionResponse) => {
     setCurrentModule(response.module_progress);
+    voice.clearTranscript();
 
     if (response.status === 'module_complete' || response.status === 'all_modules_complete') {
       // Module is complete - show transition and then exit
@@ -212,6 +249,15 @@ export function ModuleInterviewContainer({
         question_text: response.question_text || '',
         question_type: response.question_type || 'open_text',
         target_signal: response.question_meta?.target_signal,
+        options: response.options || response.question_meta?.options,
+        max_selections: response.max_selections ?? response.question_meta?.max_selections,
+        scale_min: response.scale_min ?? response.question_meta?.scale_min,
+        scale_max: response.scale_max ?? response.question_meta?.scale_max,
+        scale_labels: response.scale_labels || response.question_meta?.scale_labels,
+        matrix_items: response.matrix_items || response.question_meta?.matrix_items,
+        matrix_options: response.matrix_options || response.question_meta?.matrix_options,
+        placeholder: response.placeholder || response.question_meta?.placeholder,
+        concept_card: response.concept_card || response.question_meta?.concept_card,
       });
       setAcknowledgmentText(response.acknowledgment_text || null);
       setCurrentAnswer('');
@@ -338,19 +384,8 @@ export function ModuleInterviewContainer({
             <p className="text-white/70">{completionData.module_summary}</p>
           )}
 
-          <div className="flex gap-4 text-sm">
-            <div className="bg-darpan-surface px-4 py-2 rounded-lg">
-              <span className="text-white/40">Coverage:</span>
-              <span className="ml-2 text-darpan-lime font-medium">
-                {Math.round(completionData.coverage_score * 100)}%
-              </span>
-            </div>
-            <div className="bg-darpan-surface px-4 py-2 rounded-lg">
-              <span className="text-white/40">Confidence:</span>
-              <span className="ml-2 text-darpan-cyan font-medium">
-                {Math.round(completionData.confidence_score * 100)}%
-              </span>
-            </div>
+          <div className="bg-darpan-surface px-4 py-2 rounded-lg text-sm">
+            <span className="text-darpan-lime font-medium">All questions answered</span>
           </div>
 
           {completionData.can_generate_twin ? (
@@ -418,13 +453,13 @@ export function ModuleInterviewContainer({
           {currentModule && (
             <div className="mt-3">
               <div className="flex items-center justify-between text-xs text-white/40 mb-1">
-                <span>Coverage: {Math.round(currentModule.coverage_score * 100)}%</span>
-                <span>{currentModule.questions_asked} questions</span>
+                <span>{currentModule.questions_asked} / {currentModule.total_questions || '?'} questions</span>
+                <span>{currentModule.total_questions ? Math.round((currentModule.questions_asked / currentModule.total_questions) * 100) : 0}%</span>
               </div>
               <div className="h-1.5 bg-darpan-surface rounded-full overflow-hidden">
                 <div
                   className="h-full bg-gradient-to-r from-darpan-lime to-darpan-cyan transition-all duration-300"
-                  style={{ width: `${currentModule.coverage_score * 100}%` }}
+                  style={{ width: `${currentModule.total_questions ? (currentModule.questions_asked / currentModule.total_questions) * 100 : 0}%` }}
                 />
               </div>
             </div>

@@ -6,6 +6,7 @@ All settings are loaded from environment variables.
 from functools import lru_cache
 from typing import Optional
 
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -27,7 +28,7 @@ class Settings(BaseSettings):
 
     # API
     api_prefix: str = "/api/v1"
-    cors_origins: list[str] = ["http://localhost:3000", "http://127.0.0.1:3000"]
+    cors_origins: list[str] = ["http://localhost:3000", "http://localhost:3001", "http://127.0.0.1:3000", "http://127.0.0.1:3001"]
 
     # Database
     database_url: str = "postgresql+asyncpg://postgres:darpan@localhost:5432/darpan"
@@ -61,15 +62,25 @@ class Settings(BaseSettings):
     langfuse_secret_key: Optional[str] = None
     langfuse_host: str = "https://cloud.langfuse.com"
 
-    # Auth (placeholder for Supabase/Clerk)
+    # Auth
     auth_secret_key: str = "your-secret-key-change-in-production"
     auth_algorithm: str = "HS256"
-    auth_access_token_expire_minutes: int = 30
+    auth_access_token_expire_minutes: int = 1440  # 24 hours
+    google_client_id: str = ""
 
     # Storage
     s3_bucket: Optional[str] = None
     s3_region: str = "us-east-1"
     audio_retention_days: int = 7
+
+    @model_validator(mode="after")
+    def ensure_asyncpg_driver(self):
+        """Railway provides postgresql:// but we need postgresql+asyncpg://"""
+        if self.database_url.startswith("postgresql://"):
+            self.database_url = self.database_url.replace(
+                "postgresql://", "postgresql+asyncpg://", 1
+            )
+        return self
 
     @property
     def database_url_sync(self) -> str:

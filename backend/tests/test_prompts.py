@@ -9,11 +9,9 @@ PROMPTS_PATH = Path(__file__).parent.parent / "prompts"
 REQUIRED_PROMPTS = [
     "interviewer_question.txt",
     "module_completion.txt",
-    "profile_extraction.txt",
-    "twin_response.txt",
-    "experiment_response.txt",
     "transcript_correction.txt",
     "answer_parser.txt",
+    "answer_satisfaction.txt",
 ]
 
 
@@ -31,8 +29,8 @@ class TestPromptFilesExist:
         file_path = PROMPTS_PATH / prompt_file
         assert file_path.exists(), f"Missing prompt file: {prompt_file}"
 
-    def test_all_seven_prompts_exist(self):
-        """Test that all 7 required prompt files exist."""
+    def test_all_required_prompts_exist(self):
+        """Test that all required prompt files exist."""
         existing_prompts = [f.name for f in PROMPTS_PATH.glob("*.txt")]
         for prompt in REQUIRED_PROMPTS:
             assert prompt in existing_prompts, f"Missing: {prompt}"
@@ -101,46 +99,6 @@ class TestModuleCompletionPrompt:
         assert len(content) > 100, "Module completion prompt should have substantial content"
 
 
-class TestProfileExtractionPrompt:
-    """Tests for profile_extraction.txt prompt."""
-
-    def test_prompt_exists_and_readable(self):
-        """Test that profile extraction prompt is readable."""
-        file_path = PROMPTS_PATH / "profile_extraction.txt"
-        content = file_path.read_text()
-        assert len(content) > 100, "Profile extraction prompt should have substantial content"
-
-    def test_mentions_profile_or_twin(self):
-        """Test that prompt mentions profile or twin concepts."""
-        content = (PROMPTS_PATH / "profile_extraction.txt").read_text()
-        assert "profile" in content.lower() or "twin" in content.lower()
-
-
-class TestTwinResponsePrompt:
-    """Tests for twin_response.txt prompt."""
-
-    def test_prompt_exists_and_readable(self):
-        """Test that twin response prompt is readable."""
-        file_path = PROMPTS_PATH / "twin_response.txt"
-        content = file_path.read_text()
-        assert len(content) > 100, "Twin response prompt should have substantial content"
-
-    def test_mentions_confidence(self):
-        """Test that prompt mentions confidence scoring."""
-        content = (PROMPTS_PATH / "twin_response.txt").read_text()
-        assert "confidence" in content.lower()
-
-
-class TestExperimentResponsePrompt:
-    """Tests for experiment_response.txt prompt."""
-
-    def test_prompt_exists_and_readable(self):
-        """Test that experiment response prompt is readable."""
-        file_path = PROMPTS_PATH / "experiment_response.txt"
-        content = file_path.read_text()
-        assert len(content) > 100, "Experiment response prompt should have substantial content"
-
-
 class TestTranscriptCorrectionPrompt:
     """Tests for transcript_correction.txt prompt."""
 
@@ -202,4 +160,4 @@ class TestPromptConsistency:
             if "{" in content:
                 placeholder_count += 1
         # At least some prompts should use placeholders
-        assert placeholder_count >= 3, "Expected more prompts to use placeholders"
+        assert placeholder_count >= 2, "Expected more prompts to use placeholders"

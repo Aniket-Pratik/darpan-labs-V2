@@ -27,16 +27,16 @@ from app.schemas.interview import (
     ModuleInfo,
     ModulePlanItem,
     ModuleProgress,
+    OptionItemSchema,
     QuestionMeta,
     StartSingleModuleRequest,
-    TwinEligibilityResponse,
     UserModulesResponse,
     UserModuleStatus,
 )
 from app.schemas.llm_responses import (
-    AdaptiveQuestionResponse,
+    AcknowledgmentResponse,
     AdaptiveQuestionResult,
-    ParsedAnswer,
+    FollowUpProbeResponse,
 )
 from app.services.answer_parser_service import (
     AnswerParserService,
@@ -55,6 +55,53 @@ from app.services.question_bank_service import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def _rich_fields_from_question(
+    question: Question,
+    question_bank: "QuestionBankService | None" = None,
+    module_id: str | None = None,
+) -> dict:
+    """Extract rich UI fields from a Question into a dict for schemas.
+
+    Returns plain dicts/lists (JSON-serializable) so the result can be
+    stored in JSONB columns *and* unpacked into Pydantic schema kwargs.
+    """
+    fields: dict = {}
+    if question.options:
+        fields["options"] = [
+            {"label": o.label, "value": o.value} for o in question.options
+        ]
+    if question.max_selections is not None:
+        fields["max_selections"] = question.max_selections
+    if question.scale_min is not None:
+        fields["scale_min"] = question.scale_min
+    if question.scale_max is not None:
+        fields["scale_max"] = question.scale_max
+    if question.scale_labels:
+        fields["scale_labels"] = question.scale_labels
+    if question.matrix_items:
+        fields["matrix_items"] = question.matrix_items
+    if question.matrix_options:
+        fields["matrix_options"] = [
+            {"label": o.label, "value": o.value} for o in question.matrix_options
+        ]
+    if question.placeholder:
+        fields["placeholder"] = question.placeholder
+    # Concept card lookup
+    if question.concept_ref and question_bank and module_id:
+        concept = question_bank.get_concept_card(module_id, question.concept_ref)
+        if concept:
+            fields["concept_card"] = {
+                "concept_id": question.concept_ref,
+                "name": concept.name,
+                "consumer_insight": concept.consumer_insight,
+                "key_benefit": concept.key_benefit,
+                "how_it_works": concept.how_it_works,
+                "packaging": concept.packaging,
+                "price": concept.price,
+            }
+    return fields
 
 
 class InterviewService:
@@ -140,10 +187,12 @@ class InterviewService:
 
         # Build response
         module_plan = self._build_module_plan(modules)
+        bank = self.question_bank.load_question_bank(first_module.module_id)
         first_module_info = ModuleInfo(
             module_id=first_module.module_id,
             module_name=self.question_bank.get_module_name(first_module.module_id),
-            estimated_duration_min=3,
+            estimated_duration_min=bank.estimated_duration_min,
+            total_questions=len(bank.questions),
             status="active",
         )
 
@@ -161,6 +210,7 @@ class InterviewService:
                 target_signal=first_question.target_signals[0]
                 if first_question.target_signals
                 else "",
+                **_rich_fields_from_question(first_question, self.question_bank, first_module.module_id),
             ),
         )
 
@@ -209,36 +259,30 @@ class InterviewService:
         session.add(user_turn)
         await session.flush()
 
-        # Parse answer
-        question_meta = last_turn.question_meta or {}
-        parsed_answer = await self.answer_parser.parse_answer(
-            module_id=active_module.module_id,
-            module_name=self.question_bank.get_module_name(active_module.module_id),
-            question_text=last_turn.question_text or "",
-            target_signal=question_meta.get("target_signal", ""),
-            answer_text=request.answer_text,
-            previous_answers=await self._get_previous_answers(
-                session, interview_session_id, active_module.module_id
-            ),
-            signal_targets=self.question_bank.get_signal_targets(active_module.module_id),
-        )
+        # Check satisfaction only for open-text questions (drives follow-up probes)
+        # Skip for concept test module — pure structured survey, no follow-ups
+        last_question_type = (last_turn.question_meta or {}).get("question_type", "")
+        if active_module.module_id == "M8":
+            is_satisfactory, reason = True, None
+        elif last_question_type in ("open_text", "scale_open"):
+            question_text = last_turn.question_text or ""
+            target_signal = (last_turn.question_meta or {}).get("target_signal", "")
+            is_satisfactory, reason = await self.answer_parser.is_answer_satisfactory(
+                question_text=question_text,
+                answer_text=request.answer_text,
+                target_signal=target_signal,
+            )
+        else:
+            is_satisfactory, reason = True, None
 
-        # Update turn with parsed data
+        # Store satisfaction result in answer_meta
         user_turn.answer_meta = {
-            "specificity_score": parsed_answer.specificity_score,
-            "sentiment": parsed_answer.sentiment,
-            "needs_followup": parsed_answer.needs_followup,
-            "followup_reason": parsed_answer.followup_reason,
-            "signals_extracted": [
-                s.model_dump() for s in parsed_answer.signals_extracted
-            ],
+            "is_satisfactory": is_satisfactory,
+            "unsatisfactory_reason": reason,
         }
-        user_turn.answer_language = parsed_answer.language
 
-        # Update module state
-        await self.module_state.update_module_after_answer(
-            session, active_module, parsed_answer
-        )
+        # Update module state (just increment question count)
+        await self.module_state.update_module_after_answer(session, active_module)
 
         logger.debug(f"Submitted answer for turn {turn_index}")
 
@@ -315,8 +359,8 @@ class InterviewService:
                 next_module=next_module,
             )
 
-        # Get next question (adaptive)
-        question_result = await self._get_adaptive_question(
+        # Get next question (hybrid: deterministic base + LLM follow-up)
+        question_result = await self._get_next_question_hybrid(
             session, interview_session_id, active_module
         )
 
@@ -475,14 +519,23 @@ class InterviewService:
 
         # Determine current question
         if last_turn and last_turn.role == "interviewer":
-            # Last turn was a question, return it
+            # Last turn was a question, return it with rich fields from bank
+            q_id = (last_turn.question_meta or {}).get("question_id", "")
+            rich: dict = {}
+            if q_id and not q_id.startswith("adaptive_"):
+                orig_q = self.question_bank.get_question_by_id(
+                    active_module.module_id, q_id
+                )
+                if orig_q:
+                    rich = _rich_fields_from_question(orig_q, self.question_bank, active_module.module_id)
             current_question = FirstQuestion(
-                question_id=(last_turn.question_meta or {}).get("question_id", ""),
+                question_id=q_id,
                 question_text=last_turn.question_text or "",
                 question_type=(last_turn.question_meta or {}).get(
                     "question_type", "open_text"
                 ),
                 target_signal=(last_turn.question_meta or {}).get("target_signal", ""),
+                **rich,
             )
         else:
             # Need to generate next question
@@ -511,6 +564,7 @@ class InterviewService:
                 target_signal=question.target_signals[0]
                 if question.target_signals
                 else "",
+                **_rich_fields_from_question(question, self.question_bank, active_module.module_id),
             )
 
         # Build response
@@ -520,13 +574,15 @@ class InterviewService:
         await session.flush()
         logger.info(f"Resumed interview {interview_session_id}")
 
+        resume_bank = self.question_bank.load_question_bank(active_module.module_id)
         return InterviewStartResponse(
             session_id=interview_session_id,
             status="active",
             first_module=ModuleInfo(
                 module_id=active_module.module_id,
                 module_name=self.question_bank.get_module_name(active_module.module_id),
-                estimated_duration_min=3,
+                estimated_duration_min=resume_bank.estimated_duration_min,
+                total_questions=len(resume_bank.questions),
                 status="active",
             ),
             module_plan=module_plan,
@@ -563,15 +619,7 @@ class InterviewService:
             )
 
         module_progress = [
-            ModuleProgress(
-                module_id=m.module_id,
-                module_name=self.question_bank.get_module_name(m.module_id),
-                questions_asked=m.question_count,
-                coverage_score=m.coverage_score,
-                confidence_score=m.confidence_score,
-                signals_captured=list(m.signals_captured or []),
-                status=m.status,
-            )
+            self._build_module_progress(m)
             for m in modules
         ]
 
@@ -594,17 +642,17 @@ class InterviewService:
         session: AsyncSession,
         user_id: UUID,
     ) -> User:
-        """Ensure user exists, creating a demo user if not.
-
-        For demo purposes, auto-creates users if they don't exist.
-        In production, this should be replaced with proper auth.
+        """Ensure user exists (created via auth flow).
 
         Args:
             session: Database session.
-            user_id: User ID to check/create.
+            user_id: User ID to look up.
 
         Returns:
             User instance.
+
+        Raises:
+            ValueError: If user not found.
         """
         result = await session.execute(
             select(User).where(User.id == user_id)
@@ -612,25 +660,23 @@ class InterviewService:
         user = result.scalar_one_or_none()
 
         if user is None:
-            # Auto-create demo user
-            user = User(
-                id=user_id,
-                email=f"demo_{user_id}@darpan.local",
-                display_name=f"Demo User {str(user_id)[:8]}",
-            )
-            session.add(user)
-            await session.flush()
-            logger.info(f"Created demo user {user_id}")
+            raise ValueError(f"User {user_id} not found. Please sign in first.")
 
         return user
 
-    async def _get_adaptive_question(
+    async def _get_next_question_hybrid(
         self,
         session: AsyncSession,
         interview_session_id: UUID,
         module: InterviewModule,
     ) -> AdaptiveQuestionResult:
-        """Get adaptive question using LLM.
+        """Get next question using sequential + follow-up logic.
+
+        Two paths:
+        1. FOLLOW-UP PATH: If last answer was unsatisfactory and we haven't
+           exhausted follow-up attempts (max 2), use LLM to generate a probe.
+        2. NEXT QUESTION PATH: If answer was satisfactory (or max follow-ups
+           reached), pick next question sequentially from the bank.
 
         Args:
             session: Database session.
@@ -640,86 +686,211 @@ class InterviewService:
         Returns:
             AdaptiveQuestionResult with question details.
         """
-        # Get context for prompt
-        asked_ids = await self._get_asked_question_ids(
-            session, interview_session_id, module.module_id
-        )
-        recent_turns = await self._get_recent_turns(
-            session, interview_session_id, module.module_id
-        )
-        cross_module_summary = await self.module_state.get_completed_modules_summary(
+        last_turn = await self._get_last_user_turn(session, interview_session_id)
+        answer_meta = (last_turn.answer_meta or {}) if last_turn else {}
+        is_satisfactory = answer_meta.get("is_satisfactory", True)
+        unsatisfactory_reason = answer_meta.get("unsatisfactory_reason")
+        consecutive_followups = await self._count_consecutive_followups(
             session, interview_session_id
         )
 
-        interview = await self._get_interview_session(session, interview_session_id)
-        sensitivity_settings = (interview.settings or {}).get(
-            "sensitivity_settings", {}
+        # FOLLOW-UP PATH: only for open-text questions, skip for concept test module
+        last_question_type = (last_turn.question_meta or {}).get("question_type", "") if last_turn else ""
+        is_open_text = last_question_type in ("open_text", "scale_open")
+        if is_open_text and not is_satisfactory and consecutive_followups < 2 and module.module_id != "M8":
+            return await self._generate_followup_probe(
+                session,
+                interview_session_id,
+                module,
+                last_turn,
+                unsatisfactory_reason,
+                consecutive_followups,
+            )
+
+        # NEXT QUESTION PATH: move to next bank question
+        return await self._get_deterministic_next(session, module, last_turn)
+
+    async def _get_deterministic_next(
+        self,
+        session: AsyncSession,
+        module: InterviewModule,
+        last_turn: InterviewTurn | None = None,
+    ) -> AdaptiveQuestionResult:
+        """Pick next question sequentially from the bank."""
+        asked_ids = await self._get_asked_question_ids(
+            session, module.session_id, module.module_id
         )
 
-        # Get module info
-        target_signals = self.question_bank.get_signal_targets(module.module_id)
-        captured_signals = list(module.signals_captured or [])
-        missing_signals = [s for s in target_signals if s not in captured_signals]
+        next_question = self.question_bank.get_next_static_question(
+            module_id=module.module_id,
+            asked_question_ids=asked_ids,
+        )
 
-        try:
-            # Call LLM for adaptive question
-            prompt = self.prompt_service.get_interviewer_question_prompt(
-                module_id=module.module_id,
-                module_name=self.question_bank.get_module_name(module.module_id),
-                module_goal=self.question_bank.get_module_goal(module.module_id),
-                signal_targets=target_signals,
-                questions_asked=module.question_count,
-                max_questions=15,
-                coverage=module.coverage_score,
-                confidence=module.confidence_score,
-                captured_signals=captured_signals,
-                missing_signals=missing_signals,
-                recent_turns=recent_turns,
-                cross_module_summary=cross_module_summary,
-                sensitivity_settings=sensitivity_settings,
+        if next_question is None:
+            # All questions exhausted → module complete
+            return AdaptiveQuestionResult(
+                action="MODULE_COMPLETE",
+                question_text="",
+                language="EN",
+                question_type="open_text",
+                target_signal="",
+                rationale="All bank questions asked",
+                module_summary="Module completed.",
             )
 
+        return AdaptiveQuestionResult(
+            action="ASK_QUESTION",
+            question_text=next_question.question_text,
+            language="EN",
+            question_type=next_question.question_type,
+            target_signal=next_question.target_signals[0]
+            if next_question.target_signals
+            else "",
+            rationale="Sequential question from bank",
+            question_intent="EXPLORE",
+            question_id=next_question.question_id,
+        )
+
+    async def _generate_followup_probe(
+        self,
+        session: AsyncSession,
+        interview_session_id: UUID,
+        module: InterviewModule,
+        last_turn: InterviewTurn,
+        followup_reason: str | None,
+        consecutive_followups: int,
+    ) -> AdaptiveQuestionResult:
+        """LLM generates a targeted follow-up when the answer was vague."""
+        question_meta = last_turn.question_meta or {}
+        # Fetch module goal for richer context
+        try:
+            module_goal = self.question_bank.get_module_goal(module.module_id)
+        except (FileNotFoundError, ValueError):
+            module_goal = ""
+        try:
+            prompt = self.prompt_service.get_followup_probe_prompt(
+                question_text=last_turn.question_text or question_meta.get("question_text", ""),
+                target_signal=question_meta.get("target_signal", ""),
+                answer_text=last_turn.answer_text or "",
+                followup_attempt=consecutive_followups + 1,
+                followup_reason=followup_reason or "vague_answer",
+                previous_context=await self._get_brief_context(session, interview_session_id),
+                module_goal=module_goal,
+            )
             response = await self.llm_client.generate(
                 prompt=prompt,
-                response_format=AdaptiveQuestionResponse,
+                response_format=FollowUpProbeResponse,
                 temperature=0.5,
-                metadata={
-                    "prompt_name": "interviewer_question",
-                    "module_id": module.module_id,
-                },
+                max_tokens=200,
             )
-
-            return AdaptiveQuestionResult.from_llm_response(response)
-
-        except Exception as e:
-            logger.warning(f"LLM adaptive question failed, using static: {e}")
-            # Fallback to static question
-            question = self.question_bank.get_next_static_question(
-                module.module_id, asked_ids
-            )
-            if not question:
-                # No more questions, mark complete
-                return AdaptiveQuestionResult(
-                    action="MODULE_COMPLETE",
-                    question_text="",
-                    language="EN",
-                    question_type="open_text",
-                    target_signal="",
-                    rationale="No more questions available",
-                    module_summary="Module completed.",
-                )
-
             return AdaptiveQuestionResult(
-                action="ASK_QUESTION",
-                question_text=question.question_text,
+                action="ASK_FOLLOWUP",
+                question_text=response.followup_question,
                 language="EN",
-                question_type=question.question_type,
-                target_signal=question.target_signals[0]
-                if question.target_signals
-                else "",
-                rationale="Static fallback",
-                question_id=question.question_id,  # Preserve static question ID
+                question_type="open_text",
+                target_signal=question_meta.get("target_signal", ""),
+                rationale=f"Follow-up probe #{consecutive_followups + 1}: {followup_reason}",
+                question_intent=response.followup_intent,
+                acknowledgment_text=response.acknowledgment_text,
+                is_followup=True,
             )
+        except Exception as e:
+            logger.warning(f"Follow-up probe LLM failed, moving on: {e}")
+            # Graceful degradation: move to next bank question
+            return await self._get_deterministic_next(session, module, last_turn)
+
+    async def _generate_acknowledgment(
+        self,
+        answer_text: str,
+        question_text: str,
+    ) -> str | None:
+        """Generate warm acknowledgment text (small LLM call)."""
+        try:
+            prompt = self.prompt_service.get_acknowledgment_prompt(
+                answer_text=answer_text,
+                question_text=question_text,
+            )
+            response = await self.llm_client.generate(
+                prompt=prompt,
+                response_format=AcknowledgmentResponse,
+                temperature=0.5,
+                max_tokens=100,
+            )
+            return response.acknowledgment_text
+        except Exception:
+            return None  # Graceful degradation
+
+    async def _count_consecutive_followups(
+        self,
+        session: AsyncSession,
+        interview_session_id: UUID,
+    ) -> int:
+        """Count consecutive ASK_FOLLOWUP actions in recent turns.
+
+        Reads interviewer turns backward. Returns 0 if the last
+        interviewer action was ASK_QUESTION.
+        """
+        result = await session.execute(
+            select(InterviewTurn)
+            .where(
+                InterviewTurn.session_id == interview_session_id,
+                InterviewTurn.role == "interviewer",
+            )
+            .order_by(InterviewTurn.turn_index.desc())
+            .limit(5)
+        )
+        turns = list(result.scalars().all())
+
+        count = 0
+        for turn in turns:
+            meta = turn.question_meta or {}
+            if meta.get("is_followup"):
+                count += 1
+            else:
+                break
+        return count
+
+    async def _get_last_user_turn(
+        self,
+        session: AsyncSession,
+        interview_session_id: UUID,
+    ) -> InterviewTurn | None:
+        """Get the last user (answer) turn for a session."""
+        result = await session.execute(
+            select(InterviewTurn)
+            .where(
+                InterviewTurn.session_id == interview_session_id,
+                InterviewTurn.role == "user",
+            )
+            .order_by(InterviewTurn.turn_index.desc())
+            .limit(1)
+        )
+        return result.scalar_one_or_none()
+
+    async def _get_brief_context(
+        self,
+        session: AsyncSession,
+        interview_session_id: UUID,
+        max_pairs: int = 3,
+    ) -> str:
+        """Get brief conversation context for follow-up probe."""
+        result = await session.execute(
+            select(InterviewTurn)
+            .where(InterviewTurn.session_id == interview_session_id)
+            .order_by(InterviewTurn.turn_index.desc())
+            .limit(max_pairs * 2)
+        )
+        turns = list(reversed(result.scalars().all()))
+        if not turns:
+            return ""
+
+        lines = []
+        for t in turns:
+            if t.role == "interviewer":
+                lines.append(f"Q: {t.question_text}")
+            else:
+                lines.append(f"A: {t.answer_text}")
+        return "Recent conversation:\n" + "\n".join(lines)
 
     async def _record_consent(
         self,
@@ -749,6 +920,19 @@ class InterviewService:
         turn_index: int,
     ) -> InterviewTurn:
         """Create an interviewer turn with a question."""
+        meta: dict = {
+            "question_id": question.question_id,
+            "question_type": question.question_type,
+            "target_signal": question.target_signals[0]
+            if question.target_signals
+            else "",
+            "target_signals": question.target_signals,
+            "is_followup": question.is_followup,
+        }
+        # Add rich UI fields for structured question types
+        rich = _rich_fields_from_question(question)
+        if rich:
+            meta["rich"] = rich
         turn = InterviewTurn(
             session_id=interview_session_id,
             module_id=module_id,
@@ -756,14 +940,7 @@ class InterviewService:
             role="interviewer",
             input_mode="text",
             question_text=question.question_text,
-            question_meta={
-                "question_id": question.question_id,
-                "question_type": question.question_type,
-                "target_signal": question.target_signals[0]
-                if question.target_signals
-                else "",
-                "is_followup": question.is_followup,
-            },
+            question_meta=meta,
         )
         session.add(turn)
         await session.flush()
@@ -777,9 +954,17 @@ class InterviewService:
         question_result: AdaptiveQuestionResult,
         turn_index: int,
     ) -> InterviewTurn:
-        """Create an interviewer turn from adaptive question result."""
-        # Use the static question_id if available (from fallback), otherwise generate adaptive ID
+        """Create an interviewer turn from adaptive/hybrid question result."""
+        # Use the static question_id if available, otherwise generate adaptive ID
         question_id = question_result.question_id or f"adaptive_{turn_index}"
+
+        # Look up full target_signals from question bank if we have a real question ID
+        target_signals = [question_result.target_signal] if question_result.target_signal else []
+        if question_id and not question_id.startswith("adaptive_"):
+            q = self.question_bank.get_question_by_id(module_id, question_id)
+            if q:
+                target_signals = q.target_signals
+
         turn = InterviewTurn(
             session_id=interview_session_id,
             module_id=module_id,
@@ -791,9 +976,11 @@ class InterviewService:
                 "question_id": question_id,
                 "question_type": question_result.question_type,
                 "target_signal": question_result.target_signal,
+                "target_signals": target_signals,
                 "is_followup": question_result.is_followup,
                 "rationale": question_result.rationale,
                 "acknowledgment_text": question_result.acknowledgment_text,
+                "question_intent": question_result.question_intent,
             },
         )
         session.add(turn)
@@ -962,14 +1149,15 @@ class InterviewService:
         self, modules: list[InterviewModule]
     ) -> list[ModulePlanItem]:
         """Build module plan from InterviewModule list."""
-        return [
-            ModulePlanItem(
-                module_id=m.module_id,
-                status=m.status,
-                est_min=3,
-            )
-            for m in modules
-        ]
+        plan = []
+        for m in modules:
+            try:
+                bank = self.question_bank.load_question_bank(m.module_id)
+                est_min = bank.estimated_duration_min
+            except (FileNotFoundError, ValueError):
+                est_min = 5
+            plan.append(ModulePlanItem(module_id=m.module_id, status=m.status, est_min=est_min))
+        return plan
 
     def _build_module_plan_from_db(
         self, modules: list[InterviewModule]
@@ -985,29 +1173,47 @@ class InterviewService:
         """Build response for continuing interview."""
         # Use static question_id if available, otherwise generate adaptive ID
         question_id = question_result.question_id or f"adaptive_{module.question_count}"
+
+        # Look up original Question from bank for rich fields
+        rich: dict = {}
+        if question_id and not question_id.startswith("adaptive_"):
+            orig_q = self.question_bank.get_question_by_id(module.module_id, question_id)
+            if orig_q:
+                rich = _rich_fields_from_question(orig_q, self.question_bank, module.module_id)
+
+        meta = QuestionMeta(
+            question_id=question_id,
+            question_type=question_result.question_type,
+            target_signal=question_result.target_signal,
+            rationale=question_result.rationale,
+            is_followup=question_result.is_followup,
+            **rich,
+        )
         return InterviewNextQuestionResponse(
             question_id=question_id,
             question_text=question_result.question_text,
             question_type=question_result.question_type,
-            question_meta=QuestionMeta(
-                question_id=question_id,
-                question_type=question_result.question_type,
-                target_signal=question_result.target_signal,
-                rationale=question_result.rationale,
-                is_followup=question_result.is_followup,
-            ),
+            question_meta=meta,
             module_id=module.module_id,
-            module_progress=ModuleProgress(
-                module_id=module.module_id,
-                module_name=self.question_bank.get_module_name(module.module_id),
-                questions_asked=module.question_count,
-                coverage_score=module.coverage_score,
-                confidence_score=module.confidence_score,
-                signals_captured=list(module.signals_captured or []),
-                status=module.status,
-            ),
+            module_progress=self._build_module_progress(module),
             status="continue",
             acknowledgment_text=question_result.acknowledgment_text,
+            **rich,
+        )
+
+    def _build_module_progress(self, module: InterviewModule) -> ModuleProgress:
+        """Build ModuleProgress from an InterviewModule."""
+        bank = self.question_bank.load_question_bank(module.module_id)
+        total = len(bank.questions)
+        return ModuleProgress(
+            module_id=module.module_id,
+            module_name=self.question_bank.get_module_name(module.module_id),
+            questions_asked=module.question_count,
+            total_questions=total,
+            coverage_score=module.question_count / max(total, 1),
+            confidence_score=1.0 if module.status == "completed" else 0.0,
+            signals_captured=[],
+            status=module.status,
         )
 
     def _build_module_complete_response(
@@ -1021,22 +1227,20 @@ class InterviewService:
         """Build response for module completion."""
         status = "all_modules_complete" if all_complete else "module_complete"
 
+        progress = self._build_module_progress(module)
+        progress.status = "completed"
+        progress.coverage_score = 1.0
+        progress.confidence_score = 1.0
+
         response = InterviewNextQuestionResponse(
             module_id=module.module_id,
-            module_progress=ModuleProgress(
-                module_id=module.module_id,
-                module_name=self.question_bank.get_module_name(module.module_id),
-                questions_asked=module.question_count,
-                coverage_score=module.coverage_score,
-                confidence_score=module.confidence_score,
-                signals_captured=list(module.signals_captured or []),
-                status="completed",
-            ),
+            module_progress=progress,
             status=status,
             module_summary=module_summary,
         )
 
         if next_question and next_module:
+            rich = _rich_fields_from_question(next_question, self.question_bank, next_module.module_id)
             response.question_id = next_question.question_id
             response.question_text = next_question.question_text
             response.question_type = next_question.question_type
@@ -1046,8 +1250,12 @@ class InterviewService:
                 target_signal=next_question.target_signals[0]
                 if next_question.target_signals
                 else "",
+                **rich,
             )
             response.module_id = next_module.module_id
+            # Set top-level rich fields
+            for k, v in rich.items():
+                setattr(response, k, v)
 
         return response
 
@@ -1059,6 +1267,7 @@ class InterviewService:
                 module_id="",
                 module_name="",
                 questions_asked=0,
+                total_questions=0,
                 coverage_score=1.0,
                 confidence_score=1.0,
                 signals_captured=[],
@@ -1104,19 +1313,18 @@ class InterviewService:
             elif module.status == "completed" and module_completions[module.module_id][0].status != "completed":
                 module_completions[module.module_id] = (module, interview_session)
 
-        # Define all modules (mandatory + add-ons)
-        mandatory_modules = ["M1", "M2", "M3", "M4"]
-        addon_modules = ["A1", "A2", "A3", "A4"]
-        all_modules = mandatory_modules + addon_modules
+        # Define all modules
+        mandatory_modules = ["M1", "M2", "M3", "M4", "M5", "M6", "M7", "M8"]
+        all_modules = mandatory_modules
         module_info = {
-            "M1": {"name": "Core Identity & Context", "description": "Understanding who you are and your life context"},
-            "M2": {"name": "Decision Logic & Risk", "description": "How you make decisions and handle uncertainty"},
-            "M3": {"name": "Preferences & Values", "description": "Your priorities and what matters to you"},
-            "M4": {"name": "Communication & Social", "description": "Your interaction style and social tendencies"},
-            "A1": {"name": "Lifestyle & Routines", "description": "Your daily habits, routines, and lifestyle choices"},
-            "A2": {"name": "Spending & Financial Behavior", "description": "How you manage money and make purchase decisions"},
-            "A3": {"name": "Career & Growth Aspirations", "description": "Your career goals and personal growth mindset"},
-            "A4": {"name": "Work & Learning Style", "description": "How you work, learn, and solve problems"},
+            "M1": {"name": "Core Identity & Context", "description": "Demographics, personality, and consumer orientation"},
+            "M2": {"name": "Preferences & Values", "description": "Value system, trust hierarchy, and brand attitudes"},
+            "M3": {"name": "Purchase Decision Logic", "description": "How and where you buy, price sensitivity, and switching behavior"},
+            "M4": {"name": "Lifestyle & Grooming", "description": "Daily bathing context, routines, and skin concerns"},
+            "M5": {"name": "Sensory & Aesthetic Preferences", "description": "Fragrance, texture, lather, and packaging preferences"},
+            "M6": {"name": "Body Wash Deep-Dive", "description": "Current brands, satisfaction, pain points, and unmet needs"},
+            "M7": {"name": "Media & Influence", "description": "How you discover products and who you trust"},
+            "M8": {"name": "Concept Test", "description": "Evaluate 5 product concepts and help pick the best 2 to develop"},
         }
 
         modules: list[UserModuleStatus] = []
@@ -1151,15 +1359,14 @@ class InterviewService:
                     status="not_started",
                 ))
 
-        can_generate_twin = completed_count >= 4
+        can_generate_twin = completed_count >= 8
 
         return UserModulesResponse(
             user_id=user_id,
             modules=modules,
             completed_count=completed_count,
-            total_required=4,
+            total_required=8,
             can_generate_twin=can_generate_twin,
-            existing_twin_id=None,  # TODO: Check for existing twin
         )
 
     async def start_single_module(
@@ -1238,10 +1445,12 @@ class InterviewService:
 
         # Build response
         module_plan = self._build_module_plan(modules)
+        bank = self.question_bank.load_question_bank(first_module.module_id)
         first_module_info = ModuleInfo(
             module_id=first_module.module_id,
             module_name=self.question_bank.get_module_name(first_module.module_id),
-            estimated_duration_min=3,
+            estimated_duration_min=bank.estimated_duration_min,
+            total_questions=len(bank.questions),
             status="active",
         )
 
@@ -1259,6 +1468,7 @@ class InterviewService:
                 target_signal=first_question.target_signals[0]
                 if first_question.target_signals
                 else "",
+                **_rich_fields_from_question(first_question, self.question_bank, first_module.module_id),
             ),
         )
 
@@ -1340,38 +1550,6 @@ class InterviewService:
             confidence_score=active_module.confidence_score,
             can_generate_twin=user_modules.can_generate_twin,
             remaining_modules=remaining,
-        )
-
-    async def check_twin_eligibility(
-        self,
-        session: AsyncSession,
-        user_id: UUID,
-    ) -> TwinEligibilityResponse:
-        """Check if user can generate their digital twin.
-
-        Args:
-            session: Database session.
-            user_id: User ID.
-
-        Returns:
-            TwinEligibilityResponse with eligibility status.
-        """
-        user_modules = await self.get_user_modules(session, user_id)
-
-        completed = [m.module_id for m in user_modules.modules if m.status == "completed"]
-        missing = [m.module_id for m in user_modules.modules if m.status != "completed"]
-
-        if user_modules.can_generate_twin:
-            message = "All mandatory modules completed! You can now generate your digital twin."
-        else:
-            message = f"Complete {len(missing)} more module(s) to generate your digital twin: {', '.join(missing)}"
-
-        return TwinEligibilityResponse(
-            user_id=user_id,
-            can_generate_twin=user_modules.can_generate_twin,
-            completed_modules=completed,
-            missing_modules=missing,
-            message=message,
         )
 
 

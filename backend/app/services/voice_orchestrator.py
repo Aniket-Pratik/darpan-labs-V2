@@ -5,6 +5,7 @@ import json
 import logging
 from uuid import UUID
 
+import openai
 from fastapi import WebSocket, WebSocketDisconnect
 from sqlalchemy import select
 
@@ -116,22 +117,23 @@ class VoiceOrchestrator:
                             logger.debug("Empty transcript, skipping")
                             continue
 
-                        # Send raw Whisper transcript immediately so
-                        # the user sees their words without waiting for
-                        # correction + submission.
+                        # Send transcript back so the user can review/edit
+                        # before explicitly submitting.
                         await websocket.send_json({
                             "type": "final_transcript",
                             "text": asr_result.transcript,
                             "language": asr_result.language,
                             "confidence": asr_result.confidence,
                         })
-
-                        # Now correct + submit (user already sees text)
-                        await self._process_final_transcript(
-                            websocket=websocket,
-                            interview_session_id=interview_session_id,
-                            transcript=asr_result.transcript,
-                            confidence=asr_result.confidence,
+                    except openai.APIConnectionError:
+                        logger.error(
+                            f"Whisper API connection failed for {session_id} after retries",
+                            exc_info=True,
+                        )
+                        await self._send_error(
+                            websocket,
+                            "Voice transcription is temporarily unavailable. "
+                            "Please try again or switch to typing.",
                         )
                     except Exception as e:
                         logger.error(
@@ -310,6 +312,25 @@ class VoiceOrchestrator:
                 }
                 if next_response.module_summary:
                     msg["module_summary"] = next_response.module_summary
+                # Rich UI fields for structured question types
+                if next_response.options:
+                    msg["options"] = [o.model_dump() for o in next_response.options]
+                if next_response.max_selections is not None:
+                    msg["max_selections"] = next_response.max_selections
+                if next_response.scale_min is not None:
+                    msg["scale_min"] = next_response.scale_min
+                if next_response.scale_max is not None:
+                    msg["scale_max"] = next_response.scale_max
+                if next_response.scale_labels:
+                    msg["scale_labels"] = next_response.scale_labels
+                if next_response.matrix_items:
+                    msg["matrix_items"] = next_response.matrix_items
+                if next_response.matrix_options:
+                    msg["matrix_options"] = [o.model_dump() for o in next_response.matrix_options]
+                if next_response.placeholder:
+                    msg["placeholder"] = next_response.placeholder
+                if next_response.concept_card:
+                    msg["concept_card"] = next_response.concept_card.model_dump()
 
                 await websocket.send_json(msg)
                 logger.info(
