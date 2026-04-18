@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono, Space_Grotesk } from "next/font/google";
 import { Toaster } from "sonner";
 import { Providers } from "@/components/layout/Providers";
@@ -24,6 +24,16 @@ const spaceGrotesk = Space_Grotesk({
 export const metadata: Metadata = {
   title: "Study Design Engine — Darpan Labs",
   description: "AI-powered study design workflow",
+};
+
+// Without this, mobile Safari/Chrome render at a ~980px virtual width and
+// scale down — everything looks pixellated/blurry. initialScale=1 maps 1 CSS
+// pixel to 1 device-independent pixel, so Retina devices get crisp output.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: "#0A0A0A",
 };
 
 export default function RootLayout({
