@@ -561,6 +561,16 @@ export function QuestionnaireView({ study, stepVersion }: QuestionnaireViewProps
     study.status === "step_5_locked" ||
     study.status === "complete";
 
+  // Relabel questionnaire groups per study type. For ad_creative testing the
+  // "concepts" are creative territories, so the fan-out stage tests territory
+  // exposure — calling it "Concept Testing" is misleading.
+  const isAdCreative =
+    (study.study_metadata as { study_type?: string } | undefined)?.study_type ===
+    "ad_creative_testing";
+  const groupLabels = isAdCreative
+    ? { pre: "Pre-Exposure", perItem: "Territory Exposure", post: "Post-Exposure", item: "Territory" }
+    : { pre: "Pre-Concept", perItem: "Concept Testing", post: "Post-Concept", item: "Concept" };
+
   if (!content) return null;
 
   const sections: QuestionnaireSection[] = content.sections || [];
@@ -791,11 +801,11 @@ export function QuestionnaireView({ study, stepVersion }: QuestionnaireViewProps
         </Card>
       )}
 
-      {/* ── Pre-Concept Sections ─────────────────────────────────── */}
+      {/* ── Pre-exposure / Pre-concept Sections ─────────────────────── */}
       {!showSimulation && preConcept.length > 0 && (
         <div className="space-y-2">
           <h3 className="text-xs font-medium text-white/40 uppercase tracking-wider px-1">
-            Pre-Concept
+            {groupLabels.pre}
           </h3>
           {preConcept.map((section) => (
             <SectionCard key={section.section_id} section={section} {...sectionCardProps} />
@@ -803,11 +813,11 @@ export function QuestionnaireView({ study, stepVersion }: QuestionnaireViewProps
         </div>
       )}
 
-      {/* ── Per-Concept Sections ─────────────────────────────────── */}
+      {/* ── Per-concept / Per-territory Sections ──────────────────── */}
       {!showSimulation && conceptGroups.length > 0 && (
         <div className="space-y-4">
           <h3 className="text-xs font-medium text-white/40 uppercase tracking-wider px-1">
-            Concept Testing
+            {groupLabels.perItem}
           </h3>
           {conceptGroups.map((group) => (
             <div key={`concept-group-${group.conceptIndex}`} className="space-y-2">
@@ -816,7 +826,7 @@ export function QuestionnaireView({ study, stepVersion }: QuestionnaireViewProps
                   <span className="text-xs font-bold text-darpan-lime">{group.conceptIndex + 1}</span>
                 </div>
                 <span className="text-xs font-medium text-darpan-lime">
-                  Concept {group.conceptIndex + 1}
+                  {groupLabels.item} {group.conceptIndex + 1}
                 </span>
               </div>
               {group.sections.map((section) => (
@@ -832,11 +842,11 @@ export function QuestionnaireView({ study, stepVersion }: QuestionnaireViewProps
         </div>
       )}
 
-      {/* ── Post-Concept Sections ────────────────────────────────── */}
+      {/* ── Post-exposure / Post-concept Sections ─────────────────── */}
       {!showSimulation && postConcept.length > 0 && (
         <div className="space-y-2">
           <h3 className="text-xs font-medium text-white/40 uppercase tracking-wider px-1">
-            Post-Concept
+            {groupLabels.post}
           </h3>
           {postConcept.map((section) => (
             <SectionCard key={section.section_id} section={section} {...sectionCardProps} />
