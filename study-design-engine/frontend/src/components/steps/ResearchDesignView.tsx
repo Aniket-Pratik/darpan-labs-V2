@@ -81,7 +81,7 @@ export function ResearchDesignView({
       </Card>
 
       {/* Key Metrics */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card>
           <div className="flex items-center gap-2 mb-3">
             <Users className="w-4 h-4 text-darpan-lime" />
@@ -195,7 +195,7 @@ export function ResearchDesignView({
       {/* Additional Details */}
       <Card>
         <CardTitle>Additional Details</CardTitle>
-        <div className="grid grid-cols-2 gap-4 mt-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3">
           <div>
             <p className="text-xs text-white/40 mb-1">Data Collection</p>
             <p className="text-sm">{formatLabel(content.data_collection_method || "online")}</p>

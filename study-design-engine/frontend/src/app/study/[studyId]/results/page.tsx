@@ -338,7 +338,7 @@ export default function ResultsDashboardPage() {
         </div>
 
         {/* Content */}
-        <main className="flex-1 max-w-5xl mx-auto w-full px-6 py-8">
+        <main className="flex-1 max-w-5xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-8">
           {/* Header */}
           <div className="flex items-center gap-4 mb-8">
             <Link

@@ -156,7 +156,7 @@ export const StudyBriefView = forwardRef<StudyBriefViewHandle, StudyBriefViewPro
                 <p className="text-xs text-white/40 font-medium mb-2">
                   {categoryLabels[cat] || formatLabel(cat)}
                 </p>
-                <div className="grid grid-cols-2 gap-1.5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                   {metrics.map((m) => {
                     const selected = currentMetrics.includes(m.id);
                     return (
@@ -213,7 +213,7 @@ export const StudyBriefView = forwardRef<StudyBriefViewHandle, StudyBriefViewPro
             Target Audience
           </span>
         </CardTitle>
-        <div className="grid grid-cols-2 gap-4 mt-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3">
           {content.recommended_audience &&
             Object.entries(content.recommended_audience).map(([key, value]) => (
               <div key={key}>

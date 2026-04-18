@@ -304,7 +304,7 @@ export default function StudyWizardPage() {
         {/* Concepts to select — shown after concepts/territories are locked
             (step 2 for concept_testing, step 3 for ad_creative_testing) */}
         {study && isStepLocked(studyType === "ad_creative_testing" ? 3 : 2, study.status as StudyStatus, studyType) && (
-          <div className="max-w-4xl mx-auto px-6">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6">
             <div className="flex items-center gap-3 px-4 py-2.5 bg-darpan-surface border border-darpan-border rounded-lg mb-4">
               <span className="text-xs text-white/40">
                 Concepts to recommend:
@@ -333,7 +333,7 @@ export default function StudyWizardPage() {
             message={loadingMessage}
           />
 
-          <div className="max-w-4xl mx-auto px-6 pb-24">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 pb-24">
             {activeStep === 1 && (
               <StudyBriefView
                 ref={studyBriefRef}

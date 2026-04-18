@@ -707,7 +707,7 @@ export function QuestionnaireView({ study, stepVersion }: QuestionnaireViewProps
               Quality Controls
             </span>
           </CardTitle>
-          <div className="grid grid-cols-2 gap-3 mt-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
             <div className="flex items-center gap-2">
               <div className={`w-2 h-2 rounded-full ${content.quality_controls.straightline_detection ? "bg-darpan-success" : "bg-white/20"}`} />
               <span className="text-xs text-white/60">Straightline Detection</span>
@@ -739,7 +739,7 @@ export function QuestionnaireView({ study, stepVersion }: QuestionnaireViewProps
               Survey Logic
             </span>
           </CardTitle>
-          <div className="grid grid-cols-2 gap-3 mt-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
             <div>
               <p className="text-xs text-white/40 mb-1">Concept Rotation</p>
               <p className="text-sm">{formatLabel(content.survey_logic.concept_rotation || "random")}</p>
