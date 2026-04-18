@@ -29,7 +29,7 @@ export function Sidebar({ activePage = "Studies" }: { activePage?: string }) {
   };
 
   return (
-    <aside className="fixed left-0 top-0 bottom-0 w-[60px] bg-darpan-surface border-r border-darpan-border flex flex-col items-center py-4 z-50">
+    <aside className="fixed left-0 top-0 bottom-0 w-[60px] bg-darpan-surface border-r border-darpan-border hidden md:flex flex-col items-center py-4 z-50">
       <div className="w-9 h-9 rounded-lg bg-darpan-lime/10 border border-darpan-lime/20 flex items-center justify-center mb-8">
         <span className="text-darpan-lime text-xs font-bold tracking-tight">DL</span>
       </div>

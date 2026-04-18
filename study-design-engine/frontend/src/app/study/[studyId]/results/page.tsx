@@ -299,9 +299,9 @@ export default function ResultsDashboardPage() {
     <div className="min-h-screen flex">
       <Sidebar activePage="Studies" />
 
-      <div className="flex-1 ml-[60px] flex flex-col">
+      <div className="flex-1 ml-0 md:ml-[60px] flex flex-col">
         {/* Top bar */}
-        <div className="flex items-center justify-between px-6 h-12 shrink-0">
+        <div className="flex items-center justify-between gap-2 px-4 sm:px-6 h-12 shrink-0">
           <div className="flex items-center gap-2 text-sm">
             <Link
               href="/"

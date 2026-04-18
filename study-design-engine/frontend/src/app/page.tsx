@@ -88,8 +88,8 @@ export default function LandingPage() {
     <div className="min-h-screen flex">
       <Sidebar activePage="Studies" />
 
-      <div className="flex-1 ml-[60px] flex flex-col">
-        <div className="flex items-center justify-between px-6 h-12 shrink-0">
+      <div className="flex-1 ml-0 md:ml-[60px] flex flex-col">
+        <div className="flex items-center justify-between gap-2 px-4 sm:px-6 h-12 shrink-0">
           <div className="flex items-center gap-2 text-sm">
             <span className="text-white/40">Studies</span>
             <span className="text-white/20">/</span>
@@ -134,7 +134,7 @@ export default function LandingPage() {
           )}
         </div>
 
-        <main className="flex-1 flex items-center justify-center px-6 pb-12">
+        <main className="flex-1 flex items-center justify-center px-4 sm:px-6 py-8 sm:pb-12">
           <div className="w-full max-w-[640px]">
             {user ? (
               <AuthedHero

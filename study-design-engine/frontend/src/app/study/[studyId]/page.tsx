@@ -248,9 +248,9 @@ export default function StudyWizardPage() {
     <div className="min-h-screen flex">
       <Sidebar activePage="Studies" />
 
-      <div className="flex-1 ml-[60px] flex flex-col">
+      <div className="flex-1 ml-0 md:ml-[60px] flex flex-col">
         {/* Top bar — breadcrumb + avatar */}
-        <div className="flex items-center justify-between px-6 h-12 shrink-0">
+        <div className="flex items-center justify-between gap-2 px-4 sm:px-6 h-12 shrink-0">
           <div className="flex items-center gap-2 text-sm">
             <Link href="/" className="text-white/40 hover:text-white/60 transition-colors">
               Studies
@@ -481,7 +481,7 @@ export default function StudyWizardPage() {
         </div>
 
         {/* Action bar */}
-        <div className="fixed bottom-0 left-[60px] right-0">
+        <div className="fixed bottom-0 left-0 md:left-[60px] right-0">
           <ActionBar
             status={study.status as StudyStatus}
             activeStep={activeStep}
