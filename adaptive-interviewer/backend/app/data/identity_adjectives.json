@@ -1,0 +1,21 @@
+{
+  "instruction": "When your colleagues or peers describe you, which of these words do you MOST want them to use? Drag to rank your top 5 out of 10.",
+  "adjectives": [
+    "pragmatic",
+    "creative",
+    "decisive",
+    "innovative",
+    "dependable",
+    "cutting-edge",
+    "thoughtful",
+    "efficient",
+    "collaborative",
+    "ambitious"
+  ],
+  "top_n": 5,
+  "identity_axes": {
+    "operator":  ["pragmatic", "dependable", "efficient", "decisive"],
+    "creator":   ["creative", "innovative", "cutting-edge", "thoughtful"],
+    "connector": ["collaborative", "thoughtful", "ambitious"]
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "instrument": "PVQ-10",
+  "citation": "Schwartz, S. H. (2003). A proposal for measuring value orientations across nations. European Social Survey Core Questionnaire Development.",
+  "use_note": "Academic research use. PVQ-10 items are published in the ESS core-questionnaire documentation and widely reproduced.",
+  "instruction": "Here are short descriptions of different people. For each one, tell me how much this person is like you, on a 1 to 6 scale.",
+  "scale": {
+    "min": 1,
+    "max": 6,
+    "labels": {
+      "1": "Not like me at all",
+      "2": "Not like me",
+      "3": "A little like me",
+      "4": "Somewhat like me",
+      "5": "Like me",
+      "6": "Very much like me"
+    }
+  },
+  "items": [
+    {
+      "n": 1,
+      "text": "Thinking up new ideas and being creative is important to this person. They like to do things in their own original way.",
+      "value": "self_direction",
+      "higher_order": "openness_to_change"
+    },
+    {
+      "n": 2,
+      "text": "It is important to this person to be rich. They want to have a lot of money and expensive things.",
+      "value": "power",
+      "higher_order": "self_enhancement"
+    },
+    {
+      "n": 3,
+      "text": "Living in secure surroundings is important to this person. They avoid anything that might endanger their safety.",
+      "value": "security",
+      "higher_order": "conservation"
+    },
+    {
+      "n": 4,
+      "text": "It is important to this person to have a good time. They like to \"spoil\" themselves.",
+      "value": "hedonism",
+      "higher_order": "openness_to_change"
+    },
+    {
+      "n": 5,
+      "text": "It is important to this person to show their abilities. They want people to admire what they do.",
+      "value": "achievement",
+      "higher_order": "self_enhancement"
+    },
+    {
+      "n": 6,
+      "text": "Adventure and taking risks are important to this person. They want to have an exciting life.",
+      "value": "stimulation",
+      "higher_order": "openness_to_change"
+    },
+    {
+      "n": 7,
+      "text": "It is important to this person to help the people around them. They want to care for their well-being.",
+      "value": "benevolence",
+      "higher_order": "self_transcendence"
+    },
+    {
+      "n": 8,
+      "text": "It is important to this person always to behave properly. They want to avoid doing anything people would say is wrong.",
+      "value": "conformity",
+      "higher_order": "conservation"
+    },
+    {
+      "n": 9,
+      "text": "Tradition is important to this person. They try to follow the customs handed down by their religion or their family.",
+      "value": "tradition",
+      "higher_order": "conservation"
+    },
+    {
+      "n": 10,
+      "text": "Looking after the environment is important to this person. They strongly believe people should care for nature.",
+      "value": "universalism",
+      "higher_order": "self_transcendence"
+    }
+  ],
+  "value_labels": {
+    "self_direction": "Self-direction",
+    "power": "Power",
+    "security": "Security",
+    "hedonism": "Hedonism",
+    "achievement": "Achievement",
+    "stimulation": "Stimulation",
+    "benevolence": "Benevolence",
+    "conformity": "Conformity",
+    "tradition": "Tradition",
+    "universalism": "Universalism"
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "instrument": "BFI-2-S",
+  "citation": "Soto, C. J., & John, O. P. (2017). Short and extra-short forms of the Big Five Inventory-2: The BFI-2-S and BFI-2-XS. Journal of Research in Personality, 68, 69-81.",
+  "use_note": "Academic research use — IIMA term project. Commercial redistribution requires clearance from the authors via colby.edu/psych/personality-lab.",
+  "stem": "I am someone who...",
+  "scale": {
+    "min": 1,
+    "max": 5,
+    "labels": {
+      "1": "Disagree strongly",
+      "2": "Disagree a little",
+      "3": "Neither agree nor disagree",
+      "4": "Agree a little",
+      "5": "Agree strongly"
+    }
+  },
+  "items": [
+    {"n": 1,  "text": "Tends to be quiet.",                                           "trait": "E", "reversed": true},
+    {"n": 2,  "text": "Is compassionate, has a soft heart.",                          "trait": "A", "reversed": false},
+    {"n": 3,  "text": "Tends to be disorganized.",                                    "trait": "C", "reversed": true},
+    {"n": 4,  "text": "Worries a lot.",                                               "trait": "N", "reversed": false},
+    {"n": 5,  "text": "Is fascinated by art, music, or literature.",                  "trait": "O", "reversed": false},
+    {"n": 6,  "text": "Is dominant, acts as a leader.",                               "trait": "E", "reversed": false},
+    {"n": 7,  "text": "Is sometimes rude to others.",                                 "trait": "A", "reversed": true},
+    {"n": 8,  "text": "Has difficulty getting started on tasks.",                     "trait": "C", "reversed": true},
+    {"n": 9,  "text": "Tends to feel depressed, blue.",                               "trait": "N", "reversed": false},
+    {"n": 10, "text": "Has little interest in abstract ideas.",                        "trait": "O", "reversed": true},
+    {"n": 11, "text": "Is full of energy.",                                            "trait": "E", "reversed": false},
+    {"n": 12, "text": "Assumes the best about people.",                                "trait": "A", "reversed": false},
+    {"n": 13, "text": "Is reliable, can always be counted on.",                        "trait": "C", "reversed": false},
+    {"n": 14, "text": "Is emotionally stable, not easily upset.",                      "trait": "N", "reversed": true},
+    {"n": 15, "text": "Is original, comes up with new ideas.",                         "trait": "O", "reversed": false},
+    {"n": 16, "text": "Is outgoing, sociable.",                                        "trait": "E", "reversed": false},
+    {"n": 17, "text": "Can be cold and uncaring.",                                     "trait": "A", "reversed": true},
+    {"n": 18, "text": "Keeps things neat and tidy.",                                   "trait": "C", "reversed": false},
+    {"n": 19, "text": "Is relaxed, handles stress well.",                              "trait": "N", "reversed": true},
+    {"n": 20, "text": "Has few artistic interests.",                                   "trait": "O", "reversed": true},
+    {"n": 21, "text": "Prefers to have others take charge.",                           "trait": "E", "reversed": true},
+    {"n": 22, "text": "Is respectful, treats others with respect.",                    "trait": "A", "reversed": false},
+    {"n": 23, "text": "Is persistent, works until the task is finished.",              "trait": "C", "reversed": false},
+    {"n": 24, "text": "Feels secure, comfortable with self.",                          "trait": "N", "reversed": true},
+    {"n": 25, "text": "Is complex, a deep thinker.",                                   "trait": "O", "reversed": false},
+    {"n": 26, "text": "Is less active than other people.",                             "trait": "E", "reversed": true},
+    {"n": 27, "text": "Tends to find fault with others.",                              "trait": "A", "reversed": true},
+    {"n": 28, "text": "Can be somewhat careless.",                                     "trait": "C", "reversed": true},
+    {"n": 29, "text": "Is temperamental, gets emotional easily.",                      "trait": "N", "reversed": false},
+    {"n": 30, "text": "Has little creativity.",                                        "trait": "O", "reversed": true}
+  ],
+  "trait_labels": {
+    "E": "Extraversion",
+    "A": "Agreeableness",
+    "C": "Conscientiousness",
+    "N": "Negative Emotionality",
+    "O": "Open-Mindedness"
+  },
+  "items_per_screen": 10
+}
