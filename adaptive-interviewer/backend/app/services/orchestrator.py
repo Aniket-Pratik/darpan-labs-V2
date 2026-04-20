@@ -116,6 +116,12 @@ class Orchestrator:
             client_meta=client_meta,
         )
 
+        # Reclassification trigger: if the most recent interviewer
+        # turn reported a reclassify_signal AND we are already in a
+        # phase-3 variant, re-run the classifier before emitting the
+        # next turn. Capped by adaptive_max_reclassifications.
+        await self._maybe_reclassify(session)
+
         # Re-read turns, then decide next interviewer move.
         return await self._emit_next_interviewer_turn(session=session)
 
@@ -167,21 +173,10 @@ class Orchestrator:
         records = to_records(turns)
         cursor = compute_cursor(records, archetype)
 
-        # Chunk C hook: after phase 1 completes, run classifier.
+        # After phase 1 completes and no archetype is set, run classifier.
         if cursor.phase_id == "phase2":
-            try:
-                from app.services.classifier import run_phase2  # optional until chunk C
-                message = await run_phase2(
-                    db=self.db, session=session, records=records,
-                )
-                return message
-            except ImportError:
-                # Classifier not yet wired — surface graceful message.
-                return InterviewerMessage(
-                    phase="phase2",
-                    text="Classifier not yet wired in this build. (Chunk C).",
-                    is_terminal=True,
-                )
+            from app.services.classifier import run_phase2
+            return await run_phase2(db=self.db, session=session, records=records)
 
         if cursor.is_terminal:
             return await self._emit_terminal_message(session)
@@ -265,6 +260,21 @@ class Orchestrator:
             progress_label=progress_label,
             is_terminal=False,
         )
+
+    async def _maybe_reclassify(self, session: InterviewSession) -> None:
+        archetype = (session.settings or {}).get("archetype")
+        if archetype is None:
+            return  # still in phase 1/2 — classifier handles it
+        turns = await load_turns(self.db, session.id)
+        interviewer_turns = [t for t in turns if t.role == "interviewer"]
+        if not interviewer_turns:
+            return
+        latest_meta = interviewer_turns[-1].question_meta or {}
+        hint = latest_meta.get("reclassify_signal")
+        if not hint:
+            return
+        from app.services.classifier import trigger_reclassification
+        await trigger_reclassification(self.db, session, hint)
 
     async def _emit_terminal_message(self, session: InterviewSession) -> InterviewerMessage:
         session.status = "completed"

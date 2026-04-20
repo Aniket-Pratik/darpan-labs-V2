@@ -18,9 +18,6 @@ from app.services.phase_defs import (
     get_phase,
 )
 
-PHASE_ORDER_PRE_ARCHETYPE: list[str] = ["phase1", "phase2"]
-PHASE_ORDER_POST_ARCHETYPE: list[str] = ["phase4"]
-
 ARCHETYPE_PHASE_MAP: dict[Archetype, str] = {
     "prosumer": "phase3a",
     "smb_it": "phase3b",
@@ -48,11 +45,16 @@ class TurnRecord:
 
 
 def ordered_phase_ids(archetype: Optional[Archetype]) -> list[str]:
-    """Full phase sequence for the current interview."""
-    seq = list(PHASE_ORDER_PRE_ARCHETYPE)
+    """Item-bearing phase sequence for the current interview.
+
+    Phase 2 carries no user-facing items under the normal path — it's
+    a silent classification step handled by the orchestrator when
+    Phase 1 completes with no archetype set. So it's omitted here.
+    """
+    seq: list[str] = ["phase1"]
     if archetype is not None:
         seq.append(ARCHETYPE_PHASE_MAP[archetype])
-    seq.extend(PHASE_ORDER_POST_ARCHETYPE)
+        seq.append("phase4")
     return seq
 
 
@@ -76,6 +78,7 @@ def compute_cursor(
     """
     items = flatten_items(archetype)
     if not items:
+        # No items registered — nothing to do.
         return Cursor(phase_id="complete", item=None, probe_index=0,
                       is_phase_boundary=False, is_terminal=True)
 
@@ -125,6 +128,11 @@ def compute_cursor(
             is_phase_boundary=False,
         )
 
+    # All items in the item-bearing phases are satisfied. Branch on
+    # whether we still need to classify before calling it terminal.
+    if archetype is None:
+        return Cursor(phase_id="phase2", item=None, probe_index=0,
+                      is_phase_boundary=False, is_terminal=False)
     return Cursor(phase_id="complete", item=None, probe_index=0,
                   is_phase_boundary=False, is_terminal=True)
 
