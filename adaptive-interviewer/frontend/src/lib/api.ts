@@ -1,25 +1,17 @@
-// HTTP client for the adaptive-interviewer backend.
-// Base URL is resolved via Next's rewrite rule -> /api/backend/*
+import type { InterviewerMessage } from "./types";
 
-export type InterviewerMessage = {
+export type StartResponse = { session_id: string; message: InterviewerMessage };
+export type TurnResponse  = { session_id: string; message: InterviewerMessage };
+export type StateResponse = {
+  session_id: string;
+  status: string;
   phase: string;
   block?: string | null;
-  item_id?: string | null;
-  text: string;
-  widget?: Record<string, unknown> | null;
-  progress_label?: string | null;
-  is_terminal: boolean;
+  archetype?: string | null;
+  progress_pct: number;
+  elapsed_sec: number;
 };
-
-export type StartResponse = {
-  session_id: string;
-  message: InterviewerMessage;
-};
-
-export type TurnResponse = {
-  session_id: string;
-  message: InterviewerMessage;
-};
+export type CompleteResponse = { session_id: string; output: Record<string, unknown>; qa: Record<string, unknown> };
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`/api/backend/api/v1${path}`, {
@@ -50,8 +42,10 @@ export function postTurn(
   });
 }
 
-export function completeInterview(sessionId: string) {
-  return request<Record<string, unknown>>(`/adaptive/${sessionId}/complete`, {
-    method: "POST",
-  });
+export function getState(sessionId: string): Promise<StateResponse> {
+  return request<StateResponse>(`/adaptive/${sessionId}/state`);
+}
+
+export function completeInterview(sessionId: string): Promise<CompleteResponse> {
+  return request<CompleteResponse>(`/adaptive/${sessionId}/complete`, { method: "POST" });
 }
