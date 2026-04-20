@@ -150,31 +150,164 @@ def feature_names(archetype: str) -> list[str]:
 def build_design_matrix(
     choices: list[dict[str, Any]],
     archetype: str,
-) -> tuple[np.ndarray, np.ndarray]:
-    """Turn a respondent's conjoint responses into (X, y) for MNL.
+) -> tuple[np.ndarray, np.ndarray, list[int]]:
+    """Turn a respondent's conjoint responses into (X, y, set_sizes).
 
-    `choices` is a list of dicts each shaped like:
-        {
-          "alternatives": [ <profile>, <profile>, ... ],
-          "chosen_alt_index": int   # or -1 if "none"
-        }
-    Rows in X correspond to alternatives (flattened, choice-set by
-    choice-set). y is a binary vector of same length marking the
-    chosen row per set. "none" rows have all-zero features and y=0.
+    Rows in X correspond to alternatives (flattened, set by set).
+    y marks the chosen row per set. `set_sizes` is the count of
+    alternatives per set (used by the softmax-per-set likelihood).
+    "none" responses are skipped from the likelihood (the set is
+    excluded) in v1 — no none-constant estimated yet.
     """
     names = feature_names(archetype)
     rows: list[list[float]] = []
     chosen_flags: list[int] = []
+    set_sizes: list[int] = []
     for cs in choices:
+        chosen = cs.get("chosen_alt_index", -1)
+        if chosen is None or chosen == -1:
+            continue  # skip "none" sets from MLE in v1
         alts = cs["alternatives"]
         for idx, alt in enumerate(alts):
             feats = encode_profile(alt, archetype)
             row = [feats.get(n, 0.0) for n in names]
             rows.append(row)
-            chosen_flags.append(1 if idx == cs.get("chosen_alt_index", -1) else 0)
-        if cs.get("chosen_alt_index", 0) == -1:
-            # "none" — append a zero row with chosen=1 so likelihood
-            # is defined. We don't estimate a none-constant here in v1.
-            rows.append([0.0] * len(names))
-            chosen_flags.append(1)
-    return np.array(rows, dtype=float), np.array(chosen_flags, dtype=int)
+            chosen_flags.append(1 if idx == chosen else 0)
+        set_sizes.append(len(alts))
+    return np.array(rows, dtype=float), np.array(chosen_flags, dtype=int), set_sizes
+
+
+# ------------------- MLE / empirical-Bayes estimation --------------
+
+def _mnl_neg_log_likelihood(
+    beta: np.ndarray,
+    X: np.ndarray,
+    y: np.ndarray,
+    set_sizes: list[int],
+    prior_mean: Optional[np.ndarray] = None,
+    prior_var: float = 9.0,
+) -> float:
+    """Penalized negative log-likelihood for choice-based conjoint.
+
+    Each set contributes -log P(chosen | set). A Gaussian prior on
+    beta (default N(0, 3)) regularizes the fit since each respondent
+    only has 8 sets of 3 alternatives.
+    """
+    if prior_mean is None:
+        prior_mean = np.zeros_like(beta)
+    utilities = X @ beta
+    # Softmax per set.
+    offset = 0
+    nll = 0.0
+    for size in set_sizes:
+        u = utilities[offset:offset + size]
+        u = u - np.max(u)  # numerical stability
+        exp_u = np.exp(u)
+        denom = exp_u.sum()
+        chosen = y[offset:offset + size]
+        chosen_idx = int(np.argmax(chosen))
+        nll -= float(u[chosen_idx] - np.log(denom))
+        offset += size
+    penalty = 0.5 * float(np.sum((beta - prior_mean) ** 2) / prior_var)
+    return nll + penalty
+
+
+def estimate_part_worths(
+    choices: list[dict[str, Any]],
+    archetype: str,
+    prior_mean: Optional[np.ndarray] = None,
+) -> dict[str, Any]:
+    """Fit a regularized MNL for one respondent and return per-
+    attribute-level part-worths plus WTP curves (when a price
+    coefficient is available).
+
+    `prior_mean` enables empirical-Bayes shrinkage toward a
+    population prior (e.g., aggregate fit across all respondents of
+    the same archetype). In a single-session finalize this will be
+    None and we default to a weakly-informative zero prior.
+    """
+    from scipy.optimize import minimize
+
+    names = feature_names(archetype)
+    if prior_mean is None:
+        prior_mean = np.zeros(len(names))
+
+    X, y, set_sizes = build_design_matrix(choices, archetype)
+    if X.size == 0 or len(set_sizes) == 0:
+        return {
+            "feature_names": names,
+            "beta": [0.0] * len(names),
+            "part_worths": {},
+            "wtp": {},
+            "estimation_method": "skipped_no_valid_sets",
+            "n_sets_fit": 0,
+        }
+
+    beta0 = prior_mean.copy()
+    result = minimize(
+        _mnl_neg_log_likelihood,
+        beta0,
+        args=(X, y, set_sizes, prior_mean, 9.0),
+        method="L-BFGS-B",
+        options={"maxiter": 200},
+    )
+    beta_hat = result.x
+
+    # Part-worths: for nominal attributes, include baseline level with
+    # part-worth 0; for numeric attributes, slope-per-unit is the
+    # coefficient.
+    spec = get_spec(archetype)
+    part_worths: dict[str, dict[str, float]] = {}
+    numeric_slopes: dict[str, float] = {}
+    for attr_name, attr_spec in spec["attributes"].items():
+        if attr_spec["type"] == "numeric":
+            idx = names.index(f"{attr_name}_num")
+            numeric_slopes[attr_name] = float(beta_hat[idx])
+            part_worths[attr_name] = {
+                f"slope_per_unit ({attr_name})": float(beta_hat[idx])
+            }
+        else:
+            levels = attr_spec["levels"]
+            pw: dict[str, float] = {levels[0]: 0.0}
+            for lv in levels[1:]:
+                col = f"{attr_name}_is_{lv}"
+                pw[lv] = float(beta_hat[names.index(col)])
+            part_worths[attr_name] = pw
+
+    # WTP — USD willingness-to-pay, computed only when a price-like
+    # numeric attribute exists and has a non-zero slope.
+    wtp: dict[str, dict[str, float]] = {}
+    price_attrs = [a for a in ("price_usd", "unit_price_usd") if a in numeric_slopes]
+    if price_attrs:
+        price_key = price_attrs[0]
+        price_slope = numeric_slopes[price_key]
+        if abs(price_slope) > 1e-8:
+            for attr_name, attr_spec in spec["attributes"].items():
+                if attr_name == price_key:
+                    continue
+                if attr_spec["type"] == "numeric":
+                    slope = numeric_slopes.get(attr_name, 0.0)
+                    wtp[attr_name] = {
+                        "wtp_per_unit_usd": -slope / price_slope,
+                    }
+                else:
+                    levels = attr_spec["levels"]
+                    wtp_attr: dict[str, float] = {levels[0]: 0.0}
+                    for lv in levels[1:]:
+                        col = f"{attr_name}_is_{lv}"
+                        coef = float(beta_hat[names.index(col)])
+                        wtp_attr[lv] = -coef / price_slope
+                    wtp[attr_name] = wtp_attr
+
+    return {
+        "feature_names": names,
+        "beta": [float(b) for b in beta_hat],
+        "part_worths": part_worths,
+        "wtp": wtp,
+        "estimation_method": (
+            "per-respondent penalized MNL (L-BFGS-B, Gaussian N(0,3) prior); "
+            "aggregate HB recommended once N>=100 — see README"
+        ),
+        "n_sets_fit": len(set_sizes),
+        "converged": bool(result.success),
+    }

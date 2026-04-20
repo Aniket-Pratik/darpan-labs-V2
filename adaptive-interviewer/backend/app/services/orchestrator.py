@@ -165,10 +165,54 @@ class Orchestrator:
             elapsed_sec=elapsed,
         )
 
-    # ------------------------- finalize (stub) --------------------
+    # ------------------------- finalize ---------------------------
 
     async def finalize(self, session_id: UUID) -> Optional[CompleteInterviewResponse]:
-        raise NotImplementedError("Implemented in chunk F")
+        from sqlalchemy.orm import selectinload
+        from sqlalchemy import select
+        from app.models import InterviewSession as _IS
+        from app.services.output_builder import build_output, persist_output
+
+        res = await self.db.execute(
+            select(_IS)
+            .where(_IS.id == session_id)
+            .options(
+                selectinload(_IS.classifications),
+                selectinload(_IS.turns),
+                selectinload(_IS.output),
+            )
+        )
+        session = res.scalar_one_or_none()
+        if session is None:
+            return None
+
+        turns = sorted(session.turns, key=lambda t: t.turn_index)
+        output = build_output(session, turns)
+
+        if session.output is None:
+            await persist_output(session, output, self.db)
+        else:
+            session.output.context = output.get("context")
+            session.output.archetype = output.get("archetype")
+            session.output.jtbd = output.get("jtbd")
+            session.output.conjoint = output.get("conjoint")
+            session.output.brand_lattice = output.get("brand_lattice")
+            session.output.personality = output.get("personality")
+            session.output.values = output.get("values")
+            session.output.identity = output.get("identity")
+            session.output.tone_preference = output.get("tone_preference")
+            session.output.projective = output.get("projective")
+            session.output.qa = output.get("qa")
+
+        if session.status == "active":
+            session.status = "completed"
+            session.ended_at = datetime.now(timezone.utc)
+
+        return CompleteInterviewResponse(
+            session_id=session.id,
+            output=output,
+            qa=output.get("qa") or {},
+        )
 
     # ------------------------- internals --------------------------
 
