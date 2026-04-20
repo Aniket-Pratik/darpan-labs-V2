@@ -63,6 +63,7 @@ class Orchestrator:
         input_mode: str = "text",
         language_preference: str = "auto",
     ) -> tuple[UUID, InterviewerMessage]:
+        await self._ensure_user(user_id)
         session = InterviewSession(
             id=uuid4(),
             user_id=user_id,
@@ -357,6 +358,27 @@ class Orchestrator:
             widget=resolved_widget,
             progress_label=progress_label,
             is_terminal=False,
+        )
+
+    async def _ensure_user(self, user_id: UUID) -> None:
+        """Insert a minimal users row if one doesn't exist for this id.
+
+        The adaptive-interviewer has no auth of its own — the frontend
+        generates an anonymous UUID per browser and reuses it. We
+        upsert a stub user row so the interview_sessions FK resolves.
+        """
+        from sqlalchemy import text
+        await self.db.execute(
+            text(
+                "INSERT INTO users (id, email, display_name, profile_completed, is_admin) "
+                "VALUES (:id, :email, :name, false, false) "
+                "ON CONFLICT (id) DO NOTHING"
+            ),
+            {
+                "id": str(user_id),
+                "email": f"anon-{user_id}@adaptive.local",
+                "name": "Adaptive respondent",
+            },
         )
 
     async def _maybe_reclassify(self, session: InterviewSession) -> None:

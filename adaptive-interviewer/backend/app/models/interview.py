@@ -20,6 +20,20 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
 
 
+class User(Base):
+    """Minimal stub so the ORM can resolve `users.id` foreign keys.
+
+    The table is owned by the ai-interviewer service; create_all
+    skips it here because it already exists in the shared database.
+    We only declare columns we reference (id), not the full schema.
+    """
+
+    __tablename__ = "users"
+    __table_args__ = {"extend_existing": True}
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True)
+
+
 class InterviewSession(Base):
     __tablename__ = "interview_sessions"
 
