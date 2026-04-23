@@ -20,11 +20,12 @@ WORKDIR /app
 ENV NODE_ENV=production
 
 # Install only `serve` in the runtime image — no source, no dev deps
-RUN npm install --global serve@14
+RUN npm install --global serve@14.2.6
 
 COPY --from=builder /app/dist ./dist
 
 EXPOSE 3000
 
 # Railway injects $PORT dynamically; serve it with SPA fallback (-s).
+# Shell form required for ${PORT:-3000} expansion — do not convert to exec form.
 CMD ["sh", "-c", "serve dist -s -l tcp://0.0.0.0:${PORT:-3000}"]
