@@ -6,7 +6,7 @@ Single source of truth for getting `try.darpanlabs.ai` live. Follow top to botto
 
 ## What gets deployed
 
-Three services in one Railway project:
+Five services in one Railway project:
 
 | Service | Repo path | Purpose |
 |---|---|---|
@@ -99,7 +99,7 @@ Both services auto-generate `DATABASE_URL` and `REDIS_URL` env vars that other s
 
 ### 5b. On Namecheap
 1. Log into Namecheap → **Domain List** → click **Manage** next to `darpanlabs.ai`.
-2. **Advanced DNS** tab → **Add New Record** (twice):
+2. **Advanced DNS** tab → **Add New Record** (three times):
 
    | Type | Host | Value | TTL |
    |---|---|---|---|
