@@ -20,23 +20,23 @@ export function DashboardHeader({ data, extData, activeTab, onTabChange }: Dashb
   const displayData = isExtended && extData ? extData : data;
 
   return (
-    <header className="sticky top-0 z-40 h-14 flex items-center justify-between px-6 bg-bg/80 backdrop-blur-md border-b border-border">
+    <header className="sticky top-0 z-40 h-14 flex items-center justify-between px-6 bg-darpan-bg/80 backdrop-blur-md border-b border-darpan-border">
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+          <div className="w-2 h-2 rounded-full bg-darpan-lime animate-pulse" />
           <span className="text-sm font-semibold text-white tracking-tight">
             Dove Body Wash Concept Test
           </span>
         </div>
-        <div className="flex bg-surface rounded-lg p-0.5 border border-border">
+        <div className="flex bg-darpan-surface rounded-lg p-0.5 border border-darpan-border">
           {TABS.map(({ value, label }) => (
             <button
               key={value}
               onClick={() => onTabChange(value)}
               className={`px-2.5 py-1 text-[11px] font-medium rounded-md transition-all cursor-pointer border ${
                 activeTab === value
-                  ? 'bg-primary/15 text-primary border-primary/30 shadow-[0_0_10px_rgba(200,255,0,0.15)]'
-                  : 'text-text-muted border-transparent hover:text-text-secondary hover:border-border'
+                  ? 'bg-darpan-lime/15 text-darpan-lime border-darpan-lime/30 shadow-[0_0_10px_rgba(200,255,0,0.15)]'
+                  : 'text-white/40 border-transparent hover:text-white/60 hover:border-darpan-border'
               }`}
             >
               {label}
@@ -44,13 +44,13 @@ export function DashboardHeader({ data, extData, activeTab, onTabChange }: Dashb
           ))}
         </div>
         <div className="flex items-center gap-2">
-          <span className="px-2 py-0.5 text-[10px] font-mono bg-white/5 text-text-secondary rounded border border-border">
+          <span className="px-2 py-0.5 text-[10px] font-mono bg-white/5 text-white/60 rounded border border-darpan-border">
             n={displayData.metadata.real_n} real
           </span>
-          <span className="px-2 py-0.5 text-[10px] font-mono bg-white/5 text-text-secondary rounded border border-border">
+          <span className="px-2 py-0.5 text-[10px] font-mono bg-white/5 text-white/60 rounded border border-darpan-border">
             n={displayData.metadata.twin_n} twin{isExtended ? ' (5x17)' : ''}
           </span>
-          <span className="px-2 py-0.5 text-[10px] font-mono bg-white/5 text-text-secondary rounded border border-border">
+          <span className="px-2 py-0.5 text-[10px] font-mono bg-white/5 text-white/60 rounded border border-darpan-border">
             {displayData.metadata.concepts_tested} Concepts
           </span>
         </div>

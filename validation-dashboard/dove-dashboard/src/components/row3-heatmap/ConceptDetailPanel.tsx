@@ -21,7 +21,7 @@ export function ConceptDetailPanel({ data, conceptName }: ConceptDetailPanelProp
 
   return (
     <div
-      className="w-72 shrink-0 bg-card border border-border rounded-xl p-4"
+      className="w-72 shrink-0 bg-darpan-surface border border-darpan-border rounded-xl p-4"
       style={{
         borderTopColor: color,
         borderTopWidth: 2,
@@ -35,7 +35,7 @@ export function ConceptDetailPanel({ data, conceptName }: ConceptDetailPanelProp
         </div>
         <button
           onClick={() => setFocused(null)}
-          className="text-text-muted hover:text-white text-lg leading-none cursor-pointer transition-colors"
+          className="text-white/40 hover:text-white text-lg leading-none cursor-pointer transition-colors"
         >
           x
         </button>
@@ -43,7 +43,7 @@ export function ConceptDetailPanel({ data, conceptName }: ConceptDetailPanelProp
 
       {/* Supplementary metrics */}
       <div className="space-y-2 mb-4">
-        <div className="text-[10px] uppercase tracking-wider text-text-muted font-semibold">
+        <div className="text-[10px] uppercase tracking-wider text-white/40 font-semibold">
           Supplementary Metrics
         </div>
         {supplementary.map((m) => {
@@ -51,19 +51,19 @@ export function ConceptDetailPanel({ data, conceptName }: ConceptDetailPanelProp
           const twinVal = twin.t2b[conceptName]?.[m]?.t2b;
           return (
             <div key={m} className="flex items-center justify-between">
-              <span className="text-xs text-text-secondary">{METRIC_LABELS[m]}</span>
+              <span className="text-xs text-white/60">{METRIC_LABELS[m]}</span>
               <div className="flex gap-3 font-mono text-xs">
                 {realVal != null ? (
                   <span style={{ color: t2bColor(realVal) }}>{realVal.toFixed(0)}%</span>
                 ) : (
-                  <span className="text-text-muted">N/A</span>
+                  <span className="text-white/40">N/A</span>
                 )}
                 {twinVal != null ? (
                   <span style={{ color: t2bColor(twinVal) }} className="opacity-50">
                     {twinVal.toFixed(0)}%
                   </span>
                 ) : (
-                  <span className="text-text-muted opacity-50">N/A</span>
+                  <span className="text-white/40 opacity-50">N/A</span>
                 )}
               </div>
             </div>
@@ -73,35 +73,35 @@ export function ConceptDetailPanel({ data, conceptName }: ConceptDetailPanelProp
 
       {/* Barriers */}
       <div className="space-y-2 mb-4">
-        <div className="text-[10px] uppercase tracking-wider text-text-muted font-semibold">
+        <div className="text-[10px] uppercase tracking-wider text-white/40 font-semibold">
           Top Barriers
         </div>
         {barriers.slice(0, 4).map((b) => (
           <div key={b.name} className="flex items-center justify-between">
-            <span className="text-xs text-text-secondary capitalize">
+            <span className="text-xs text-white/60 capitalize">
               {b.name.replace(/_/g, ' ')}
             </span>
-            <span className="font-mono text-xs text-warning">{b.pct.toFixed(0)}%</span>
+            <span className="font-mono text-xs text-darpan-warning">{b.pct.toFixed(0)}%</span>
           </div>
         ))}
         {barriers.length === 0 && (
-          <div className="text-xs text-text-muted">No barriers reported</div>
+          <div className="text-xs text-white/40">No barriers reported</div>
         )}
       </div>
 
       {/* Direct ranking */}
       <div className="space-y-1">
-        <div className="text-[10px] uppercase tracking-wider text-text-muted font-semibold">
+        <div className="text-[10px] uppercase tracking-wider text-white/40 font-semibold">
           Direct Ranking
         </div>
         <div className="flex items-center justify-between text-xs">
-          <span className="text-text-secondary">In top 3</span>
+          <span className="text-white/60">In top 3</span>
           <span className="font-mono text-white">
             {top3Pct > 0 ? `${top3Pct.toFixed(0)}%` : 'Not in top-3'}
           </span>
         </div>
         <div className="flex items-center justify-between text-xs">
-          <span className="text-text-secondary">Ranked #1</span>
+          <span className="text-white/60">Ranked #1</span>
           <span className="font-mono text-white">
             {rank1Pct > 0 ? `${rank1Pct.toFixed(0)}%` : '\u2014'}
           </span>

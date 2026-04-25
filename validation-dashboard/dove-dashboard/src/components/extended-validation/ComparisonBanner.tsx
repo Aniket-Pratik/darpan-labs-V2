@@ -53,8 +53,8 @@ export function ComparisonBanner({ data, baselineData }: Props) {
             : false;
 
           return (
-            <div key={key} className="bg-card border border-border rounded-xl p-4">
-              <div className="text-[11px] text-text-muted mb-3 font-medium">{label}</div>
+            <div key={key} className="bg-darpan-surface border border-darpan-border rounded-xl p-4">
+              <div className="text-[11px] text-white/40 mb-3 font-medium">{label}</div>
               <div className="flex flex-col gap-2">
                 <Row
                   label="Single Twin (baseline)"
@@ -100,7 +100,7 @@ function Row({
   const color = qualityColor(value, metricType);
   return (
     <div className="flex items-center justify-between py-1">
-      <span className="text-[11px] text-text-secondary">{label}</span>
+      <span className="text-[11px] text-white/60">{label}</span>
       <div className="flex items-center gap-2">
         <span className="text-sm font-mono font-bold" style={{ color }}>
           {formatMetricValue(value, metricType)}

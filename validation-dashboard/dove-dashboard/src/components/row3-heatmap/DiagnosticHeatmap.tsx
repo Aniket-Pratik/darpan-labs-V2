@@ -28,8 +28,8 @@ export function DiagnosticHeatmap({ data, source, label }: DiagnosticHeatmapProp
   }, [data.metadata.concept_short_names, block.composites]);
 
   return (
-    <div className="bg-card border border-border rounded-xl p-4 overflow-x-auto" style={{ boxShadow: '0 0 20px rgba(200,255,0,0.03)' }}>
-      <div className="text-[10px] font-bold uppercase tracking-widest text-text-muted mb-3">
+    <div className="bg-darpan-surface border border-darpan-border rounded-xl p-4 overflow-x-auto" style={{ boxShadow: '0 0 20px rgba(200,255,0,0.03)' }}>
+      <div className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-3">
         {label} (n={block.n})
       </div>
       <div
@@ -45,12 +45,12 @@ export function DiagnosticHeatmap({ data, source, label }: DiagnosticHeatmapProp
             key={m}
             onClick={() => setDrilldown(m)}
             className={`text-[10px] text-center font-semibold transition-colors cursor-pointer pb-2 ${
-              drilldownMetric === m ? 'text-primary' : 'text-text-secondary hover:text-primary'
+              drilldownMetric === m ? 'text-darpan-lime' : 'text-white/60 hover:text-darpan-lime'
             }`}
           >
             {METRIC_LABELS[m]}
             {COMPOSITE_WEIGHTS[m] && (
-              <div className="text-[8px] text-text-muted font-mono">
+              <div className="text-[8px] text-white/40 font-mono">
                 {(COMPOSITE_WEIGHTS[m] * 100).toFixed(0)}%w
               </div>
             )}
@@ -62,14 +62,14 @@ export function DiagnosticHeatmap({ data, source, label }: DiagnosticHeatmapProp
             key={m}
             onClick={() => setDrilldown(m)}
             className={`text-[10px] text-center font-semibold transition-colors cursor-pointer pb-2 ${
-              drilldownMetric === m ? 'text-secondary' : 'text-text-muted hover:text-secondary'
+              drilldownMetric === m ? 'text-darpan-cyan' : 'text-white/40 hover:text-darpan-cyan'
             }`}
           >
             {METRIC_LABELS[m]}
           </button>
         ))}
         <div />
-        <div className="text-[10px] text-center font-semibold text-primary pb-2">
+        <div className="text-[10px] text-center font-semibold text-darpan-lime pb-2">
           Composite
         </div>
 
@@ -103,7 +103,7 @@ export function DiagnosticHeatmap({ data, source, label }: DiagnosticHeatmapProp
                 />
               ))}
 
-              <div className="border-l border-border" />
+              <div className="border-l border-darpan-border" />
 
               {EXTRA_COLS.map((m) => (
                 <HeatmapCell
@@ -117,10 +117,10 @@ export function DiagnosticHeatmap({ data, source, label }: DiagnosticHeatmapProp
                 />
               ))}
 
-              <div className="border-l border-border" />
+              <div className="border-l border-darpan-border" />
 
               <div className="flex items-center justify-center py-1.5">
-                <span className="font-mono text-sm font-bold text-primary">
+                <span className="font-mono text-sm font-bold text-darpan-lime">
                   {block.composites[name]?.toFixed(1) ?? '\u2014'}
                 </span>
               </div>

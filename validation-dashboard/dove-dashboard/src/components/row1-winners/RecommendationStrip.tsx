@@ -34,8 +34,8 @@ export function RecommendationStrip({ data }: RecommendationStripProps) {
       }}
     >
       <div className="flex items-start gap-2">
-        <span className="text-primary text-xs font-semibold shrink-0 mt-px">RECOMMENDATION</span>
-        <span className="text-xs text-text-secondary leading-relaxed">{recommendation}</span>
+        <span className="text-darpan-lime text-xs font-semibold shrink-0 mt-px">RECOMMENDATION</span>
+        <span className="text-xs text-white/60 leading-relaxed">{recommendation}</span>
       </div>
     </div>
   );

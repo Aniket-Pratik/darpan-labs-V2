@@ -68,24 +68,24 @@ function ComparisonCard({
   highlight?: boolean;
 }) {
   return (
-    <div className="bg-card border border-border rounded-xl p-4">
-      <div className="text-[11px] text-text-muted mb-2">{label}</div>
+    <div className="bg-darpan-surface border border-darpan-border rounded-xl p-4">
+      <div className="text-[11px] text-white/40 mb-2">{label}</div>
       <div className="flex flex-col gap-1.5">
         <div className="flex items-center justify-between">
-          <span className="text-[10px] text-text-muted font-mono">85 Twins</span>
+          <span className="text-[10px] text-white/40 font-mono">85 Twins</span>
           <span
-            className={`text-sm font-mono font-bold ${highlight ? 'text-primary' : 'text-white'}`}
+            className={`text-sm font-mono font-bold ${highlight ? 'text-darpan-lime' : 'text-white'}`}
           >
             {extValue}
           </span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-[10px] text-text-muted font-mono">17 Twins</span>
-          <span className="text-sm font-mono text-text-secondary">{origValue}</span>
+          <span className="text-[10px] text-white/40 font-mono">17 Twins</span>
+          <span className="text-sm font-mono text-white/60">{origValue}</span>
         </div>
       </div>
       {match !== undefined && (
-        <div className="mt-2 pt-2 border-t border-border">
+        <div className="mt-2 pt-2 border-t border-darpan-border">
           <span
             className="text-[10px] font-mono px-2 py-0.5 rounded"
             style={{

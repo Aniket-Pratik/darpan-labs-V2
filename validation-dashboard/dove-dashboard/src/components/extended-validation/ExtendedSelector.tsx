@@ -24,15 +24,15 @@ export function ExtendedSelector({ data }: Props) {
 
   return (
     <div className="flex items-center gap-3 flex-wrap">
-      <div className="flex bg-surface rounded-lg p-0.5 border border-border">
+      <div className="flex bg-darpan-surface rounded-lg p-0.5 border border-darpan-border">
         {VIEWS.map(({ value, label }) => (
           <button
             key={value}
             onClick={() => setValidationView(value)}
             className={`px-2.5 py-1 text-[11px] font-medium rounded-md transition-all cursor-pointer border ${
               validationView === value
-                ? 'bg-primary/15 text-primary border-primary/30 shadow-[0_0_10px_rgba(200,255,0,0.15)]'
-                : 'text-text-muted border-transparent hover:text-text-secondary hover:border-border'
+                ? 'bg-darpan-lime/15 text-darpan-lime border-darpan-lime/30 shadow-[0_0_10px_rgba(200,255,0,0.15)]'
+                : 'text-white/40 border-transparent hover:text-white/60 hover:border-darpan-border'
             }`}
           >
             {label}
@@ -40,11 +40,11 @@ export function ExtendedSelector({ data }: Props) {
         ))}
       </div>
       <div className="flex items-center gap-2">
-        <label className="text-[11px] text-text-muted font-medium">Participant</label>
+        <label className="text-[11px] text-white/40 font-medium">Participant</label>
         <select
           value={selectedParticipant}
           onChange={(e) => setSelectedParticipant(e.target.value)}
-          className="bg-surface border border-border rounded-lg px-3 py-1.5 text-sm text-white font-mono focus:border-primary/50 focus:outline-none cursor-pointer"
+          className="bg-darpan-surface border border-darpan-border rounded-lg px-3 py-1.5 text-sm text-white font-mono focus:border-darpan-lime/50 focus:outline-none cursor-pointer"
         >
           {participants.map((id) => (
             <option key={id} value={id}>{id}</option>
@@ -52,11 +52,11 @@ export function ExtendedSelector({ data }: Props) {
         </select>
       </div>
       <div className="flex items-center gap-2">
-        <label className="text-[11px] text-text-muted font-medium">Concept</label>
+        <label className="text-[11px] text-white/40 font-medium">Concept</label>
         <select
           value={selectedConcept}
           onChange={(e) => setSelectedConcept(Number(e.target.value))}
-          className="bg-surface border border-border rounded-lg px-3 py-1.5 text-sm text-white font-mono focus:border-primary/50 focus:outline-none cursor-pointer"
+          className="bg-darpan-surface border border-darpan-border rounded-lg px-3 py-1.5 text-sm text-white font-mono focus:border-darpan-lime/50 focus:outline-none cursor-pointer"
         >
           <option value={-1}>All Concepts</option>
           {CONCEPT_NAMES.map((name, idx) => (

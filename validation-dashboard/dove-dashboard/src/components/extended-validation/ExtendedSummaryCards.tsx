@@ -29,14 +29,14 @@ export function ExtendedSummaryCards({ data }: Props) {
         return (
           <div
             key={key}
-            className="bg-card border border-border rounded-xl p-4"
+            className="bg-darpan-surface border border-darpan-border rounded-xl p-4"
             style={{
               borderLeftWidth: 3,
               borderLeftColor: color,
               boxShadow: `0 0 20px ${color}10`,
             }}
           >
-            <div className="text-[11px] text-text-secondary mb-1">{label}</div>
+            <div className="text-[11px] text-white/60 mb-1">{label}</div>
             <div className="text-3xl font-mono font-bold mb-1" style={{ color }}>
               {formatMetricValue(value, key)}
             </div>
@@ -47,7 +47,7 @@ export function ExtendedSummaryCards({ data }: Props) {
               >
                 {quality}
               </span>
-              <span className="text-[10px] text-text-muted">{description}</span>
+              <span className="text-[10px] text-white/40">{description}</span>
             </div>
           </div>
         );

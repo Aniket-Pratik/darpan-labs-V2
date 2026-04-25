@@ -7,12 +7,12 @@ interface Props {
 
 export function TwinComparisonTable({ pair }: Props) {
   return (
-    <div className="bg-card border border-border rounded-xl p-4">
+    <div className="bg-darpan-surface border border-darpan-border rounded-xl p-4">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-[11px] font-medium text-text-secondary">
+        <h3 className="text-[11px] font-medium text-white/60">
           All 5 Twins for {pair.participant_id}
         </h3>
-        <span className="text-[10px] font-mono text-text-muted">
+        <span className="text-[10px] font-mono text-white/40">
           Best match highlighted
         </span>
       </div>
@@ -30,11 +30,11 @@ export function TwinComparisonTable({ pair }: Props) {
                 boxShadow: isBest ? `0 0 12px ${color}20` : 'none',
               }}
             >
-              <div className="text-[11px] font-mono text-text-secondary mb-1">{t.twin_id}</div>
+              <div className="text-[11px] font-mono text-white/60 mb-1">{t.twin_id}</div>
               <div className="text-lg font-mono font-bold" style={{ color }}>
                 {t.mae.toFixed(2)}
               </div>
-              <div className="text-[10px] text-text-muted">MAE</div>
+              <div className="text-[10px] text-white/40">MAE</div>
               {isBest && (
                 <div
                   className="mt-1 text-[9px] font-mono px-1.5 py-0.5 rounded"

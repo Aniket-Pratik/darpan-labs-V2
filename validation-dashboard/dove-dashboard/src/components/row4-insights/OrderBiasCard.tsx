@@ -21,8 +21,8 @@ export function OrderBiasCard({ data }: OrderBiasCardProps) {
     mm.verdict.includes('Moderate') ? '#FFB800' : '#FF4444';
 
   return (
-    <div className="bg-card border border-border rounded-xl p-4" style={{ boxShadow: '0 0 20px rgba(200,255,0,0.03)' }}>
-      <div className="text-[10px] font-bold uppercase tracking-widest text-text-muted mb-3">
+    <div className="bg-darpan-surface border border-darpan-border rounded-xl p-4" style={{ boxShadow: '0 0 20px rgba(200,255,0,0.03)' }}>
+      <div className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-3">
         Order Bias Check
       </div>
 
@@ -30,12 +30,12 @@ export function OrderBiasCard({ data }: OrderBiasCardProps) {
         {bars.map((bar) => (
           <div key={bar.label}>
             <div className="flex items-center justify-between mb-1">
-              <span className="text-xs text-text-secondary">{bar.label} Effect</span>
+              <span className="text-xs text-white/60">{bar.label} Effect</span>
               <span className="font-mono text-xs" style={{ color: bar.color }}>
                 {bar.pct.toFixed(1)}%
               </span>
             </div>
-            <div className="h-3 bg-surface rounded-full overflow-hidden">
+            <div className="h-3 bg-darpan-surface rounded-full overflow-hidden">
               <div
                 className="h-full rounded-full transition-all"
                 style={{
@@ -62,7 +62,7 @@ export function OrderBiasCard({ data }: OrderBiasCardProps) {
         {mm.verdict}
       </div>
 
-      <p className="text-[10px] text-text-muted mt-3 leading-relaxed">
+      <p className="text-[10px] text-white/40 mt-3 leading-relaxed">
         Variance decomposition shows how much of the score variation is due to the concept itself vs.
         presentation order vs. individual respondent differences.
       </p>

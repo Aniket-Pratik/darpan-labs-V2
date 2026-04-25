@@ -37,7 +37,7 @@ export function Tier1Card({ label, accentColor, dataBlock, className = '' }: Tie
 
   return (
     <div
-      className={`bg-card border border-border rounded-xl p-5 relative overflow-hidden ${className}`}
+      className={`bg-darpan-surface border border-darpan-border rounded-xl p-5 relative overflow-hidden ${className}`}
       style={{
         borderLeftWidth: 3,
         borderLeftColor: accentColor,
@@ -51,7 +51,7 @@ export function Tier1Card({ label, accentColor, dataBlock, className = '' }: Tie
         >
           {label}
         </span>
-        <span className="text-[10px] font-mono text-text-muted bg-white/5 px-1.5 py-0.5 rounded border border-border">
+        <span className="text-[10px] font-mono text-white/40 bg-white/5 px-1.5 py-0.5 rounded border border-darpan-border">
           n={dataBlock.n}
         </span>
       </div>
@@ -69,7 +69,7 @@ export function Tier1Card({ label, accentColor, dataBlock, className = '' }: Tie
                 {name}
               </span>
               {i > 0 && !allTied && sorted.length <= 3 && (
-                <span className="text-[10px] font-mono text-text-muted bg-white/5 px-1.5 py-0.5 rounded border border-border ml-1">
+                <span className="text-[10px] font-mono text-white/40 bg-white/5 px-1.5 py-0.5 rounded border border-darpan-border ml-1">
                   TIED
                 </span>
               )}
@@ -83,14 +83,14 @@ export function Tier1Card({ label, accentColor, dataBlock, className = '' }: Tie
 
       {/* Runners-up: Tier 1 overflow when all tied, or Tier 2 concepts */}
       {runners.length > 0 && (
-        <div className="mt-2.5 pt-2.5 border-t border-border/50">
+        <div className="mt-2.5 pt-2.5 border-t border-darpan-border/50">
           <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-[10px] text-text-muted">Also Tier 1:</span>
+            <span className="text-[10px] text-white/40">Also Tier 1:</span>
             {runners.map((name) => (
-              <span key={name} className="flex items-center gap-1 text-[11px] text-text-secondary">
+              <span key={name} className="flex items-center gap-1 text-[11px] text-white/60">
                 <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: CONCEPT_COLORS[name] }} />
                 {name}
-                <span className="font-mono text-[10px] text-text-muted">{dataBlock.composites[name]?.toFixed(1)}</span>
+                <span className="font-mono text-[10px] text-white/40">{dataBlock.composites[name]?.toFixed(1)}</span>
               </span>
             ))}
           </div>
@@ -98,14 +98,14 @@ export function Tier1Card({ label, accentColor, dataBlock, className = '' }: Tie
       )}
 
       {tier2.length > 0 && (
-        <div className={`${runners.length > 0 ? 'mt-1.5' : 'mt-2.5 pt-2.5 border-t border-border/50'}`}>
+        <div className={`${runners.length > 0 ? 'mt-1.5' : 'mt-2.5 pt-2.5 border-t border-darpan-border/50'}`}>
           <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-[10px] text-text-muted">Tier 2:</span>
+            <span className="text-[10px] text-white/40">Tier 2:</span>
             {tier2.map((name) => (
-              <span key={name} className="flex items-center gap-1 text-[11px] text-text-muted">
+              <span key={name} className="flex items-center gap-1 text-[11px] text-white/40">
                 <span className="w-1.5 h-1.5 rounded-full opacity-50" style={{ backgroundColor: CONCEPT_COLORS[name] }} />
                 {name}
-                <span className="font-mono text-[10px] text-text-muted/60">{dataBlock.composites[name]?.toFixed(1)}</span>
+                <span className="font-mono text-[10px] text-white/40/60">{dataBlock.composites[name]?.toFixed(1)}</span>
               </span>
             ))}
           </div>
@@ -113,7 +113,7 @@ export function Tier1Card({ label, accentColor, dataBlock, className = '' }: Tie
       )}
 
       {allTied && (
-        <div className="mt-2.5 flex items-center gap-1.5 px-2 py-1 bg-warning/10 border border-warning/15 rounded text-[10px] text-warning">
+        <div className="mt-2.5 flex items-center gap-1.5 px-2 py-1 bg-darpan-warning/10 border border-darpan-warning/15 rounded text-[10px] text-darpan-warning">
           All concepts in single statistical tier — no pairwise differences survive Bonferroni
         </div>
       )}
@@ -122,19 +122,19 @@ export function Tier1Card({ label, accentColor, dataBlock, className = '' }: Tie
       {dataBlock.priceData && (
         <div className="mt-2.5 flex items-center gap-2 flex-wrap">
           {dataBlock.priceData.price_pi.t2b != null && (
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded border border-border bg-white/5 text-text-secondary">
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded border border-darpan-border bg-white/5 text-white/60">
               Price-qual PI: <span className="text-white font-semibold">{dataBlock.priceData.price_pi.t2b.toFixed(0)}% T2B</span>
             </span>
           )}
           {dataBlock.priceData.wtp.median != null && (
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded border border-border bg-white/5 text-text-secondary">
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded border border-darpan-border bg-white/5 text-white/60">
               WTP median: <span className="text-white font-semibold">{'\u20B9'}{dataBlock.priceData.wtp.median}</span>
             </span>
           )}
         </div>
       )}
 
-      <div className="mt-3 pt-2.5 border-t border-border flex items-center gap-3 text-[10px] text-text-muted">
+      <div className="mt-3 pt-2.5 border-t border-darpan-border flex items-center gap-3 text-[10px] text-white/40">
         <span className="font-mono">
           Friedman {formatPValue(dataBlock.friedman.p_value)}
         </span>

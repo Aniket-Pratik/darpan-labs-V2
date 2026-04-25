@@ -40,7 +40,7 @@ export function AgreementBadge({ agreement }: AgreementBadgeProps) {
       </div>
 
       {/* Description */}
-      <p className="text-[9px] text-text-muted text-center max-w-[110px] leading-tight">
+      <p className="text-[9px] text-white/40 text-center max-w-[110px] leading-tight">
         {agreement.description}
       </p>
 

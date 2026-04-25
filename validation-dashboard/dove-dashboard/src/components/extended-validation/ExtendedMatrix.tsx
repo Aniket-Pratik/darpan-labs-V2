@@ -34,18 +34,18 @@ export function ExtendedMatrix({ data }: Props) {
   };
 
   return (
-    <div className="bg-card border border-border rounded-xl p-5">
+    <div className="bg-darpan-surface border border-darpan-border rounded-xl p-5">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-sm font-semibold text-white">Participant x Concept Matrix</h3>
-        <div className="flex bg-surface rounded-lg p-0.5 border border-border">
+        <div className="flex bg-darpan-surface rounded-lg p-0.5 border border-darpan-border">
           {METRIC_TABS.map((tab) => (
             <button
               key={tab}
               onClick={() => setMatrixMetric(tab)}
               className={`px-2.5 py-1 text-[11px] font-medium rounded-md transition-all cursor-pointer border ${
                 matrixMetric === tab
-                  ? 'bg-primary/15 text-primary border-primary/30 shadow-[0_0_10px_rgba(200,255,0,0.15)]'
-                  : 'text-text-muted border-transparent hover:text-text-secondary hover:border-border'
+                  ? 'bg-darpan-lime/15 text-darpan-lime border-darpan-lime/30 shadow-[0_0_10px_rgba(200,255,0,0.15)]'
+                  : 'text-white/40 border-transparent hover:text-white/60 hover:border-darpan-border'
               }`}
             >
               {VALIDATION_METRIC_LABELS[tab]}
@@ -58,13 +58,13 @@ export function ExtendedMatrix({ data }: Props) {
         <table className="w-full border-collapse">
           <thead>
             <tr>
-              <th className="text-[11px] font-mono text-text-muted text-left p-1.5 w-16" />
+              <th className="text-[11px] font-mono text-white/40 text-left p-1.5 w-16" />
               {CONCEPT_NAMES.map((name, idx) => (
-                <th key={idx} className="text-[11px] font-mono text-text-muted text-center p-1.5">
+                <th key={idx} className="text-[11px] font-mono text-white/40 text-center p-1.5">
                   {name}
                 </th>
               ))}
-              <th className="text-[11px] font-mono text-text-secondary text-center p-1.5 border-l border-border">
+              <th className="text-[11px] font-mono text-white/60 text-center p-1.5 border-l border-darpan-border">
                 Avg
               </th>
             </tr>
@@ -77,7 +77,7 @@ export function ExtendedMatrix({ data }: Props) {
 
               return (
                 <tr key={pid} className="hover:bg-white/[0.02]">
-                  <td className="text-[11px] font-mono text-text-muted p-1.5">{pid}</td>
+                  <td className="text-[11px] font-mono text-white/40 p-1.5">{pid}</td>
                   {CONCEPT_NAMES.map((_, cIdx) => {
                     const concept = pair?.concepts[cIdx];
                     const val = concept
@@ -102,7 +102,7 @@ export function ExtendedMatrix({ data }: Props) {
                       </td>
                     );
                   })}
-                  <td className="text-center p-1.5 border-l border-border">
+                  <td className="text-center p-1.5 border-l border-darpan-border">
                     <span
                       className="inline-block px-2 py-1 rounded text-[11px] font-mono font-bold min-w-[52px]"
                       style={{
@@ -116,8 +116,8 @@ export function ExtendedMatrix({ data }: Props) {
                 </tr>
               );
             })}
-            <tr className="border-t border-border">
-              <td className="text-[11px] font-mono text-text-secondary p-1.5 font-medium">Avg</td>
+            <tr className="border-t border-darpan-border">
+              <td className="text-[11px] font-mono text-white/60 p-1.5 font-medium">Avg</td>
               {CONCEPT_NAMES.map((name, cIdx) => {
                 const cAvg = data.aggregate.by_concept[name];
                 const val = cAvg ? getMetricValue(cAvg, matrixMetric) : null;
@@ -133,7 +133,7 @@ export function ExtendedMatrix({ data }: Props) {
                   </td>
                 );
               })}
-              <td className="text-center p-1.5 border-l border-border">
+              <td className="text-center p-1.5 border-l border-darpan-border">
                 {(() => {
                   const val = getMetricValue(
                     { mae: data.aggregate.overall_mae, accuracy: data.aggregate.overall_accuracy, exact: data.aggregate.overall_exact },

@@ -14,7 +14,7 @@ export function SectionRow({ title, subtitle, children }: SectionRowProps) {
           {title}
         </h2>
         {subtitle && (
-          <p className="text-xs text-text-muted mt-0.5">{subtitle}</p>
+          <p className="text-xs text-white/40 mt-0.5">{subtitle}</p>
         )}
       </div>
       {children}

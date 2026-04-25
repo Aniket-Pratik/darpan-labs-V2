@@ -24,7 +24,7 @@ function App() {
   const [activeTab, setActiveTab] = useState<DashboardTab>('aggregate');
 
   return (
-    <div className="min-h-screen bg-bg">
+    <div className="min-h-screen bg-darpan-bg">
       <DashboardHeader
         data={data}
         extData={extAggData}

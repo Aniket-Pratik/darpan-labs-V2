@@ -17,10 +17,10 @@ export function TwinSelectionChart({ summary }: Props) {
   }));
 
   return (
-    <div className="bg-card border border-border rounded-xl p-5">
+    <div className="bg-darpan-surface border border-darpan-border rounded-xl p-5">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-sm font-semibold text-white">Best-Match Twin Selection Frequency</h3>
-        <span className="text-[10px] text-text-muted font-mono">
+        <span className="text-[10px] text-white/40 font-mono">
           Which twin variant was selected most often as best match
         </span>
       </div>
@@ -59,12 +59,12 @@ export function TwinSelectionChart({ summary }: Props) {
         </ResponsiveContainer>
         <div className="flex flex-col gap-2 justify-center">
           {data.map((d) => (
-            <div key={d.twin} className="flex items-center justify-between bg-surface rounded-lg px-3 py-2 border border-border">
+            <div key={d.twin} className="flex items-center justify-between bg-darpan-surface rounded-lg px-3 py-2 border border-darpan-border">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-mono text-white">{d.twin}</span>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-[11px] font-mono text-text-secondary">
+                <span className="text-[11px] font-mono text-white/60">
                   {d.count} / 17 selected
                 </span>
                 <span

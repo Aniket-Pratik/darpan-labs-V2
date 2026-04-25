@@ -19,7 +19,7 @@ export function AccuracyCard({ metricType, value, quality }: AccuracyCardProps) 
 
   return (
     <div
-      className="bg-card border border-border rounded-xl p-4 flex flex-col gap-2"
+      className="bg-darpan-surface border border-darpan-border rounded-xl p-4 flex flex-col gap-2"
       style={{
         borderLeftWidth: 3,
         borderLeftColor: color,
@@ -27,7 +27,7 @@ export function AccuracyCard({ metricType, value, quality }: AccuracyCardProps) 
       }}
     >
       <div className="flex items-center justify-between">
-        <span className="text-[11px] font-medium text-text-secondary">
+        <span className="text-[11px] font-medium text-white/60">
           {VALIDATION_METRIC_LABELS[metricType]}
         </span>
         <span
@@ -43,7 +43,7 @@ export function AccuracyCard({ metricType, value, quality }: AccuracyCardProps) 
       <span className="text-2xl font-mono font-bold" style={{ color }}>
         {formatMetricValue(value, metricType)}
       </span>
-      <span className="text-[10px] text-text-muted font-mono">
+      <span className="text-[10px] text-white/40 font-mono">
         {metricType === 'mae' && '< 1.0 Good · 1.0–1.5 OK · > 1.5 Poor'}
         {metricType === 'accuracy' && '≥ 85% Good · 70–85% OK · < 70% Poor'}
         {metricType === 'exact' && '≥ 45% Good · 25–45% OK · < 25% Poor'}

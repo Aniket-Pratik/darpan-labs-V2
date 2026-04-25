@@ -100,7 +100,7 @@ export function IndividualValidationTab({ data }: Props) {
               </div>
             </>
           ) : (
-            <div className="bg-card border border-border rounded-xl p-8 text-center text-text-muted">
+            <div className="bg-darpan-surface border border-darpan-border rounded-xl p-8 text-center text-white/40">
               No data available for this selection.
             </div>
           )}

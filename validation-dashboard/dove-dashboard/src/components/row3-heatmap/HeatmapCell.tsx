@@ -16,7 +16,7 @@ export function HeatmapCell({ value, mean, n, metric, concept, otherSource }: He
   if (value === null && n === 0) {
     return (
       <div className="flex items-center justify-center py-1.5">
-        <span className="text-[10px] text-text-muted">N/A</span>
+        <span className="text-[10px] text-white/40">N/A</span>
       </div>
     );
   }

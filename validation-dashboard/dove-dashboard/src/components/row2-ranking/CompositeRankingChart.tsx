@@ -47,17 +47,17 @@ export function CompositeRankingChart({ data }: CompositeRankingChartProps) {
   const showBoth = dataSource === 'both';
 
   return (
-    <div className="bg-card border border-border rounded-xl p-4" style={{ boxShadow: '0 0 20px rgba(200,255,0,0.03)' }}>
+    <div className="bg-darpan-surface border border-darpan-border rounded-xl p-4" style={{ boxShadow: '0 0 20px rgba(200,255,0,0.03)' }}>
       {/* Legend for Real vs Twin */}
       {showBoth && (
         <div className="flex items-center gap-4 mb-3 pl-[100px]">
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-2 rounded-sm bg-white/70" />
-            <span className="text-[10px] text-text-secondary font-mono">Real</span>
+            <span className="text-[10px] text-white/60 font-mono">Real</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-2 rounded-sm bg-white/25" />
-            <span className="text-[10px] text-text-secondary font-mono">Twin</span>
+            <span className="text-[10px] text-white/60 font-mono">Twin</span>
           </div>
         </div>
       )}
@@ -182,7 +182,7 @@ export function CompositeRankingChart({ data }: CompositeRankingChartProps) {
               <span className="font-mono font-semibold" style={{ color: tierColor }}>
                 Tier {tier}
               </span>
-              <span className="text-text-muted">
+              <span className="text-white/40">
                 {concepts.map((c) => c.name).join(', ')}
               </span>
             </div>

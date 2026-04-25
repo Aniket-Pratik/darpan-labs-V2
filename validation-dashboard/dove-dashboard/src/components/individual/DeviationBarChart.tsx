@@ -16,8 +16,8 @@ export function DeviationBarChart({ perMetric }: Props) {
   }));
 
   return (
-    <div className="bg-card border border-border rounded-xl p-4">
-      <h3 className="text-[11px] font-medium text-text-secondary mb-2">
+    <div className="bg-darpan-surface border border-darpan-border rounded-xl p-4">
+      <h3 className="text-[11px] font-medium text-white/60 mb-2">
         Deviation (Twin - Real)
       </h3>
       <ResponsiveContainer width="100%" height={320}>

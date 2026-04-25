@@ -21,8 +21,8 @@ export function RadarChartOverlay({ concept }: Props) {
   }));
 
   return (
-    <div className="bg-card border border-border rounded-xl p-4">
-      <h3 className="text-[11px] font-medium text-text-secondary mb-2">Real vs Twin Overlay</h3>
+    <div className="bg-darpan-surface border border-darpan-border rounded-xl p-4">
+      <h3 className="text-[11px] font-medium text-white/60 mb-2">Real vs Twin Overlay</h3>
       <ResponsiveContainer width="100%" height={320}>
         <RadarChart data={data} cx="50%" cy="50%" outerRadius="72%">
           <PolarGrid stroke="#2A2A2A" />
