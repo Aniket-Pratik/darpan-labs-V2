@@ -4,10 +4,7 @@ import validationData from './data/individual-validation-data.json';
 import extendedAggData from './data/extended-aggregate-data.json';
 import extendedValData from './data/extended-validation-data.json';
 import { DashboardHeader } from './components/layout/DashboardHeader';
-import { WinnersRow } from './components/row1-winners/WinnersRow';
-import { RankingRow } from './components/row2-ranking/RankingRow';
-import { HeatmapRow } from './components/row3-heatmap/HeatmapRow';
-import { InsightsRow } from './components/row4-insights/InsightsRow';
+import { AggregateTab } from './components/aggregate/AggregateTab';
 import { IndividualValidationTab } from './components/individual/IndividualValidationTab';
 import { ExtendedAggregateTab } from './components/extended-aggregate/ExtendedAggregateTab';
 import { ExtendedValidationTab } from './components/extended-validation/ExtendedValidationTab';
@@ -31,20 +28,19 @@ function App() {
         activeTab={activeTab}
         onTabChange={setActiveTab}
       />
-      <main className="max-w-[1400px] mx-auto">
+      <main>
         {activeTab === 'aggregate' ? (
-          <>
-            <WinnersRow data={data} />
-            <RankingRow data={data} />
-            <HeatmapRow data={data} />
-            <InsightsRow data={data} />
-          </>
+          <AggregateTab data={data} />
         ) : activeTab === 'individual' ? (
           <IndividualValidationTab data={individualData} />
         ) : activeTab === 'extended-aggregate' ? (
-          <ExtendedAggregateTab data={extAggData} originalData={data} />
+          <div className="max-w-[1400px] mx-auto">
+            <ExtendedAggregateTab data={extAggData} originalData={data} />
+          </div>
         ) : (
-          <ExtendedValidationTab data={extValData} baselineData={individualData} />
+          <div className="max-w-[1400px] mx-auto">
+            <ExtendedValidationTab data={extValData} baselineData={individualData} />
+          </div>
         )}
       </main>
     </div>
