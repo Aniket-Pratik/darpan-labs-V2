@@ -16,11 +16,12 @@ export function DataSourceToggle() {
       {OPTIONS.map(({ value, label }) => (
         <button
           key={value}
+          type="button"
           onClick={() => setDataSource(value)}
-          className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all cursor-pointer ${
+          className={`px-2.5 py-1 text-[11px] font-medium rounded-md transition-colors cursor-pointer border ${
             dataSource === value
-              ? 'bg-darpan-lime text-black shadow-[0_0_12px_rgba(200,255,0,0.3)]'
-              : 'text-white/40 hover:text-white'
+              ? 'bg-darpan-lime/10 text-darpan-lime border-darpan-lime/20'
+              : 'text-white/40 border-transparent hover:text-white/70'
           }`}
         >
           {label}

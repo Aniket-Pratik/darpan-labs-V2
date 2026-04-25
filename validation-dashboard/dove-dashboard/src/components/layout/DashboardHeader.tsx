@@ -1,7 +1,6 @@
-import { DataSourceToggle } from '../shared/DataSourceToggle';
 import type { DashboardData, DashboardTab } from '../../types';
 
-interface DashboardHeaderProps {
+interface Props {
   data: DashboardData;
   extData?: DashboardData;
   activeTab: DashboardTab;
@@ -9,53 +8,58 @@ interface DashboardHeaderProps {
 }
 
 const TABS: { value: DashboardTab; label: string }[] = [
-  { value: 'aggregate', label: 'Aggregate Analysis' },
-  { value: 'individual', label: 'Individual Validation' },
+  { value: 'aggregate', label: 'Aggregate' },
+  { value: 'individual', label: 'Individual' },
   { value: 'extended-aggregate', label: 'Extended Aggregate' },
   { value: 'extended-validation', label: 'Extended Validation' },
 ];
 
-export function DashboardHeader({ data, extData, activeTab, onTabChange }: DashboardHeaderProps) {
+export function DashboardHeader({ data, extData, activeTab, onTabChange }: Props) {
   const isExtended = activeTab === 'extended-aggregate' || activeTab === 'extended-validation';
   const displayData = isExtended && extData ? extData : data;
 
   return (
-    <header className="sticky top-0 z-40 h-14 flex items-center justify-between px-6 bg-darpan-bg/80 backdrop-blur-md border-b border-darpan-border">
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-darpan-lime animate-pulse" />
-          <span className="text-sm font-semibold text-white tracking-tight">
-            Dove Body Wash Concept Test
-          </span>
-        </div>
+    <header className="sticky top-0 z-40 h-12 flex items-center justify-between px-6 bg-darpan-bg/80 backdrop-blur-md border-b border-darpan-border">
+      <div className="flex items-center gap-2 text-sm">
+        <span className="text-white/40">Studies</span>
+        <span className="text-white/20">/</span>
+        <span className="text-white/40 truncate max-w-[280px]">
+          Dove Body Wash Concept Test
+        </span>
+        <span className="text-white/20">/</span>
+        <span className="text-white/60 font-medium">Validation</span>
+      </div>
+
+      <div className="flex items-center gap-3">
         <div className="flex bg-darpan-surface rounded-lg p-0.5 border border-darpan-border">
           {TABS.map(({ value, label }) => (
             <button
               key={value}
+              type="button"
               onClick={() => onTabChange(value)}
-              className={`px-2.5 py-1 text-[11px] font-medium rounded-md transition-all cursor-pointer border ${
+              className={`px-2.5 py-1 text-[11px] font-medium rounded-md transition-colors cursor-pointer border ${
                 activeTab === value
-                  ? 'bg-darpan-lime/15 text-darpan-lime border-darpan-lime/30 shadow-[0_0_10px_rgba(200,255,0,0.15)]'
-                  : 'text-white/40 border-transparent hover:text-white/60 hover:border-darpan-border'
+                  ? 'bg-darpan-lime/10 text-darpan-lime border-darpan-lime/20'
+                  : 'text-white/40 border-transparent hover:text-white/70'
               }`}
             >
               {label}
             </button>
           ))}
         </div>
-        <div className="flex items-center gap-2">
-          <span className="px-2 py-0.5 text-[10px] font-mono bg-white/5 text-white/60 rounded border border-darpan-border">
+
+        <div className="flex items-center gap-1.5">
+          <span className="px-2 py-0.5 text-[10px] font-mono bg-white/[0.03] text-white/50 rounded border border-darpan-border tabular-nums">
             n={displayData.metadata.real_n} real
           </span>
-          <span className="px-2 py-0.5 text-[10px] font-mono bg-white/5 text-white/60 rounded border border-darpan-border">
-            n={displayData.metadata.twin_n} twin{isExtended ? ' (5x17)' : ''}
+          <span className="px-2 py-0.5 text-[10px] font-mono bg-white/[0.03] text-white/50 rounded border border-darpan-border tabular-nums">
+            n={displayData.metadata.twin_n} twin{isExtended ? ' (5×17)' : ''}
           </span>
-          <span className="px-2 py-0.5 text-[10px] font-mono bg-white/5 text-white/60 rounded border border-darpan-border">
+          <span className="px-2 py-0.5 text-[10px] font-mono bg-white/[0.03] text-white/50 rounded border border-darpan-border tabular-nums">
             {displayData.metadata.concepts_tested} Concepts
           </span>
         </div>
       </div>
-      {activeTab === 'aggregate' && <DataSourceToggle />}
     </header>
   );
 }

@@ -7,42 +7,70 @@ interface Props {
   data: IndividualValidationData;
 }
 
+function Chip({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`px-2.5 py-1 rounded-md text-[11px] font-medium border transition-colors cursor-pointer ${
+        active
+          ? 'bg-darpan-lime/10 text-darpan-lime border-darpan-lime/20'
+          : 'bg-white/[0.02] text-white/40 border-darpan-border hover:text-white/70 hover:border-darpan-border-active'
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
 export function ParticipantConceptSelector({ data }: Props) {
   const { selectedParticipant, selectedConcept, setSelectedParticipant, setSelectedConcept } =
     useValidationStore();
-
   const participants = data.pairs.map((p) => p.participant_id);
 
   return (
-    <div className="flex items-center gap-3">
-      <div className="flex items-center gap-2">
-        <label className="text-[11px] text-white/40 font-medium">Participant</label>
-        <select
-          value={selectedParticipant}
-          onChange={(e) => setSelectedParticipant(e.target.value)}
-          className="bg-darpan-surface border border-darpan-border rounded-lg px-3 py-1.5 text-sm text-white font-mono focus:border-darpan-lime/50 focus:outline-none cursor-pointer"
-        >
-          {participants.map((id) => (
-            <option key={id} value={id}>
-              {id}
-            </option>
+    <div className="bg-darpan-surface border border-darpan-border rounded-xl px-5 py-4 space-y-3">
+      <div>
+        <p className="text-xs font-medium text-white/30 uppercase tracking-wider mb-2">
+          Participant
+        </p>
+        <div className="flex flex-wrap gap-1.5">
+          {participants.map((pid) => (
+            <Chip
+              key={pid}
+              active={selectedParticipant === pid}
+              onClick={() => setSelectedParticipant(pid)}
+            >
+              {pid}
+            </Chip>
           ))}
-        </select>
+        </div>
       </div>
-      <div className="flex items-center gap-2">
-        <label className="text-[11px] text-white/40 font-medium">Concept</label>
-        <select
-          value={selectedConcept}
-          onChange={(e) => setSelectedConcept(Number(e.target.value))}
-          className="bg-darpan-surface border border-darpan-border rounded-lg px-3 py-1.5 text-sm text-white font-mono focus:border-darpan-lime/50 focus:outline-none cursor-pointer"
-        >
-          <option value={-1}>All Concepts</option>
+
+      <div>
+        <p className="text-xs font-medium text-white/30 uppercase tracking-wider mb-2">Concept</p>
+        <div className="flex flex-wrap gap-1.5">
+          <Chip active={selectedConcept === -1} onClick={() => setSelectedConcept(-1)}>
+            All Concepts
+          </Chip>
           {CONCEPT_NAMES.map((name, idx) => (
-            <option key={idx} value={idx}>
+            <Chip
+              key={name}
+              active={selectedConcept === idx}
+              onClick={() => setSelectedConcept(idx)}
+            >
               {name}
-            </option>
+            </Chip>
           ))}
-        </select>
+        </div>
       </div>
     </div>
   );

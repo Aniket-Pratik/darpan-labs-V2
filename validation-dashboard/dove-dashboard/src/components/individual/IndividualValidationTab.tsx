@@ -1,14 +1,19 @@
 import { useMemo } from 'react';
+import { motion } from 'framer-motion';
 import { useValidationStore } from '../../store/useValidationStore';
-import { SectionRow } from '../layout/SectionRow';
 import { ParticipantConceptSelector } from './ParticipantConceptSelector';
+import { HeroFidelityCard } from './HeroFidelityCard';
 import { AccuracyCard } from './AccuracyCard';
 import { RadarChartOverlay } from './RadarChartOverlay';
 import { DeviationBarChart } from './DeviationBarChart';
 import { AggregateMatrix } from './AggregateMatrix';
 import { AggregateSummaryCards } from './AggregateSummaryCards';
 import { qualityTier } from '../../lib/validation-utils';
-import type { IndividualValidationData, ConceptValidation, PerMetricEntry } from '../../types/individual';
+import type {
+  IndividualValidationData,
+  ConceptValidation,
+  PerMetricEntry,
+} from '../../types/individual';
 
 interface Props {
   data: IndividualValidationData;
@@ -22,7 +27,6 @@ function aggregateConcepts(concepts: ConceptValidation[]): ConceptValidation | n
   const acc = valid.reduce((s, c) => s + (c.plus_minus_1_accuracy ?? 0), 0) / valid.length;
   const exact = valid.reduce((s, c) => s + (c.exact_match_rate ?? 0), 0) / valid.length;
 
-  // Average real/twin metrics across concepts
   const allKeys = new Set<string>();
   valid.forEach((c) => {
     Object.keys(c.real_metrics).forEach((k) => allKeys.add(k));
@@ -32,7 +36,6 @@ function aggregateConcepts(concepts: ConceptValidation[]): ConceptValidation | n
   const realMetrics: Record<string, number> = {};
   const twinMetrics: Record<string, number> = {};
   const perMetric: PerMetricEntry[] = [];
-
   for (const key of allKeys) {
     const realVals = valid.map((c) => c.real_metrics[key]).filter((v) => v !== undefined);
     const twinVals = valid.map((c) => c.twin_metrics[key]).filter((v) => v !== undefined);
@@ -41,7 +44,12 @@ function aggregateConcepts(concepts: ConceptValidation[]): ConceptValidation | n
       const tAvg = Math.round((twinVals.reduce((a, b) => a + b, 0) / twinVals.length) * 10) / 10;
       realMetrics[key] = rAvg;
       twinMetrics[key] = tAvg;
-      perMetric.push({ metric: key, real: rAvg, twin: tAvg, diff: Math.round((tAvg - rAvg) * 10) / 10 });
+      perMetric.push({
+        metric: key,
+        real: rAvg,
+        twin: tAvg,
+        diff: Math.round((tAvg - rAvg) * 10) / 10,
+      });
     }
   }
 
@@ -65,7 +73,6 @@ function aggregateConcepts(concepts: ConceptValidation[]): ConceptValidation | n
 
 export function IndividualValidationTab({ data }: Props) {
   const { selectedParticipant, selectedConcept } = useValidationStore();
-
   const pair = data.pairs.find((p) => p.participant_id === selectedParticipant);
 
   const concept = useMemo(() => {
@@ -74,45 +81,73 @@ export function IndividualValidationTab({ data }: Props) {
     return pair.concepts[selectedConcept] ?? null;
   }, [pair, selectedConcept]);
 
-  return (
-    <>
-      <SectionRow title="Individual Detail" subtitle="Per-participant, per-concept twin accuracy">
-        <div className="flex flex-col gap-4">
-          <ParticipantConceptSelector data={data} />
-          {concept ? (
-            <>
-              <div className="grid grid-cols-3 gap-3">
-                <AccuracyCard metricType="mae" value={concept.mae} quality={concept.quality.mae} />
-                <AccuracyCard
-                  metricType="accuracy"
-                  value={concept.plus_minus_1_accuracy}
-                  quality={concept.quality.accuracy}
-                />
-                <AccuracyCard
-                  metricType="exact"
-                  value={concept.exact_match_rate}
-                  quality={concept.quality.exact}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <RadarChartOverlay concept={concept} />
-                <DeviationBarChart perMetric={concept.per_metric} />
-              </div>
-            </>
-          ) : (
-            <div className="bg-darpan-surface border border-darpan-border rounded-xl p-8 text-center text-white/40">
-              No data available for this selection.
-            </div>
-          )}
-        </div>
-      </SectionRow>
+  const conceptNameForHero =
+    selectedConcept === -1 ? null : (concept?.concept_name ?? null);
 
-      <SectionRow title="Validation Matrix" subtitle="17 participants x 5 concepts heatmap">
-        <div className="flex flex-col gap-4">
-          <AggregateSummaryCards data={data} />
-          <AggregateMatrix data={data} />
+  return (
+    <div className="max-w-5xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-8 space-y-6">
+      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+        <ParticipantConceptSelector data={data} />
+      </motion.div>
+
+      {pair && concept ? (
+        <>
+          <HeroFidelityCard
+            participantId={pair.participant_id}
+            conceptName={conceptNameForHero}
+            concept={concept}
+          />
+
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="grid grid-cols-3 gap-3"
+          >
+            <AccuracyCard metricType="mae" value={concept.mae} quality={concept.quality.mae} />
+            <AccuracyCard
+              metricType="accuracy"
+              value={concept.plus_minus_1_accuracy}
+              quality={concept.quality.accuracy}
+            />
+            <AccuracyCard
+              metricType="exact"
+              value={concept.exact_match_rate}
+              quality={concept.quality.exact}
+            />
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="grid grid-cols-1 lg:grid-cols-2 gap-3"
+          >
+            <RadarChartOverlay concept={concept} />
+            <DeviationBarChart perMetric={concept.per_metric} />
+          </motion.div>
+        </>
+      ) : (
+        <div className="bg-darpan-surface border border-darpan-border rounded-xl p-8 text-center text-white/30 text-sm">
+          No data available for this selection.
         </div>
-      </SectionRow>
-    </>
+      )}
+
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="space-y-3"
+      >
+        <div>
+          <h3 className="text-sm font-semibold text-white">Across all participants</h3>
+          <p className="text-xs text-white/35 mt-0.5">
+            17 × 5 fidelity matrix — click a cell to jump to that pair.
+          </p>
+        </div>
+        <AggregateSummaryCards data={data} />
+        <AggregateMatrix data={data} />
+      </motion.div>
+    </div>
   );
 }

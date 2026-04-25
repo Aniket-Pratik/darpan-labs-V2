@@ -6,9 +6,9 @@ interface Props {
 }
 
 const METRICS: { key: ValidationMetricType; label: string; description: string }[] = [
-  { key: 'mae', label: 'Overall MAE', description: 'Mean Absolute Error across all pairs' },
-  { key: 'accuracy', label: 'Overall ±1 Accuracy', description: 'Predictions within 1 point' },
-  { key: 'exact', label: 'Overall Exact Match', description: 'Predictions exactly correct' },
+  { key: 'mae', label: 'Overall MAE', description: 'Mean absolute error' },
+  { key: 'accuracy', label: 'Overall ±1 Accuracy', description: 'Within 1 point' },
+  { key: 'exact', label: 'Overall Exact Match', description: 'Exactly correct' },
 ];
 
 export function AggregateSummaryCards({ data }: Props) {
@@ -29,25 +29,20 @@ export function AggregateSummaryCards({ data }: Props) {
         return (
           <div
             key={key}
-            className="bg-darpan-surface border border-darpan-border rounded-xl p-4"
-            style={{
-              borderLeftWidth: 3,
-              borderLeftColor: color,
-              boxShadow: `0 0 20px ${color}10`,
-            }}
+            className="bg-darpan-surface border border-darpan-border rounded-xl px-4 py-3"
           >
-            <div className="text-[11px] text-white/60 mb-1">{label}</div>
-            <div className="text-3xl font-mono font-bold mb-1" style={{ color }}>
+            <div className="text-xs text-white/40 uppercase tracking-wider mb-1">{label}</div>
+            <div className="text-lg font-mono font-bold tabular-nums mb-1" style={{ color }}>
               {formatMetricValue(value, key)}
             </div>
             <div className="flex items-center gap-2">
               <span
-                className="text-[10px] font-mono px-2 py-0.5 rounded"
+                className="text-[10px] font-mono px-1.5 py-0.5 rounded"
                 style={{ color, backgroundColor: `${color}15` }}
               >
                 {quality}
               </span>
-              <span className="text-[10px] text-white/40">{description}</span>
+              <span className="text-[10px] text-white/30">{description}</span>
             </div>
           </div>
         );
