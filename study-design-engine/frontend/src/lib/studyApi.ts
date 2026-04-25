@@ -379,18 +379,6 @@ export interface TwinSimulationResult {
   completed_at: string | null;
 }
 
-export interface ValidationReportDetail {
-  report_id: string;
-  study_id: string;
-  mode: string;
-  status: string;
-  twin_count: number | null;
-  real_count: number | null;
-  report_data: Record<string, any> | null;
-  created_at: string;
-  completed_at: string | null;
-}
-
 export function listAvailableTwins(studyId: string): Promise<AvailableTwin[]> {
   return request(`/api/v1/studies/${studyId}/available-twins`);
 }
@@ -410,12 +398,6 @@ export function listTwinSimulationResults(
   studyId: string,
 ): Promise<TwinSimulationResult[]> {
   return request(`/api/v1/studies/${studyId}/twin-simulation-results`);
-}
-
-export function listValidationReports(
-  studyId: string,
-): Promise<ValidationReportDetail[]> {
-  return request(`/api/v1/studies/${studyId}/validation-reports`);
 }
 
 // ─── Qualitative Insights ──────────────────────────────
