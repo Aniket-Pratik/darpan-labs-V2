@@ -5,10 +5,10 @@ Context
 -------
 `DELETE FROM studies WHERE id = ...` fails because 5 child tables FK to `studies.id`
 with `NO ACTION` cascade rules: `step_versions`, `concepts`, `simulation_runs`,
-`review_comments`, `audit_log`. Two more tables (`pipeline_jobs`, `validation_reports`)
-reference `study_id` without a formal FK — cleaning them up keeps orphaned rows
-from piling up. This script does all of that inside a single transaction so the
-delete is atomic.
+`review_comments`, `audit_log`. One more table (`pipeline_jobs`) references
+`study_id` without a formal FK — cleaning it up keeps orphaned rows from piling
+up. This script does all of that inside a single transaction so the delete is
+atomic.
 
 Usage
 -----
@@ -51,7 +51,6 @@ from psycopg2.extras import RealDictCursor
 # transaction so any ordering issue would surface as a clear FK error.
 CHILD_TABLES: list[str] = [
     "simulation_runs",       # FK → studies (NO ACTION), FK → pipeline_jobs (SET NULL)
-    "validation_reports",    # FK → pipeline_jobs (SET NULL); has study_id col
     "audit_log",             # FK → studies (NO ACTION)
     "concepts",               # FK → studies (NO ACTION)
     "review_comments",       # FK → studies (NO ACTION)
