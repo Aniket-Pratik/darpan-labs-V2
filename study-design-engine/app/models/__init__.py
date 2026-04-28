@@ -3,7 +3,7 @@ from app.models.concept import Concept
 from app.models.audit import ReviewComment, AuditLog
 from app.models.metric import MetricLibrary
 from app.models.user import User
-from app.models.twin import Participant, DigitalTwin, PipelineJob, TwinSimulationRun, ValidationReport
+from app.models.twin import Participant, DigitalTwin, PipelineJob, TwinSimulationRun
 
 __all__ = [
     "Study",
@@ -17,5 +17,4 @@ __all__ = [
     "DigitalTwin",
     "PipelineJob",
     "TwinSimulationRun",
-    "ValidationReport",
 ]

@@ -72,24 +72,6 @@ class PipelineJob(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
-class ValidationReport(Base):
-    """Validation report comparing twin simulation results (optionally vs real responses)."""
-
-    __tablename__ = "validation_reports"
-
-    id: Mapped[uuid.UUID] = mapped_column(pg.UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    study_id: Mapped[uuid.UUID] = mapped_column(pg.UUID(as_uuid=True), ForeignKey("studies.id"), nullable=False, index=True)
-    job_id: Mapped[Optional[uuid.UUID]] = mapped_column(
-        pg.UUID(as_uuid=True), ForeignKey("pipeline_jobs.id", ondelete="SET NULL"), nullable=True,
-    )
-    mode: Mapped[str] = mapped_column(String(20), nullable=False)  # comparison, synthesis
-    status: Mapped[str] = mapped_column(String(20), nullable=False, server_default="pending")
-    twin_count: Mapped[Optional[int]] = mapped_column(nullable=True)
-    real_count: Mapped[Optional[int]] = mapped_column(nullable=True)
-    report_data: Mapped[Optional[dict]] = mapped_column(pg.JSONB, nullable=True)  # full validation output
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
-
 
 class TwinSimulationRun(Base):
     """Unified simulation run (replaces old SDE SimulationRun for twin simulations)."""
