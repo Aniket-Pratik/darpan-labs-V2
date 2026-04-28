@@ -21,7 +21,10 @@ export function CompositeRankingChart({ data }: Props) {
   const focusedConcept = useDashboardStore((s) => s.focusedConcept);
   const drilldownMetric = useDashboardStore((s) => s.drilldownMetric);
 
-  const conceptNames = data.metadata.concept_short_names;
+  // Use composites keys instead of metadata.concept_short_names to avoid
+  // name-mismatches in the source JSON (e.g., metadata says "60-Second Body "
+  // with a trailing space while composites is keyed "Body Spray").
+  const conceptNames = Object.keys(data.real.composites);
 
   const chartData = conceptNames
     .map((name) => {
